@@ -7,7 +7,8 @@ Route::get('/', function () {
 });
 
 Route::get('/home', function () {
-    return view('Este es el Home');
+    return view('home'); 
+    // cambiar esto al home.blade.php sin el blade
 });
 
 Route::get('/students', function () {
