@@ -4,13 +4,14 @@ import 'bootstrap';
 import './bootstrap';
 import { createApp } from 'vue';
 import HelloWorld from './components/HelloWorld.vue';
+import Home from './components/home.vue'
 
 const app = createApp({});
 app.component('hello-world', HelloWorld);
-app.component('home',home);// El primero nombre donde lo llamaran, el celeste como tienen que llamar al archivo.vue
-app.component('students',students);
-app.component('profesores',profesores);
-app.component('courses',courses);
-app.component('payment',payment);
-app.component('inventory',inventory);
+app.component('home',Home);// El primero nombre donde lo llamaran, el celeste como tienen que llamar al archivo.vue
+app.component('students',Students);
+app.component('profesores',Profesores);
+app.component('courses',Courses);
+app.component('payment',Payment);
+app.component('inventory',Inventory);
 app.mount('#app');
