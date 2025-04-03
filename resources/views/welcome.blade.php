@@ -7,7 +7,7 @@
 </head>
 <body>
     <div id="app">
-        <hello-world></hello-world>
+        <hello-world></hello-world> <!-- narnaja -->
     </div>
 </body>
 </html>
