@@ -1,7 +1,10 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap';
+
 import './bootstrap';
 import { createApp } from 'vue';
-import ExampleComponent from './components/ExampleComponent.vue';
+import HelloWorld from './components/HelloWorld.vue';
 
 const app = createApp({});
-app.component('example-component', ExampleComponent);
+app.component('hello-world', HelloWorld);
 app.mount('#app');
