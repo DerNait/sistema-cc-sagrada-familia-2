@@ -4,7 +4,7 @@ import 'bootstrap';
 import './bootstrap';
 import { createApp } from 'vue';
 import HelloWorld from './components/HelloWorld.vue';
-import Home from './components/home.vue'
+import Home from './components/Home.vue'
 
 const app = createApp({});
 app.component('hello-world', HelloWorld);
