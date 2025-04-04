@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Home Profesores</title>
+    <title>Centro Cultural Sagrada Familia II</title>
     @vite('resources/js/app.js')
 </head>
 <body>
