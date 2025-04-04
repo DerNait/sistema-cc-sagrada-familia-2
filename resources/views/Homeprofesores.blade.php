@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Vue Test</title>
+    <title>Centro Cultural Sagrada Familia II</title>
     @vite('resources/js/app.js')
 </head>
 <body>
     <div id="app">
-        <home></home> <!-- narnaja -->
+        <home-profesores></home-profesores>
     </div>
 </body>
 </html>

@@ -6,8 +6,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/home', function () {
-    return view('home'); 
+Route::get('/homepadres', function () {
+    return view('Homepadres'); 
+    // cambiar esto al home.blade.php sin el blade
+});
+
+Route::get('/homeprofesores', function () {
+    return view('Homeprofesores'); 
     // cambiar esto al home.blade.php sin el blade
 });
 
