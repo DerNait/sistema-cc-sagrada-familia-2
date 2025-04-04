@@ -10,8 +10,8 @@ import Homeprofesores from './components/Homeprofesores.vue';
 const app = createApp({});
 
 app.component('hello-world', HelloWorld);
-app.component('home-padres',Homepadres);// El primero nombre donde lo llamaran, el celeste como tienen que llamar al archivo.vue
-app.component('home-profesores',Homeprofesores);
+app.component('home-padres', Homepadres);// El primero nombre donde lo llamaran, el celeste como tienen que llamar al archivo.vue
+app.component('home-profesores', Homeprofesores);
 // app.component('students',Students);
 // app.component('profesores',Profesores);
 // app.component('courses',Courses);
