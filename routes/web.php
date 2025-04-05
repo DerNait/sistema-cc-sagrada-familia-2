@@ -6,6 +6,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/iniciosesion', function(){
+    return view('iniciosesion');
+});
+
 Route::get('/homepadres', function () {
     return view('Homepadres'); 
     // cambiar esto al home.blade.php sin el blade
