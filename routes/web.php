@@ -10,6 +10,10 @@ Route::get('/iniciosesion', function(){
     return view('iniciosesion');
 });
 
+Route::get('/registro', function () {
+    return view('registro');
+});
+
 Route::get('/homepadres', function () {
     return view('Homepadres'); 
     // cambiar esto al home.blade.php sin el blade
