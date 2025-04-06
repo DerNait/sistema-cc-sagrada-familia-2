@@ -13,7 +13,7 @@ return new class extends Migration
             $table->unsignedBigInteger('seccion_id')->nullable(false);
             $table->foreign('seccion_id')->references('id')->on('secciones')->onDelete('cascade');
             $table->unsignedBigInteger('estudiante_id')->nullable(false);
-            $table->foreign('estudiante_id')->references('id')->on('usuario_id')->onDelete('cascade');
+            $table->foreign('estudiante_id')->references('id')->on('usuarios')->onDelete('cascade');
             $table->timestamps();
         });
     }

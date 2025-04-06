@@ -15,13 +15,13 @@ return new class extends Migration
             $table->unsignedBigInteger('estudiante_id')->nullable(false);
             $table->foreign('estudiante_id')->references('id')->on('usuarios')->onDelete('cascade');
             $table->unsignedBigInteger('tipo_pago_id')->nullable(false);
-            $table->foreign('tipo_pago_id')->references('id')->on('tipo_pago')->onDelete('cascade');
+            $table->foreign('tipo_pago_id')->references('id')->on('tipo_pagos')->onDelete('cascade');
             $table->decimal('monto_pagado',10,2)->nullable(false);
             $table->integer('meses_pagados')->nullable(false);
             $table->date('periodo_inicio')->nullable(false);
             $table->date('periodo_fin')->nullable(false);
             $table->unsignedBigInteger('tipo_estado_id')->nullable(false);
-            $table->foreign('tipo_estado_id')->references('id')->on('tipo_estado')->onDelete('cascade');
+            $table->foreign('tipo_estado_id')->references('id')->on('tipo_estados')->onDelete('cascade');
             $table->timestamps();
         });
     }

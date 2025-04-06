@@ -14,8 +14,8 @@ return new class extends Migration
             $table->foreign('empleado_id')->references('id')->on('usuarios')->onDelete('cascade');
             $table->integer('periodo_mes')->nullable(false);
             $table->integer('periodo_anio')->nullable(false);
-            $table->unsignedBigInteger('tipo_estados');
-            $table->foreign('tipo_estados')->references('id')->on('tipo_estados')->onDelete('cascade');
+            $table->unsignedBigInteger('tipo_estado_id');
+            $table->foreign('tipo_estado_id')->references('id')->on('tipo_estados')->onDelete('cascade');
             $table->decimal('monto_base',10,2)->nullable(false);
             $table->decimal('monto_total',10,2)->nullable(false);
             $table->timestamps();

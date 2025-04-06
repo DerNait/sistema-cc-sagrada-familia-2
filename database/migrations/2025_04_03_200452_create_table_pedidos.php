@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('pedidos', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('usuario_id')->nullable(false);
-            $table->foreign('usuarios_id')->references('id')->on('usuarios')->onDelete('cascade');
+            $table->foreign('usuario_id')->references('id')->on('usuarios')->onDelete('cascade');
             $table->unsignedBigInteger('vendedor_id')->nullable(false);
             $table->foreign('vendedor_id')->references('id')->on('usuarios')->onDelete('cascade');
             $table->decimal('precio_total',10,2)->nullable(false);
