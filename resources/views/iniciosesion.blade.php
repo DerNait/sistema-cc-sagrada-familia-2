@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Vue Test</title>
+    <title>Iniciar Sesión</title>
     @vite('resources/js/app.js')
 </head>
 <body>
