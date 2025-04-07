@@ -37,7 +37,7 @@ Route::get('/profesores', function () {
 });
 
 Route::get('/courses', function () {
-    return view('Este es el cursos');
+    return view('cursos');
 });
 
 Route::get('/payment', function () {

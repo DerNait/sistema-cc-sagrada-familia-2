@@ -10,6 +10,7 @@ import InicioSesion from './components/InicioSesion.vue';
 import Registro from './components/Registro.vue';
 import Estudiantes from './components/Estudiantes.vue';
 import Profesores from './components/Profesores.vue';
+import Cursos from './components/Cursos.vue';
 
 const app = createApp({});
 
@@ -20,6 +21,7 @@ app.component('inicio-sesion',InicioSesion);
 app.component('registro',Registro);
 app.component('estudiantes',Estudiantes);
 app.component('profesores',Profesores);
+app.component('cursos',Cursos);
 
 // app.component('students',Students);
 // app.component('profesores',Profesores);
