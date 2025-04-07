@@ -35,7 +35,3 @@
 
 <script setup>
 </script>
-
-<style scoped>
-/* Aqui van los styles cuando los use */
-</style>
