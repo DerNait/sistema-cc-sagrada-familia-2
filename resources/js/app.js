@@ -12,6 +12,7 @@ import Estudiantes from './components/Estudiantes.vue';
 import Profesores from './components/Profesores.vue';
 import Cursos from './components/Cursos.vue';
 import Pagos from './components/Pagos.vue';
+import Inventario from './components/Inventario.vue';
 
 const app = createApp({});
 
@@ -24,9 +25,9 @@ app.component('estudiantes',Estudiantes);
 app.component('profesores',Profesores);
 app.component('cursos',Cursos);
 app.component('pagos',Pagos);
+app.component('inventario',Inventario);
 
 // app.component('students',Students);
 // app.component('profesores',Profesores);
 // app.component('courses',Courses);
-// app.component('inventory',Inventory);
 app.mount('#app');

@@ -45,7 +45,7 @@ Route::get('/payment', function () {
 });
 
 Route::get('/inventory', function () {
-    return view('Este es el inventario');
+    return view('inventario');
 });
 Auth::routes();
 
