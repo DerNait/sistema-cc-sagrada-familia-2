@@ -19,6 +19,10 @@ Route::get('/homepadres', function () {
     // cambiar esto al home.blade.php sin el blade
 });
 
+Route::get('/estudiantes', function(){
+    return view ('estudiantes');
+});
+
 Route::get('/homeprofesores', function () {
     return view('Homeprofesores'); 
     // cambiar esto al home.blade.php sin el blade
