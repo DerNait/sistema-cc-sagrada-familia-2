@@ -43,3 +43,6 @@ Route::get('/payment', function () {
 Route::get('/inventory', function () {
     return view('Este es el inventario');
 });
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

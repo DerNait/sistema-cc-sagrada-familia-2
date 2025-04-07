@@ -11,17 +11,27 @@ export default defineConfig({
             host: 'localhost',
             protocol: 'ws',
         },
-        watch: {
+        /* watch: {
             usePolling: true,
             interval: 100,
-        },
+        }, */
     },
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: [
+                'resources/sass/app.scss',
+                'resources/js/app.js',
+            ],
             refresh: true,
         }),
-        vue(),
+        vue({
+            template: {
+                transformAssetUrls: {
+                    base: null,
+                    includeAbsolute: false,
+                },
+            },
+        }),
     ],
     resolve: {
         alias: {

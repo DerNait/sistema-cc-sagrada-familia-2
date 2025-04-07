@@ -5,7 +5,7 @@
       style="width: 550px; text-align: center; min-height: 600px;"
     >
       <img
-        src="/public/images/logo_.jpg"
+        src="/images/logo_.jpg"
         alt="Logo"
         class="mb-4 w-75"
         style="margin-top: 50px;"
