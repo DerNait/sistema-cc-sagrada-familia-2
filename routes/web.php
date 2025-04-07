@@ -33,7 +33,7 @@ Route::get('/students', function () {
 });
 
 Route::get('/profesores', function () {
-    return view('Este es el profesores');
+    return view('profesores');
 });
 
 Route::get('/courses', function () {
