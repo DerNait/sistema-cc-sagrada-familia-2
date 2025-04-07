@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -50,9 +52,18 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
+            'apellido'          => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'fecha_nacimiento'  => ['required', 'date'],
+            'role'              => ['required', 'exists:roles,id'],
         ]);
+    }
+
+    public function showRegistrationForm()
+    {
+        $roles = Role::all();
+        return view('auth.register', compact('roles'));
     }
 
     /**
@@ -63,10 +74,18 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        \Log::info('Creating new user...');
+        
+        $rol = Role::findOrFail($data['role']);
+        
         return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'rol_id'            => $rol->id,
+            'name'              => $data['name'],
+            'apellido'          => $data['apellido'],
+            'email'             => $data['email'],
+            'fecha_registro'    => Carbon::now(),
+            'fecha_nacimiento'  => $data['fecha_nacimiento'],
+            'password'          => Hash::make($data['password']),
         ]);
     }
 }
