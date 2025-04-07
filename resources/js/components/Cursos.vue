@@ -5,7 +5,7 @@
         style="max-width: 600px; width: 100%;"
       >
         <img
-          src="/public/images/logo_.jpg"
+          src="/images/logo_.jpg"
           alt="Logo"
           class="mb-4"
           style="width: 150px;"
@@ -15,7 +15,6 @@
         <p class="text-muted fs-5">🚧 Página en construcción... 🚧</p>
         <p class="text-muted">Estamos trabajando para brindarte una mejor experiencia.</p>
   
-        <button class="btn btn-outline-secondary mt-4" @click="volver">Volver</button>
       </div>
     </div>
   </template>
