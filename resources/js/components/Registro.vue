@@ -49,29 +49,22 @@
                     <input type="date" id="fechaNacimiento" class="form-control border-success" v-model="form.fechaNacimiento" />
                 </div>
 
-                <!-- FECHA DE NACIMIENTO -->
-                <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="fechaNacimiento" class="form-label">Fecha de nacimiento</label>
-                    <input type="date" id="fechaNacimiento" class="form-control border-success" v-model="form.fechaNacimiento" />
-                </div>
-
                 <!-- ROL -->
                 <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="rol" class="form-label">Rol</label>
+                <label for="rol" class="form-label">Rol</label>
+                <Multiselect v-model="form.rol" :options="roles" placeholder="Selecciona un rol" label="name" track-by="name"  class="multiselect"/>
                 </div>
-                <Multiselect v-model="form.rol" :options="roles" placeholder="Selecciona un rol" label="name" track-by="name" class="form-control-sm"/>
-
-                <!-- BOTÓN -->
-                <button class="btn btn-success w-100" style="max-width: 450px;">Registrar Usuario</button>
-            </div>
+            
+            <!-- BOTÓN -->
+            <button class="btn btn-success w-100" style="max-width: 450px;">Registrar Usuario</button>
         </div>
     </div>
+</div>
 </template>
 
 <script setup>
 import { reactive } from 'vue'
 import Multiselect from 'vue-multiselect'
-import 'vue-multiselect/dist/vue-multiselect.min.css'
 
 const form = reactive({
     nombre: '',
@@ -91,3 +84,12 @@ const roles = [
     { name: 'Estudiante' }
     ]
 </script>
+
+<style scoped>
+.multiselect {
+  border: 1px solid #198754; /* color borde success */
+  border-radius: 4px;
+  padding: 0.375rem 0.75rem;
+  min-height: 38px;
+}
+</style>
