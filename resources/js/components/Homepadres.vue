@@ -1,10 +1,5 @@
 <template>
   <div>
-    <!-- Encabezado -->
-    <header class="header">
-      <h1>Centro cultural Sagrada Familia II</h1>
-    </header>
-
     <!-- Lista de pagos -->
     <main class="main-content">
       <section class="payment-list">
