@@ -41,7 +41,7 @@ Route::get('/courses', function () {
 });
 
 Route::get('/payment', function () {
-    return view('Este es el pagos');
+    return view('pagos');
 });
 
 Route::get('/inventory', function () {

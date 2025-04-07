@@ -11,6 +11,7 @@ import Registro from './components/Registro.vue';
 import Estudiantes from './components/Estudiantes.vue';
 import Profesores from './components/Profesores.vue';
 import Cursos from './components/Cursos.vue';
+import Pagos from './components/Pagos.vue';
 
 const app = createApp({});
 
@@ -22,10 +23,10 @@ app.component('registro',Registro);
 app.component('estudiantes',Estudiantes);
 app.component('profesores',Profesores);
 app.component('cursos',Cursos);
+app.component('pagos',Pagos);
 
 // app.component('students',Students);
 // app.component('profesores',Profesores);
 // app.component('courses',Courses);
-// app.component('payment',Payment);
 // app.component('inventory',Inventory);
 app.mount('#app');
