@@ -1,10 +1,5 @@
 <template>
   <div>
-    <!-- Encabezado -->
-    <header class="header">
-      <h1>Centro Cultural Sagrada Familia II</h1>
-    </header>
-
     <!-- Lista de grados y materias -->
     <main class="main-content">
       <section class="grades-list">
