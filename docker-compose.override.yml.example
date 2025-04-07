@@ -10,6 +10,6 @@ services:
       - .:/var/www/html
     command: >
       sh -c "cd /var/www/html &&
-            npm install &&
+            npm install --legacy-peer-deps &&
             composer install &&
             php artisan serve --host=0.0.0.0 --port=8000"
