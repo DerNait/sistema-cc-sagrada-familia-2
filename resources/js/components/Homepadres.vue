@@ -15,16 +15,6 @@
       </section>
     </main>
 
-    <!-- Menú de navegación -->
-    <footer class="footer">
-      <nav>
-        <ul class="nav-menu">
-          <li>🏠 Home</li>
-          <li>💰 Pagos</li>
-          <li>⚠️ Notificaciones</li>
-        </ul>
-      </nav>
-    </footer>
   </div>
 </template>
 

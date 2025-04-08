@@ -16,23 +16,8 @@
         <button class="report-button">Generar Reporte en PDF</button>
       </div>
     </main>
-
-    <!-- Menú de navegación -->
-    <footer class="footer">
-      <nav>
-        <ul class="nav-menu">
-          <li>🏠 Home</li>
-          <li>📘 Notas</li>
-          <li>⚠️ Notificaciones</li>
-        </ul>
-      </nav>
-    </footer>
   </div>
 </template>
 
 <script setup>
 </script>
-
-<style scoped>
-/* Aqui van los styles cuando los use */
-</style>
