@@ -52,8 +52,6 @@
 
 ## Acerca del Proyecto
 
-![Captura del Proyecto](images/screenshot.png)
-
 Este proyecto busca facilitar la gestión operativa y administrativa del Centro Cultural Sagrada Familia. Utiliza una arquitectura moderna basada en contenedores Docker con Laravel 12, Vue 3 y PostgreSQL.
 
 <p align="right">(<a href="#readme-top">volver arriba</a>)</p>
@@ -193,7 +191,7 @@ Repositorio: [https://github.com/DerNait/sistema-cc-sagrada-familia-2](https://g
 [issues-shield]: https://img.shields.io/github/issues/DerNait/sistema-cc-sagrada-familia-2.svg?style=for-the-badge
 [issues-url]: https://github.com/DerNait/sistema-cc-sagrada-familia-2/issues
 [license-shield]: https://img.shields.io/github/license/DerNait/sistema-cc-sagrada-familia-2.svg?style=for-the-badge
-[license-url]: https://github.com/DerNait/sistema-cc-sagrada-familia-2/blob/master/LICENSE.txt
+[license-url]: https://github.com/DerNait/sistema-cc-sagrada-familia-2/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/tu_linkedin
 [Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
