@@ -117,6 +117,19 @@
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
                 </div>
+
+                    <!---Fecha de Registro-->
+                    <div class="mb-3 text-start w-100" style="max-width: 450px;">
+                        <label for="fecha_registro" class="form-label">Fecha de Registro</label>
+                        <input type="date"
+                            id="fecha_registro"
+                            name="fecha_registro"
+                            class="form-control border-success @error('fecha_registro') is-invalid @enderror"
+                            value="{{ old('fecha_registro') }}">
+                        @error('fecha_registro')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
                 <!-- BOTÓN -->
                 <button type="submit" class="btn btn-success w-100" style="max-width: 450px;">
                     Registrar Usuario
