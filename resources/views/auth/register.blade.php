@@ -106,7 +106,9 @@
                         required>
                         <option value="">Selecciona un rol</option>
                         @foreach($roles as $rol)
-                            <option value="{{ $rol->id }}" {{ old('role') == $rol->id ? 'selected' : '' }}>
+                            <option value="{{ $rol->id }}"
+                                data-nombre="{{ strtolower($rol->nombre) }}"
+                                {{ old('role') == $rol->id ? 'selected' : '' }}>
                                 {{ $rol->nombre }}
                             </option>
                         @endforeach
@@ -115,7 +117,6 @@
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
                 </div>
-
                 <!-- BOTÓN -->
                 <button type="submit" class="btn btn-success w-100" style="max-width: 450px;">
                     Registrar Usuario
@@ -124,4 +125,31 @@
         </div>
     </div>
 </div>
+
+<!-- SCRIPT DE CAMBIO DE CAMPOS -->
+<script>
+    function mostrarCamposEmpleado() {
+        const select = document.getElementById('role');
+        const campos = document.getElementById('camposEmpleado');
+        
+        if (select.selectedIndex > 0) {
+            const rolNombre = select.options[select.selectedIndex].getAttribute('data-nombre');
+            
+            const rolesEmpleado = ['docente', 'secretaria', 'inventario'];
+            
+            
+            console.log("Rol seleccionado:", rolNombre);
+            console.log("¿Es rol de empleado?", rolesEmpleado.includes(rolNombre));
+            
+            campos.style.display = rolesEmpleado.includes(rolNombre) ? 'block' : 'none';
+        } else {
+            campos.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        mostrarCamposEmpleado();
+        document.getElementById('role').addEventListener('change', mostrarCamposEmpleado);
+    });
+</script>
 @endsection
