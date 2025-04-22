@@ -118,6 +118,22 @@
                     @enderror
                 </div>
 
+                <!-- CAMPOS ADICIONALES PARA EMPLEADOS -->
+                <div id="camposEmpleado" style="display: none; width: 100%; max-width: 450px;">
+                    <!-- SALARIO -->
+                    <div class="mb-3 text-start">
+                        <label for="salario" class="form-label">Salario Base</label>
+                        <input type="number"
+                            id="salario"
+                            name="salario"
+                            class="form-control border-success @error('salario') is-invalid @enderror"
+                            value="{{ old('salario') }}">
+                        @error('salario')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
                     <!---Fecha de Registro-->
                     <div class="mb-3 text-start w-100" style="max-width: 450px;">
                         <label for="fecha_registro" class="form-label">Fecha de Registro</label>
