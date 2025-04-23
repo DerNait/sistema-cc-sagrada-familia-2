@@ -59,6 +59,11 @@ class RegisterController extends Controller
             'role'              => ['required', 'exists:roles,id'],
             'salario' => ['nullable', 'numeric', 'min:0'],
             'fecha_registro' => ['nullable', 'date'],
+        ],
+        [
+            'name.regex' => 'El campo nombre solo puede contener letras y espacios.',
+            'apellido.regex' => 'El campo apellido solo puede contener letras y espacios.',
+            'password.regex' => 'La contraseña debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial.',
         ]);
     }
 
