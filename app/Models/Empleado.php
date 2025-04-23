@@ -16,9 +16,4 @@ class Empleado extends Model
         'created_at',
         'updated_at',
     ];
-    
-    public function usuario()
-    {
-        return $this->belongsTo(User::class, 'usuario_id');
-    }
 }

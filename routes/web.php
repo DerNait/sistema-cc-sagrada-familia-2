@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\EmpleadosController;
 
 
 Route::get('/iniciosesion', function(){
@@ -51,10 +52,12 @@ Route::get('/inventory', function () {
 });
 
 Route::get('/empleados', function () {
-    return view('empleados');
+    return view('empleados.empleados');
 });
 
 Auth::routes();
+
+Route::get('/empleados/planilla', [EmpleadosController::class, 'planilla']);
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
