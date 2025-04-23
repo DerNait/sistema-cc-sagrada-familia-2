@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ExportController;
+
 
 Route::get('/iniciosesion', function(){
     return view('iniciosesion');
@@ -32,6 +34,10 @@ Route::get('/profesores', function () {
     return view('profesores');
 });
 
+Route::get('/planilla', function () {
+    return view('planilla');
+});
+
 Route::get('/courses', function () {
     return view('cursos');
 });
@@ -47,3 +53,4 @@ Auth::routes();
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/exportar-empleados', [ExportController::class, 'export']);
