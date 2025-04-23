@@ -57,6 +57,8 @@ class RegisterController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/[a-z]/','regex:/[A-Z]/', 'regex:/[0-9]/', 'regex:/[@$!%*#?&]/'],
             'fecha_nacimiento'  => ['required', 'date'],
             'role'              => ['required', 'exists:roles,id'],
+            'salario' => ['nullable', 'numeric', 'min:0'],
+            'fecha_registro' => ['nullable', 'date'],
         ]);
     }
 
