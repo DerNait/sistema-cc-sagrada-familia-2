@@ -55,6 +55,11 @@ Route::get('/empleados', function () {
     return view('empleados.empleados');
 });
 
+Route::get('/edicion', function () {
+    return view('edicionusuarios');
+});
+
+
 Auth::routes();
 
 Route::get('/empleados/planilla', [EmpleadosController::class, 'planilla']);
