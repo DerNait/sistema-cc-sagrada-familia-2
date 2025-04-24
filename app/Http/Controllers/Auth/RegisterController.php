@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Empleado;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -94,5 +95,14 @@ class RegisterController extends Controller
             'fecha_nacimiento'  => $data['fecha_nacimiento'],
             'password'          => Hash::make($data['password']),
         ]);
+
+        if (!empty($data['salario'])) {
+            Empleado::create([
+                'usuario_id' => $user->id,
+                'salario_base' => $data['salario'],
+            ]);
+        }
+
+        return $user;
     }
 }
