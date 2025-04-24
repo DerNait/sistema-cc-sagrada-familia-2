@@ -56,7 +56,7 @@
                 </div>
             
             <!-- BOTÓN -->
-            <button class="btn btn-success w-100" style="max-width: 450px;" @click="registrarUsuario">Registrar Usuario</button>
+            <button class="btn btn-success w-100" style="max-width: 450px;" @click="registrarUsuario" :disabled='enviado'>Registrar Usuario</button>
         </div>
     </div>
 </div>
@@ -65,6 +65,7 @@
 <script setup>
 import { reactive } from 'vue'
 import Multiselect from 'vue-multiselect'
+import axis from 'axios'
 
 
 const form = reactive({
@@ -76,6 +77,17 @@ const form = reactive({
     fechaNacimiento: '',
     rol: null
 })
+
+const enviando = ref(false)
+
+const roles = [
+  { name: 'Administracion' },
+  { name: 'Inventario' },
+  { name: 'Secretaria' },
+  { name: 'Docente' },
+  { name: 'Estudiante' }
+]
+
 
 const roles = [
     { name: 'Administracion' },
