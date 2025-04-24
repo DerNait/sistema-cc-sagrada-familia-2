@@ -15,6 +15,7 @@ import Pagos from './components/Pagos.vue';
 import Inventario from './components/Inventario.vue';
 import Empleados from './components/Empleados.vue';
 import Planilla from './components/Planilla.vue';
+import EdicionUsuarios from './components/EdicionUsuarios.vue';
 
 const app = createApp({});
 
@@ -30,6 +31,7 @@ app.component('pagos',Pagos);
 app.component('inventario',Inventario);
 app.component('planilla',Planilla);
 app.component('empleados',Empleados);
+app.component('edicion-usuarios',EdicionUsuarios);
 
 // app.component('students',Students);
 // app.component('profesores',Profesores);
