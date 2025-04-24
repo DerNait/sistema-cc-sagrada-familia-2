@@ -56,7 +56,7 @@
                 </div>
             
             <!-- BOTÓN -->
-            <button class="btn btn-success w-100" style="max-width: 450px;">Registrar Usuario</button>
+            <button class="btn btn-success w-100" style="max-width: 450px; @click="registrarUsuario">Registrar Usuario</button>
         </div>
     </div>
 </div>
@@ -65,6 +65,7 @@
 <script setup>
 import { reactive } from 'vue'
 import Multiselect from 'vue-multiselect'
+import axios from 'axios'
 
 const form = reactive({
     nombre: '',
@@ -83,6 +84,7 @@ const roles = [
     { name: 'Docente' },
     { name: 'Estudiante' }
     ]
+
 </script>
 
 <style scoped>
