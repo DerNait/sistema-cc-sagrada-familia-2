@@ -1,0 +1,59 @@
+<?php
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use App\Models\{Module, ModulePermission, Menu};
+use App\Navigation\NavModule;
+
+class NavigationSeeder extends Seeder
+{
+    public function run()
+    {
+        // 1) Borra todo para no acumular duplicados:
+        ModulePermission::truncate();
+        Module::truncate();
+        Menu::truncate();
+
+        // 2) Definir el nav
+        $modules = collect([
+            new NavModule('Dashboard','dashboard',100,'fa fa-home',   null, NavModule::READ),
+            new NavModule('Catálogos','catalogos',200,'fa fa-book',    null, NavModule::READ),
+            new NavModule('Usuarios', 'usuarios', 100, 'fa fa-user', 'catalogos', NavModule::READ),
+            new NavModule('Empleados','empleados',200,'fa fa-user','catalogos', NavModule::READ),
+        ]);
+
+        // 3) Inserta módulos y permisos
+        $saved = [];
+        foreach ($modules as $m) {
+            $mod = Module::firstOrCreate(['modulo' => $m->key]);
+            foreach ($m->actions as $act) {
+                $perm = ModulePermission::firstOrCreate([
+                    'modulo_id' => $mod->id,
+                    'permiso'   => $act,
+                ]);
+                if ($act === $m->menuAction) {
+                    $saved[$m->key]['menuPerm'] = $perm->id;
+                }
+            }
+            $saved[$m->key]['id'] = $mod->id;
+        }
+
+        // 4) Armar menu
+        foreach ($modules as $m) {
+            $fullRoute = $m->routeName;
+
+            Menu::firstOrCreate(
+                ['route' => $fullRoute],
+                [
+                    'parent_id'            => $m->parentKey
+                        ? Menu::where('route', $m->parentKey . '.index')->value('id')
+                        : null,
+                    'module_permission_id' => $saved[$m->key]['menuPerm'] ?? null,
+                    'name'                 => $m->label,
+                    'order'                => $m->order,
+                    'icon'                 => $m->icon,
+                ]
+            );
+        }
+    }
+}

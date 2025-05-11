@@ -1,42 +1,39 @@
 <?php
-
 namespace Database\Seeders;
 
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class RolesTableSeeder extends Seeder
 {
     public function run()
-    {   
-        Role::truncate();
-        Role::insert([
+    {
+        $roles = [
+            'Administracion',
+            'Secretaria',
+            'Inventario',
+            'Docente',
+            'Estudiante',
+        ];
+
+        foreach ($roles as $rolNombre) {
+            Role::firstOrCreate(
+                ['nombre' => $rolNombre],
+                ['created_at' => now(), 'updated_at' => now()]
+            );
+        }
+
+        $adminRoleId = Role::where('nombre', 'Administracion')->value('id');
+
+        User::firstOrCreate(
+            ['email' => 'admin@example.com'],
             [
-                'nombre' => 'Administracion',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'nombre' => 'Secretaria',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'nombre' => 'Inventario',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'nombre' => 'Docente',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'nombre' => 'Estudiante',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+                'name'     => 'Admin',
+                'password' => Hash::make('secret'),
+                'rol_id'   => $adminRoleId,
+            ]
+        );
     }
 }
