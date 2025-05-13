@@ -16,6 +16,7 @@ import Inventario from './components/Inventario.vue';
 import Empleados from './components/Empleados.vue';
 import Planilla from './components/Planilla.vue';
 import EdicionUsuarios from './components/EdicionUsuarios.vue';
+import AgregacionInventario from './components/AgregacionInventario.vue';
 
 const app = createApp({});
 
@@ -28,6 +29,7 @@ app.component('estudiantes',Estudiantes);
 app.component('profesores',Profesores);
 app.component('cursos',Cursos);
 app.component('pagos',Pagos);
+app.component('agregacion-inventario',AgregacionInventario);
 app.component('inventario',Inventario);
 app.component('planilla',Planilla);
 app.component('empleados',Empleados);

@@ -50,8 +50,12 @@ Route::get('/payment', function () {
     return view('pagos');
 });
 
+Route::get('/agregacioninventario', function () {
+    return view('AgregacionInventario');
+});
+
 Route::get('/inventario', function () {
-    return view('inventario');
+    return view('Inventario');
 });
 
 Route::get('/empleados', function () {
