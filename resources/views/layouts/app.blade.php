@@ -47,6 +47,16 @@
         <main class="flex-grow-1 p-3">
             @yield('content')
         </main>
+            {{-- Footer fijo con navegación --}}
+        <footer class="bg-white border-top shadow-sm py-2 fixed-bottom">
+            <div class="container">
+                <div class="d-flex justify-content-around text-center small">
+                    <div><span>🏠</span><br>Home</div>
+                    <div><span>💰</span><br>Pagos</div>
+                    <div><span>⚠️</span><br>Notificaciones</div>
+                </div>
+            </div>
+        </footer>
     </div>
 </body>
 </html>
