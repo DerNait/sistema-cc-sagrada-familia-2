@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Catalogs\EmpleadosController;
 use App\Http\Controllers\Catalogs\UsersController;
+use App\Http\Controllers\Catalogs\EstudiantesController;
 
 
 Route::get('/iniciosesion', function(){
@@ -92,5 +93,14 @@ Route::prefix('catalogos')->name('catalogos.')->group(function () {
         Route::get('{id}/editar', [UsersController::class, 'edit'])->name('edit');
         Route::put('{id}',        [UsersController::class, 'update'])->name('update');
         Route::delete('{id}',     [UsersController::class, 'destroy'])->name('destroy');
-    });   
+    });
+
+    Route::prefix('estudiantes')->name('estudiantes.')->group(function () {
+        Route::get('/',           [EstudiantesController::class, 'index'])->name('index');
+        Route::get('crear',       [EstudiantesController::class, 'create'])->name('create');
+        Route::post('crear',      [EstudiantesController::class, 'store'])->name('store');
+        Route::get('{id}/editar', [EstudiantesController::class, 'edit'])->name('edit');
+        Route::put('{id}',        [EstudiantesController::class, 'update'])->name('update');
+        Route::delete('{id}',     [EstudiantesController::class, 'destroy'])->name('destroy');
+    }); 
 });
