@@ -48,7 +48,7 @@ Route::get('/payment', function () {
     return view('pagos');
 });
 
-Route::get('/inventory', function () {
+Route::get('/inventario', function () {
     return view('inventario');
 });
 
