@@ -72,3 +72,6 @@
 
 </body>
 </html>
+@php
+    $hideFooter = true; // Esto ocultará el footer
+@endphp

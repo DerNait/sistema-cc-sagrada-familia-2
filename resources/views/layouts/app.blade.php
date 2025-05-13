@@ -48,6 +48,7 @@
             @yield('content')
         </main>
             {{-- Footer fijo con navegación --}}
+        @unless(isset($hideFooter) && $hideFooter)    
         <footer class="bg-white border-top shadow-sm py-2 fixed-bottom">
             <div class="container">
                 <div class="d-flex justify-content-around text-center small">
@@ -57,6 +58,7 @@
                 </div>
             </div>
         </footer>
+        @endunless
     </div>
 </body>
 </html>
