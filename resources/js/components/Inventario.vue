@@ -101,3 +101,56 @@
     </div>
   </div>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      form: {
+        producto: '',
+        productoPersonalizado: '',
+        tipoUniforme: '',
+        talla: '',
+        cantidad: '',
+        fecha: ''
+      },
+      mensaje: ''
+    };
+  },
+  methods: {
+    guardarMovimiento() {
+      let nombreFinalProducto = '';
+
+      if (this.form.producto === 'uniformes') {
+        nombreFinalProducto = `Uniforme - ${this.form.tipoUniforme} - Talla ${this.form.talla}`;
+      } else if (this.form.producto === 'otros') {
+        nombreFinalProducto = this.form.productoPersonalizado;
+      } else {
+        nombreFinalProducto = this.form.producto;
+      }
+
+      console.log("Movimiento registrado:", {
+        producto: nombreFinalProducto,
+        cantidad: this.form.cantidad,
+        fecha: this.form.fecha
+      });
+
+      this.mensaje = `Movimiento guardado para "${nombreFinalProducto}".`;
+
+      // Resetear formulario
+      this.form = {
+        producto: '',
+        productoPersonalizado: '',
+        tipoUniforme: '',
+        talla: '',
+        cantidad: '',
+        fecha: ''
+      };
+
+      setTimeout(() => {
+        this.mensaje = '';
+      }, 3000);
+    }
+  }
+};
+</script>
