@@ -17,18 +17,6 @@
             <home-profesores></home-profesores>
         </div>
     </main>
-
-    {{-- Footer fijo con navegación --}}
-    <footer class="bg-white border-top shadow-sm py-2 fixed-bottom">
-        <div class="container">
-            <div class="d-flex justify-content-around text-center small">
-                <div><span>🏠</span><br>Home</div>
-                <div><span>📋</span><br>Clases</div>
-                <div><span>⚠️</span><br>Alertas</div>
-            </div>
-        </div>
-    </footer>
-
 </body>
 </html>
 @endsection
