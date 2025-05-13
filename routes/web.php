@@ -5,6 +5,7 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Catalogs\EmpleadosController;
 use App\Http\Controllers\Catalogs\UsersController;
 use App\Http\Controllers\Catalogs\EstudiantesController;
+use App\Http\Controllers\Catalogs\MaestrosController;
 
 
 Route::get('/iniciosesion', function(){
@@ -102,5 +103,14 @@ Route::prefix('catalogos')->name('catalogos.')->group(function () {
         Route::get('{id}/editar', [EstudiantesController::class, 'edit'])->name('edit');
         Route::put('{id}',        [EstudiantesController::class, 'update'])->name('update');
         Route::delete('{id}',     [EstudiantesController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('maestros')->name('maestros.')->group(function () {
+        Route::get('/',           [MaestrosController::class, 'index'])->name('index');
+        Route::get('crear',       [MaestrosController::class, 'create'])->name('create');
+        Route::post('crear',      [MaestrosController::class, 'store'])->name('store');
+        Route::get('{id}/editar', [MaestrosController::class, 'edit'])->name('edit');
+        Route::put('{id}',        [MaestrosController::class, 'update'])->name('update');
+        Route::delete('{id}',     [MaestrosController::class, 'destroy'])->name('destroy');
     }); 
 });
