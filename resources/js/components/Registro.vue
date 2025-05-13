@@ -81,15 +81,6 @@ const form = reactive({
 const enviando = ref(false)
 
 const roles = [
-  { name: 'Administracion' },
-  { name: 'Inventario' },
-  { name: 'Secretaria' },
-  { name: 'Docente' },
-  { name: 'Estudiante' }
-]
-
-
-const roles = [
     { name: 'Administracion' },
     { name: 'Inventario' },
     { name: 'Secretaria' },
