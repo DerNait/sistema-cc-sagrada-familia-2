@@ -182,3 +182,6 @@
     });
 </script>
 @endsection
+@php
+    $hideFooter = true; // Esto ocultará el footer
+@endphp

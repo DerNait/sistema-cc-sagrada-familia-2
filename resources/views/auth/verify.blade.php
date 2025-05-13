@@ -26,3 +26,6 @@
     </div>
 </div>
 @endsection
+@php
+    $hideFooter = true; // Esto ocultará el footer
+@endphp
