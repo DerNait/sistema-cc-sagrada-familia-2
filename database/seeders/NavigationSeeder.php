@@ -20,6 +20,7 @@ class NavigationSeeder extends Seeder
             new NavModule('Catálogos','catalogos',200,'fa fa-book',    null, NavModule::READ),
             new NavModule('Usuarios', 'usuarios', 100, 'fa fa-user', 'catalogos', NavModule::READ),
             new NavModule('Empleados','empleados',200,'fa fa-user','catalogos', NavModule::READ),
+            new NavModule('Estudiantes','estudiantes',300,'fa fa-user','catalogos', NavModule::READ),
         ]);
 
         // 3) Inserta módulos y permisos
