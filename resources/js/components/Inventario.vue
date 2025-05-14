@@ -19,7 +19,7 @@
         <h4 class="mb-3">Filtros de Búsqueda</h4>
         
         <div class="row g-3">
-          <!-- Filtro por ID -->
+          <!-- Filtro por ID si se agruegan mas productos cambiar max -->
           <div class="col-md-4">
             <label for="filter-id" class="form-label">ID del Producto</label>
             <input
@@ -29,6 +29,7 @@
               class="form-control"
               placeholder="Buscar por ID"
               min="0"
+              max="3"
               step="1"
             >
           </div>
@@ -50,13 +51,17 @@
             <label for="filter-tipo" class="form-label">Tipo de Producto</label>
             <select
               id="filter-tipo"
-              v-model="filters.tipo"
+              v-model="filters.tipo_producto_id"
               class="form-select"
             >
-              <option value="">Todos los tipos</option>
-              <option value="uniformes">Uniformes</option>
-              <option value="utiles">Útiles</option>
-              <option value="otros">Otros</option>
+              <option :value="null">Todos los tipos</option>
+              <option 
+                v-for="tipo in tipos" 
+                :key="tipo.id" 
+                :value="tipo.id"
+              >
+                {{ tipo.nombre }}
+              </option>
             </select>
           </div>
 
@@ -116,7 +121,7 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h4>Resultados</h4>
           <div class="text-muted">
-            Mostrando {{ filteredProducts.length }} productos
+            Mostrando {{ productos.length }} productos
           </div>
         </div>
 
@@ -133,10 +138,10 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="product in filteredProducts" :key="product.id">
+              <tr v-for="product in productos" :key="product.id">
                 <td>{{ product.id }}</td>
-                <td>{{ product.nombre }}</td>
-                <td>{{ product.tipo }}</td>
+                <td>{{ product.producto_nombre || product.nombre }}</td>
+                <td>{{ product.tipo_nombre || product.tipo }}</td>
                 <td>${{ product.precio_unitario.toLocaleString() }}</td>
                 <td>{{ product.cantidad }}</td>
                 <td>{{ formatDate(product.fecha_ingreso) }}</td>
@@ -156,80 +161,125 @@ export default {
       filters: {
         id: null,
         nombre: '',
-        tipo: '',
+        tipo_producto_id: null,
         precio_min: null,
         precio_max: null,
         fecha_ingreso: ''
       },
-      products: [] // Aquí se cargarán los productos desde Laravel
-    };
-  },
-  created() {
-    this.cargarProductos();
-  },
-  computed: {
-    filteredProducts() {
-      return this.products.filter(product => {
-        return (
-          (this.filters.id === null || product.id == this.filters.id) &&
-          (this.filters.nombre === '' || 
-            product.nombre.toLowerCase().includes(this.filters.nombre.toLowerCase())) &&
-          (this.filters.tipo === '' || product.tipo === this.filters.tipo) &&
-          (this.filters.precio_min === null || product.precio_unitario >= this.filters.precio_min) &&
-          (this.filters.precio_max === null || product.precio_unitario <= this.filters.precio_max) &&
-          (this.filters.fecha_ingreso === '' || product.fecha_ingreso === this.filters.fecha_ingreso)
-        );
-      });
+      productos: [],
+      tipos: [],
+      loading: false,
+      error: null
     }
   },
+  created() {
+    this.cargarDatosIniciales();
+  },
   methods: {
+    async cargarDatosIniciales() {
+      try {
+        this.loading = true;
+        await Promise.all([
+          this.cargarTipos(),
+          this.cargarProductos()
+        ]);
+      } catch (error) {
+        this.error = "Error al cargar datos iniciales";
+        console.error(error);
+      } finally {
+        this.loading = false;
+      }
+    },
+    async cargarTipos() {
+      try {
+        const { data } = await axios.get('/api/productos/tipos');
+        this.tipos = data;
+      } catch (error) {
+        console.error('Error cargando tipos:', error);
+        throw error;
+      }
+    },
     async cargarProductos() {
       try {
-        // Aquí debes hacer la llamada a tu API Laravel
-        const response = await axios.get('/api/productos');
-        this.products = response.data;
+        // Limpiar filtros nulos
+        const params = {
+          id: this.filters.id || undefined,
+          nombre: this.filters.nombre || undefined,
+          tipo_producto_id: this.filters.tipo_producto_id || undefined,
+          precio_min: this.filters.precio_min || undefined,
+          precio_max: this.filters.precio_max || undefined,
+          fecha_ingreso: this.filters.fecha_ingreso || undefined
+        };
+        
+        const { data } = await axios.get('/api/productos', { 
+          params,
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        this.productos = data.data || [];
       } catch (error) {
-        console.error('Error al cargar productos:', error);
+        console.error('Error cargando productos:', error);
+        this.error = "Error al cargar productos";
+        throw error;
       }
     },
     aplicarFiltros() {
-      // Los filtros se aplican automáticamente gracias a la propiedad computada
-      console.log('Filtros aplicados:', this.filters);
+      this.cargarProductos();
     },
     resetFilters() {
       this.filters = {
         id: null,
         nombre: '',
-        tipo: '',
+        tipo_producto_id: null,
         precio_min: null,
         precio_max: null,
         fecha_ingreso: ''
       };
+      this.cargarProductos();
     },
-    formatDate(dateString) {
-      const options = { year: 'numeric', month: 'short', day: 'numeric' };
-      return new Date(dateString).toLocaleDateString('es-ES', options);
+    formatDate(date) {
+      if (!date) return '';
+      try {
+        return new Date(date).toLocaleDateString('es-ES');
+      } catch {
+        return date;
+      }
     }
   }
-};
+}
 </script>
 
 <style scoped>
-.filter-section {
-  background-color: #f8f9fa;
-}
-
-.table th {
-  background-color: #343a40;
-  color: white;
+.container-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
 .table-responsive {
-  max-height: 500px;
+  max-height: 60vh;
   overflow-y: auto;
 }
 
-.btn {
-  min-width: 120px;
+.filter-section {
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 </style>
