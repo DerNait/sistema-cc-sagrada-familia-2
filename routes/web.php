@@ -6,7 +6,7 @@ use App\Http\Controllers\Catalogs\EmpleadosController;
 use App\Http\Controllers\Catalogs\UsersController;
 use App\Http\Controllers\Catalogs\EstudiantesController;
 use App\Http\Controllers\Catalogs\MaestrosController;
-
+use App\Http\Controllers\ProductoController;
 
 Route::get('/iniciosesion', function(){
     return view('iniciosesion');
@@ -66,6 +66,8 @@ Route::get('/edicion', function () {
     return view('edicionusuarios');
 });
 
+Route::get('/productos', [ProductoController::class, 'index']);
+Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
 
 Auth::routes();
 
