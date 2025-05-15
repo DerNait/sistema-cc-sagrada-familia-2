@@ -8,6 +8,8 @@ use App\Http\Controllers\Catalogs\EstudiantesController;
 use App\Http\Controllers\Catalogs\ProductosController;
 use App\Http\Controllers\ProductoController;
 
+
+
 Route::get('/iniciosesion', function(){
     return view('iniciosesion');
 });

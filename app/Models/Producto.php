@@ -18,4 +18,8 @@ class Producto extends Model
     public function tipo_producto() {
         return $this->belongsTo(TipoProducto::class, 'tipo_producto_id');
     }
+
+    public function movimientos(){
+        return $this->hasMany(Movimiento::class);
+    }
 }
