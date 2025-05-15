@@ -5,7 +5,6 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Catalogs\EmpleadosController;
 use App\Http\Controllers\Catalogs\UsersController;
 use App\Http\Controllers\Catalogs\EstudiantesController;
-use App\Http\Controllers\Catalogs\MaestrosController;
 use App\Http\Controllers\Catalogs\ProductosController;
 use App\Http\Controllers\ProductoController;
 
@@ -111,5 +110,14 @@ Route::prefix('catalogos')->name('catalogos.')->group(function () {
         Route::put('{id}',        [EstudiantesController::class, 'update'])->name('update');
         Route::delete('{id}',     [EstudiantesController::class, 'destroy'])->name('destroy');
     });
- 
+
+    Route::prefix('productos')->name('productos.')->group(function () {
+        Route::get('/',           [ProductosController::class, 'index'])->name('index');
+        Route::get('crear',       [ProductosController::class, 'create'])->name('create');
+        Route::post('crear',      [ProductosController::class, 'store'])->name('store');
+        Route::get('{id}/editar', [ProductosController::class, 'edit'])->name('edit');
+        Route::put('{id}',        [ProductosController::class, 'update'])->name('update');
+        Route::delete('{id}',     [ProductosController::class, 'destroy'])->name('destroy');
+    });
+
 });
