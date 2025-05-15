@@ -149,9 +149,31 @@
             </tbody>
           </table>
         </div>
+        </div>
+          <h1 class="mb-3">Descargar Inventario</h1>
+          <p class="text-muted">Haz clic en el botón para descargar la planilla de Inventario en formato Excel.</p>
+          
+        
+          <button
+            class="btn btn-primary mt-4"
+            @click="exportarEmpleados"
+            :disabled="isExporting"
+          >
+            <span v-if="!isExporting">Descargar Inventario en Excel</span>
+            <span v-else>Generando archivo...</span>
+          </button>
+          
+      
+          <div v-if="isExporting" class="mt-3">
+            <p class="text-muted">Procesando... Por favor espera.</p>
+          </div>
+          
+        
+          <div v-if="errorMessage" class="mt-3 alert alert-danger">
+            {{ errorMessage }}
+        </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -169,7 +191,9 @@ export default {
       productos: [],
       tipos: [],
       loading: false,
-      error: null
+      error: null,
+      isExporting: false,  
+      errorMessage: ""   
     }
   },
   created() {
@@ -245,6 +269,25 @@ export default {
       } catch {
         return date;
       }
+    },
+    exportarProductos() {
+      this.isExporting = true; 
+      this.errorMessage = "";
+     
+      const link = document.createElement('a');
+      link.href = '/exportar-productos';
+      link.setAttribute('download', 'prodcutos.xlsx'); 
+      document.body.appendChild(link);
+      
+      
+      setTimeout(() => {
+        link.click();
+        document.body.removeChild(link);
+       
+        setTimeout(() => {
+          this.isExporting = false;
+        }, 1500);
+      }, 500);
     }
   }
 }
