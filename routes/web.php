@@ -111,22 +111,5 @@ Route::prefix('catalogos')->name('catalogos.')->group(function () {
         Route::put('{id}',        [EstudiantesController::class, 'update'])->name('update');
         Route::delete('{id}',     [EstudiantesController::class, 'destroy'])->name('destroy');
     });
-
-    Route::prefix('maestros')->name('maestros.')->group(function () {
-        Route::get('/',           [MaestrosController::class, 'index'])->name('index');
-        Route::get('crear',       [MaestrosController::class, 'create'])->name('create');
-        Route::post('crear',      [MaestrosController::class, 'store'])->name('store');
-        Route::get('{id}/editar', [MaestrosController::class, 'edit'])->name('edit');
-        Route::put('{id}',        [MaestrosController::class, 'update'])->name('update');
-        Route::delete('{id}',     [MaestrosController::class, 'destroy'])->name('destroy');
-    }); 
-
-    Route::prefix('productos')->name('productos.')->group(function () {
-        Route::get('/',           [ProductosController::class, 'index'])->name('index');
-        Route::get('crear',       [ProductosController::class, 'create'])->name('create');
-        Route::post('crear',      [ProductosController::class, 'store'])->name('store');
-        Route::get('{id}/editar', [ProductosController::class, 'edit'])->name('edit');
-        Route::put('{id}',        [ProductosController::class, 'update'])->name('update');
-        Route::delete('{id}',     [ProductosController::class, 'destroy'])->name('destroy');
-    });
+ 
 });
