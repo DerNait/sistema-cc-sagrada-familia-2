@@ -142,7 +142,7 @@
                 <td>{{ product.id }}</td>
                 <td>{{ product.producto_nombre || product.nombre }}</td>
                 <td>{{ product.tipo_nombre || product.tipo }}</td>
-                <td>${{ product.precio_unitario.toLocaleString() }}</td>
+                <td>Q {{ product.precio_unitario.toLocaleString() }}</td>
                 <td>{{ product.cantidad }}</td>
                 <td>{{ formatDate(product.fecha_ingreso) }}</td>
               </tr>
