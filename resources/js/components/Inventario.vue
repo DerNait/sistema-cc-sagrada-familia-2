@@ -216,7 +216,7 @@ export default {
     },
     async cargarTipos() {
       try {
-        const { data } = await axios.get('/api/productos/tipos');
+        const { data } = await axios.get('/productos/tipos');
         this.tipos = data;
       } catch (error) {
         console.error('Error cargando tipos:', error);
@@ -235,7 +235,7 @@ export default {
           fecha_ingreso: this.filters.fecha_ingreso || undefined
         };
         
-        const { data } = await axios.get('/api/productos', { 
+        const { data } = await axios.get('/productos', { 
           params,
           headers: {
             'Accept': 'application/json'
