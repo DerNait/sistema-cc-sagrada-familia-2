@@ -37,14 +37,20 @@ class UsersController extends CrudControllerBase
              ]);
 
         $this->column('rol_id')
-             ->label('Rol')
-             ->type('relation')
-             ->options(
-                 Role::orderBy('nombre')
-                     ->pluck('nombre','id')
-                     ->toArray()
-             )
-             ->rules(['required','exists:roles,id']);
+               ->label('Rol')
+               ->type('relation')
+               ->filterable('select')
+               ->filterOptions(
+                    Role::orderBy('nombre')
+                         ->pluck('nombre','id')
+                         ->toArray()
+               )
+               ->options(
+                    Role::orderBy('nombre')
+                         ->pluck('nombre','id')
+                         ->toArray()
+               )
+               ->rules(['required','exists:roles,id']);
 
         $this->column('fecha_registro')
              ->label('Fecha registro')

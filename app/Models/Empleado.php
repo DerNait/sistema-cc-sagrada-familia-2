@@ -22,11 +22,6 @@ class Empleado extends Model
         return $this->belongsTo(User::class, 'usuario_id');
     }
 
-    public function role()
-    {
-        return $this->belongsTo(Role::class, 'role_id');
-    }
-
     public function pagos() {
         return $this->hasMany(PagosEmpleado::class);
     }
