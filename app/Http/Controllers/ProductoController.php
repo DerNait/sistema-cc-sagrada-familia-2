@@ -18,32 +18,32 @@ class ProductoController extends Controller
             'fecha_ingreso' => 'nullable|date',
         ]);
 
-        $query = DB::table('products')
-            ->select('products.*', 'tipo_productos.nombre as tipo_nombre')
-            ->join('tipo_productos', 'products.tipo_producto_id', '=', 'tipo_productos.id');
+        $query = DB::table('productos')
+            ->select('productos.*', 'tipo_productos.nombre as tipo_nombre')
+            ->join('tipo_productos', 'productos.tipo_producto_id', '=', 'tipo_productos.id');
 
         if ($request->filled('id')) {
-            $query->where('products.id', $request->id);
+            $query->where('productos.id', $request->id);
         }
 
         if ($request->filled('nombre')) {
-            $query->where('products.nombre', 'like', '%'.$request->nombre.'%');
+            $query->where('productos.nombre', 'like', '%'.$request->nombre.'%');
         }
 
         if ($request->filled('tipo_producto_id')) {
-            $query->where('products.tipo_producto_id', $request->tipo_producto_id);
+            $query->where('productos.tipo_producto_id', $request->tipo_producto_id);
         }
 
         if ($request->filled('precio_min')) {
-            $query->where('products.precio_unitario', '>=', $request->precio_min);
+            $query->where('productos.precio_unitario', '>=', $request->precio_min);
         }
 
         if ($request->filled('precio_max')) {
-            $query->where('products.precio_unitario', '<=', $request->precio_max);
+            $query->where('productos.precio_unitario', '<=', $request->precio_max);
         }
 
         if ($request->filled('fecha_ingreso')) {
-            $query->whereDate('products.fecha_ingreso', $request->fecha_ingreso);
+            $query->whereDate('productos.fecha_ingreso', $request->fecha_ingreso);
         }
 
         return response()->json([
