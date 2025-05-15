@@ -6,6 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Producto extends Model
 {
+    protected $fillable = [
+        'tipo_producto_id',
+        'nombre',
+        'fecha_ingreso',
+        'precio_unitario',
+        'cantidad',
+        'created_at',
+        'updated_at',
+    ];
     public function tipo_producto() {
         return $this->belongsTo(TipoProducto::class, 'tipo_producto_id');
     }
