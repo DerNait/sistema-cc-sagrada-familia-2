@@ -102,13 +102,13 @@
           <div class="col-12 d-flex justify-content-end gap-2">
             <button
               @click="resetFilters"
-              class="btn btn-outline-secondary"
+              class="btn btn-danger"
             >
               Limpiar Filtros
             </button>
             <button
               @click="aplicarFiltros"
-              class="btn btn-primary"
+              class="btn btn-success"
             >
               Aplicar Filtros
             </button>
@@ -142,7 +142,7 @@
                 <td>{{ product.id }}</td>
                 <td>{{ product.producto_nombre || product.nombre }}</td>
                 <td>{{ product.tipo_nombre || product.tipo }}</td>
-                <td>${{ product.precio_unitario.toLocaleString() }}</td>
+                <td>Q {{ product.precio_unitario.toLocaleString() }}</td>
                 <td>{{ product.cantidad }}</td>
                 <td>{{ formatDate(product.fecha_ingreso) }}</td>
               </tr>
@@ -155,7 +155,7 @@
           
         
           <button
-            class="btn btn-primary mt-4"
+            class="btn btn-success mt-4"
             @click="exportarEmpleados"
             :disabled="isExporting"
           >
