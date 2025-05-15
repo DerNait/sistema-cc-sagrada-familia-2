@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Crud\CrudControllerBase;
 use App\Models\Empleado;
 use App\Models\User;
+use App\Models\Role;
 use App\Models\PagosEmpleado;
 use Illuminate\Support\Facades\DB;
 
@@ -28,6 +29,23 @@ class EmpleadosController extends CrudControllerBase
                     ->mapWithKeys(fn($u)=>[$u->id => "{$u->name} {$u->apellido}"])
                     ->toArray()
             );
+
+        $this->column('user.role.nombre')
+            ->label('Rol')
+            ->readonly();
+
+        $this->column('user.role.id')
+            ->label('Filtrar por rol')
+            ->type('relation')
+            ->filterable('select')
+            ->filterOptions(
+                Role::orderBy('nombre')
+                    ->pluck('nombre','id')
+                    ->toArray()
+            )
+            ->hide()
+            ->readonly();
+
 
         $this->column('salario_base')
             ->label('Salario')

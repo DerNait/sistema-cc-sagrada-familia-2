@@ -48,36 +48,101 @@ abstract class CrudControllerBase extends Controller
     {
         $this->configure($request);
 
-        // 1) campos y relaciones como antes...
-        $all   = array_keys($this->columns);
-        $rels  = []; $locals = [];
-        foreach ($all as $f) {
-            if (str_contains($f,'.')) {
-                $rels[] = explode('.', $f, 2)[0];
+        // 1) Separamos campos locales vs relaciones (todas las rutas, no sólo el primer nivel)
+        $all       = array_keys($this->columns);
+        $localCols = [];
+        $relationPaths = [];
+
+        foreach ($all as $field) {
+            if (str_contains($field, '.')) {
+                // por ejemplo 'user.role.nombre' → querremos eager-load de 'user.role'
+                $relationPaths[] = Str::beforeLast($field, '.');
             } else {
-                $locals[] = $f;
+                $localCols[] = $field;
             }
         }
 
-        // 2) removemos el select()
+        // 2) Armamos la query con eager-load de todas las relaciones
         $query = $this->newModelQuery()
-                    ->with(array_unique($rels));
+                    ->with(array_unique($relationPaths));
 
-        // 3) búsqueda, paginación…
+        // 3) Aplicamos filtros dinámicos, incluyendo relaciones anidadas
+        foreach ($this->columns as $col) {
+            if (! $col->filterable) {
+                continue;
+            }
+
+            // Recupera el valor, soportando nested arrays ó dot notation
+            $value = Arr::get($request->query(), $col->field);
+
+            if ($value === null || $value === '') {
+                continue;
+            }
+
+            if (str_contains($col->field, '.')) {
+                // ej: 'user.role.id'
+                $parts = explode('.', $col->field);
+                $attr  = array_pop($parts);   // 'id'
+                $root  = array_shift($parts); // 'user'
+                $rest  = $parts;              // ['role']
+
+                // construimos whereHas anidado dinámicamente
+                $query->whereHas($root, function($q) use ($rest, $attr, $value) {
+                    // si hay más niveles, encadenamos whereHas
+                    if (count($rest) > 0) {
+                        $next = array_shift($rest);
+                        $q->whereHas($next, function($q2) use ($rest, $attr, $value) {
+                            if (count($rest) > 0) {
+                                // en caso extremo de 3+ niveles
+                                $this->applyNestedWhereHas($q2, $rest, $attr, $value);
+                            } else {
+                                $q2->where($attr, $value);
+                            }
+                        });
+                    } else {
+                        // sólo un nivel (no debería pasar, pues . fue detectado)
+                        $q->where($attr, $value);
+                    }
+                });
+
+            } else {
+                // filtro local
+                switch ($col->filterType) {
+                    case 'select':
+                    case 'numeric':
+                        $query->where($col->field, $value);
+                        break;
+                    case 'date':
+                        $query->whereDate($col->field, $value);
+                        break;
+                    default:
+                        $query->where($col->field, 'ILIKE', "%{$value}%");
+                }
+            }
+        }
+
+        // 4) Búsqueda global sobre columnas locales
         if ($q = $request->query('q')) {
-            $query->where(function($w) use($q,$locals){
-                foreach ($locals as $c) {
-                    $w->orWhere($c,'ILIKE',"%{$q}%");
+            $query->where(function($w) use($q, $localCols) {
+                foreach ($localCols as $c) {
+                    $w->orWhere($c, 'ILIKE', "%{$q}%");
                 }
             });
         }
 
-        $data = $query->paginate($request->query('per_page',20));
+        // 5) Paginamos manteniendo los filtros en la querystring
+        $data = $query
+            ->paginate($request->query('per_page', 20))
+            ->withQueryString();
 
+        // 6) Enviamos todo a la vista
         return view('crud.table', [
-        'data'      => $data,
-        'columns'   => $this->columns,
-        'abilities' => $this->abilities,
+            'data'      => $data,
+            'columns'   => $this->columns,
+            'abilities' => $this->abilities,
+            'filters'   => $request->only(
+                array_filter($all, fn($f) => $this->columns[$f]->filterable)
+            ),
         ]);
     }
 
@@ -178,6 +243,21 @@ abstract class CrudControllerBase extends Controller
     {
         $this->abilities = Forerunner::crudMatrix($moduleName);
     }
+
+    /**
+     * Helper recursivo para whereHas de 3+ niveles.
+     */
+    protected function applyNestedWhereHas($query, array $relations, string $attr, $value)
+    {
+        $next = array_shift($relations);
+        $query->whereHas($next, function($q) use ($relations, $attr, $value) {
+            if (count($relations) > 0) {
+                $this->applyNestedWhereHas($q, $relations, $attr, $value);
+            } else {
+                $q->where($attr, $value);
+            }
+        });
+    }
 }
 
 /* ---------------------------------------------------------------
@@ -205,4 +285,21 @@ class ColumnConfig
     public function readonly(): self             { $this->editable = false;  return $this; }
     public function rules(array $rules): self    { $this->rules = $rules;    return $this; }
     public function options(array $opts): self   { $this->options = $opts;   return $this; }
+
+    public bool   $filterable    = false;
+    public string $filterType    = 'text';   // 'text'|'select'|'date'|'numeric'
+    public ?array $filterOptions = null;
+
+    public function filterable(string $type = 'text'): self
+    {
+        $this->filterable = true;
+        $this->filterType = $type;
+        return $this;
+    }
+
+    public function filterOptions(array $opts): self
+    {
+        $this->filterOptions = $opts;
+        return $this;
+    }
 }
