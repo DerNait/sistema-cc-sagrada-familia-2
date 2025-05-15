@@ -31,8 +31,29 @@ class ProductosController extends CrudControllerBase
             ->label('Nombre')
             ->rules(['required','string','max:255']);
 
+            
+        $this->column('precio_unitario')
+            ->label('Precio Unitario')
+            ->type('number')
+            ->rules(['required','numeric','min:0']);
+            
+        $this->column('cantidad')
+            ->label('Cantidad')
+            ->type('number')
+            ->rules(['required','integer','min:0']);
+            
+        $this->column('fecha_ingreso')
+                ->label('Fecha de Ingreso')
+                ->type('date')
+                ->rules(['required','date']);
+                
         $this->column('created_at')
             ->label('Creado en')
+            ->type('datetime')
+            ->readonly();
+
+        $this->column('updated_at')
+            ->label('Actualizado en')
             ->type('datetime')
             ->readonly();
 
