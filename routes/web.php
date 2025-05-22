@@ -1,22 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Catalogs\EmpleadosController;
 use App\Http\Controllers\Catalogs\UsersController;
 use App\Http\Controllers\Catalogs\EstudiantesController;
 use App\Http\Controllers\Catalogs\ProductosController;
 use App\Http\Controllers\ProductoController;
-
-
-
-Route::get('/iniciosesion', function(){
-    return view('iniciosesion');
-});
-
-Route::get('/registro', function () {
-    return view('registro');
-});
+use App\Http\Controllers\DashboardController;
 
 Route::get('/homepadres', function () {
     return view('Homepadres'); 
@@ -75,12 +65,7 @@ Auth::routes();
 
 Route::get('/empleados/planilla', [EmpleadosController::class, 'planilla']);
 
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/exportar-empleados', [App\Http\Controllers\ExportController::class, 'export'])->name('export.empleados');
-
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/exportar-empleados', [App\Http\Controllers\ExportController::class, 'export'])->name('export.empleados');
 
 Route::prefix('catalogos')->name('catalogos.')->group(function () {
