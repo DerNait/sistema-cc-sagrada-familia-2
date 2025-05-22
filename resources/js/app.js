@@ -18,6 +18,10 @@ import Planilla from './components/Planilla.vue';
 import EdicionUsuarios from './components/EdicionUsuarios.vue';
 import AgregacionInventario from './components/AgregacionInventario.vue';
 
+// CRUD
+import Table from './components/Crud/Table.vue';
+import Form from './components/Crud/Form.vue';
+
 const app = createApp({});
 
 app.component('hello-world', HelloWorld);
@@ -34,6 +38,10 @@ app.component('inventario',Inventario);
 app.component('planilla',Planilla);
 app.component('empleados',Empleados);
 app.component('edicion-usuarios',EdicionUsuarios);
+
+// CRUD
+app.component('crud-table', Table);
+app.component('crud-form', Form);
 
 // app.component('students',Students);
 // app.component('profesores',Profesores);
