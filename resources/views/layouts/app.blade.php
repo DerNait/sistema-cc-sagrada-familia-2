@@ -43,7 +43,7 @@
         </nav>
 
         {{-- --------------- Contenido --------------- --}}
-        <main class="flex-grow-1 p-3">
+        <main id="app" class="flex-grow-1 p-3">
             @yield('content')
         </main>
 

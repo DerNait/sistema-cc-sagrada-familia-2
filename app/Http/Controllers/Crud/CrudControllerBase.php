@@ -135,14 +135,20 @@ abstract class CrudControllerBase extends Controller
             ->paginate($request->query('per_page', 20))
             ->withQueryString();
 
+            
         // 6) Enviamos todo a la vista
-        return view('crud.table', [
+        $params = [
             'data'      => $data,
             'columns'   => $this->columns,
             'abilities' => $this->abilities,
             'filters'   => $request->only(
                 array_filter($all, fn($f) => $this->columns[$f]->filterable)
             ),
+        ];
+
+        return view('component', [
+            'component' => 'crud-table',
+            'params'    => $params
         ]);
     }
 
@@ -151,10 +157,15 @@ abstract class CrudControllerBase extends Controller
         $this->configure($request);
         abort_unless($this->abilities['create'] ?? false, 403);
 
-        return view('crud.form', [
+        $params = [
             'item'     => null,
             'columns'  => $this->columns,
             'action'  => route(Str::beforeLast($request->route()->getName(), '.') . '.store'),
+        ];
+
+        return view('component', [
+            'component' => 'crud-form',
+            'params'    => $params
         ]);
     }
 
@@ -181,10 +192,15 @@ abstract class CrudControllerBase extends Controller
 
         $item = $this->newModelQuery()->findOrFail($id);
 
-        return view('crud.form', [
+        $params = [
             'item'    => $item,
             'columns' => $this->columns,
             'action'  => route(Str::beforeLast($request->route()->getName(), '.') . '.update', $item->getKey()),
+        ];
+
+        return view('component', [
+            'component' => 'crud-form',
+            'params'    => $params
         ]);
     }
 
