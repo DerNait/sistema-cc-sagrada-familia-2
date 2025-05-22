@@ -35,19 +35,20 @@
         </div>
     </nav>
 
-    <div class="flex-grow-1 d-flex">
-        {{-- --------------- Sidebar --------------- --}}
-        <aside class="bg-dark text-light p-2" style="width:240px;overflow-y:auto">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview">
-                {!! \App\Navigation\Sidebar::render() !!}
-            </ul>
-        </aside>
+    <div class="flex-grow-1 d-flex flex-column">
+
+        {{-- --------------- Navbar horizontal --------------- --}}
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+            {!! \App\Navigation\Navbar::render() !!}
+        </nav>
 
         {{-- --------------- Contenido --------------- --}}
         <main class="flex-grow-1 p-3">
             @yield('content')
         </main>
+
     </div>
+
         {{-- Footer fijo con navegación --}}
     @unless(isset($hideFooter) && $hideFooter)    
     <footer class="bg-white border-top shadow-sm py-2">
