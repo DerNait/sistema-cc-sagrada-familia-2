@@ -21,7 +21,7 @@
             </label>
 
             <select
-              v-if="c.type === 'relation' && c.options"
+              v-if="c.type == 'relation' && c.options"
               class="form-select"
               :name="c.field"
               v-model="form[c.field]"
@@ -35,15 +35,6 @@
                 {{ label }}
               </option>
             </select>
-
-            <input 
-                v-else-if="c.type === 'numeric'"
-                type="number"
-                step="any"
-                class="form-control"
-                :name="c.field"
-                v-model.number="form[c.field]"
-            />
             <input 
                 v-else 
                 :type="inputType(c.type)" 
@@ -81,6 +72,7 @@ function inputType(t) {
   if (t === 'date') return 'date';
   if (t === 'time') return 'time';
   if (t === 'datetime') return 'datetime-local';
+  if (t === 'number') return 'number';
   return 'text';
 }
 
