@@ -44,7 +44,7 @@
     Nuevo
   </a>
 
-  <table class="table table-bordered">
+  <table id="dataTable" class="table table-bordered display">
     <thead>
       <tr>
         <template v-for="c in Object.values(columns)" :key="c.field">
@@ -55,7 +55,7 @@
     </thead>
 
     <tbody>
-      <tr v-for="row in rows" :key="row.id">
+      <tr v-for="row in rows" :key="row.id" :data-id="row.id">
         <template v-for="c in Object.values(columns)" :key="c.field">
             <td v-if="c.visible">
             <template v-if="c.type==='relation' && c.options">
@@ -90,13 +90,28 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import axios from 'axios';
+import { ref, computed, onMounted, nextTick } from 'vue';
+import 'datatables.net-dt/css/dataTables.dataTables.css';
+import DataTable from 'datatables.net'; 
 
 const props = defineProps(['data','columns','abilities','filters']);
 
 const rows = ref([...props.data.data]);
 const localFilters = ref({ ...props.filters });
+
+let dt = null;
+
+onMounted(async () => {
+  await nextTick();
+  dt = new DataTable('#dataTable', {
+    language: {
+      url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+    },
+    paging: true,
+    searching: true,
+    ordering: true
+  });
+});
 
 function buildName (field) {
   const parts = field.split('.');
@@ -142,6 +157,7 @@ function deleteRow (row) {
       
       if (idx > -1) {
           rows.value.splice(idx, 1);
+          dt?.row(`tr[data-id="${row.id}"]`).remove().draw(false);
       }
     })
     .catch(err => console.log(err.message));
