@@ -26,6 +26,10 @@ Route::get('/students', function () {
     return view('Este es el student');
 });
 
+Route::get('/calificaciones', function () {
+    return view('calificaciones');
+});
+
 Route::get('/profesores', function () {
     return view('profesores');
 });

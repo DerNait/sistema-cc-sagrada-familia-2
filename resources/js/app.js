@@ -17,6 +17,7 @@ import Empleados from './components/Empleados.vue';
 import Planilla from './components/Planilla.vue';
 import EdicionUsuarios from './components/EdicionUsuarios.vue';
 import AgregacionInventario from './components/AgregacionInventario.vue';
+import Calificaciones from './components/Calificaciones.vue';
 
 // CRUD
 import Table from './components/Crud/Table.vue';
@@ -38,6 +39,7 @@ app.component('inventario',Inventario);
 app.component('planilla',Planilla);
 app.component('empleados',Empleados);
 app.component('edicion-usuarios',EdicionUsuarios);
+app.component('calificaciones',Calificaciones);
 
 // CRUD
 app.component('crud-table', Table);
