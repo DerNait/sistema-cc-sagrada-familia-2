@@ -1,99 +1,162 @@
 <template>
-    <div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
-        <div
-        class="bg-white px-6 py-3 rounded shadow d-flex flex-column justify-content-center align-items-center"
-        style="width: 600px; text-align: center; min-height: 500px;">
-            <img
-            src="/images/logo_.jpg"
-            alt="Logo"
-            class="mb-4 w-75"
-            style="margin-top: 50px;"
-            />
+  <div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+    <div class="bg-white px-6 py-3 rounded shadow d-flex flex-column justify-content-center align-items-center"
+         style="width: 600px; text-align: center; min-height: 500px;">
+      <img src="/images/logo_.jpg" alt="Logo" class="mb-4 w-75" style="margin-top: 50px;" />
+      <div class="mt-5 w-100 d-flex flex-column align-items-center">
+        <h3 class="mb-4">Registro</h3>
 
-            <div class="mt-5 w-100 d-flex flex-column align-items-center" style="margin-top: 50px;">
-                <h3 class="mb-4">Registro</h3>
+        <form class="row needs-validation g-3 w-100"
+              ref="formElement"
+              @submit.prevent="handleSubmit"
+              novalidate
+              style="max-width: 450px;">
+          
+          <!-- Nombre -->
+          <div class="col-12">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="nombre" v-model="form.nombre"  />
+            <div class="invalid-feedback">Por favor ingresa tu nombre.</div>
+            <div class="valid-feedback">¡Lindo nombre!</div>
+          </div>
 
-                <!-- NOMBRE -->
-                <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="nombre" class="form-label">Nombre</label>
-                    <input type="text" id="nombre" class="form-control border-success" v-model="form.nombre" />
-                </div>
-        
-                <!-- APELLIDO -->
-                <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="apellido" class="form-label">Apellido</label>
-                    <input type="text" id="apellido" class="form-control border-success" v-model="form.apellido" />
-                </div>
-  
-                <!-- CORREO -->
-                <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="correo" class="form-label">Correo</label>
-                    <input type="email" id="correo" class="form-control border-success" v-model="form.correo" />
-                </div>
-  
-                <!-- CONTRASEÑA -->
-                <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="contraseña" class="form-label">Contraseña</label>
-                    <input type="password" id="contraseña" class="form-control border-success" v-model="form.contraseña" />
-                </div>
+          <!-- Apellido -->
+          <div class="col-12">
+            <label for="apellido" class="form-label">Apellido</label>
+            <input type="text" class="form-control" id="apellido" v-model="form.apellido"  />
+            <div class="invalid-feedback">Por favor ingresa tu apellido.</div>
+            <div class="valid-feedback"></div>
+          </div>
 
-                <!-- CONFIRMAR CONTRASEÑA -->
-                <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="confirmarContraseña" class="form-label">Confirmar Contraseña</label>
-                    <input type="password" id="confirmarContraseña" class="form-control border-success" v-model="form.confirmarContraseña" />
-                </div>
+          <!-- Correo -->
+          <div class="col-12">
+            <label for="correo" class="form-label">Correo</label>
+            <input type="email" class="form-control" id="correo" v-model="form.correo"  />
+            <div class="invalid-feedback">Por favor ingresa un correo válido.</div>
+            <div class="valid-feedback">¡Se ve bien!</div>
+          </div>
 
-                <!-- FECHA DE NACIMIENTO -->
-                <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="fechaNacimiento" class="form-label">Fecha de nacimiento</label>
-                    <input type="date" id="fechaNacimiento" class="form-control border-success" v-model="form.fechaNacimiento" />
-                </div>
+          <!-- Contraseña -->
+          <div class="col-12">
+            <label for="contraseña" class="form-label">Contraseña</label>
+            <input type="password" class="form-control" id="contraseña" v-model="form.contraseña" minlength="6"  />
+            <div class="invalid-feedback">Debe tener al menos 6 caracteres.</div>
+            <div class="valid-feedback">¡Mantenla en secreto!</div>
+          </div>
 
-                <!-- ROL -->
-                <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                <label for="rol" class="form-label">Rol</label>
-                <Multiselect v-model="form.rol" :options="roles" placeholder="Selecciona un rol" label="name" track-by="name"  class="multiselect"/>
-                </div>
-            
-            <!-- BOTÓN -->
-            <button class="btn btn-success w-100" style="max-width: 450px;" @click="registrarUsuario" :disabled='enviado'>Registrar Usuario</button>
-        </div>
+          <!-- Confirmar contraseña -->
+          <div class="col-12">
+            <label for="confirmarContraseña" class="form-label">Confirmar Contraseña</label>
+            <input type="password" class="form-control" id="confirmarContraseña" v-model="form.confirmarContraseña"
+                   :class="{'is-invalid': !passwordsCoinciden, 'is-valid': form.confirmarContraseña && passwordsCoinciden}"
+                    />
+            <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+            <div class="valid-feedback">¡Si coinciden!</div>
+          </div>
+
+          <!-- Fecha de nacimiento -->
+          <div class="col-12">
+            <label for="fechaNacimiento" class="form-label">Fecha de nacimiento</label>
+            <input type="date" class="form-control" id="fechaNacimiento" v-model="form.fechaNacimiento"  />
+            <div class="invalid-feedback">Por favor ingresa tu fecha de nacimiento.</div>
+            <div class="valid-feedback">¡Se ve bien!</div>
+          </div>
+
+          <!-- Rol -->
+          <div class="col-12">
+            <label class="form-label">Rol</label>
+            <Multiselect v-model="form.rol"
+                         :options="roles"
+                         placeholder="Selecciona un rol"
+                         label="name"
+                         track-by="name"
+                         :class="{'is-invalid': showValidation && !form.rol, 'is-valid': form.rol}"
+                         class="multiselect" />
+            <div v-if="showValidation && !form.rol" class="invalid-feedback d-block">Por favor selecciona un rol.</div>
+            <div v-if="form.rol" class="valid-feedback d-block">¡Se ve bien!</div>
+          </div>
+
+          <!-- Botón -->
+          <div class="col-12">
+            <button type="submit" class="btn btn-success w-100" :disabled="enviado">Registrar Usuario</button>
+          </div>
+        </form>
+      </div>
     </div>
-</div>
+  </div>
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref, computed } from 'vue'
 import Multiselect from 'vue-multiselect'
-import axis from 'axios'
-
-
+import Swal from 'sweetalert2';
 const form = reactive({
-    nombre: '',
-    apellido: '',
-    correo: '',
-    contraseña: '',
-    confirmarContraseña: '',
-    fechaNacimiento: '',
-    rol: null
+  nombre: '',
+  apellido: '',
+  correo: '',
+  contraseña: '',
+  confirmarContraseña: '',
+  fechaNacimiento: '',
+  rol: null
 })
 
-const enviando = ref(false)
+const enviado = ref(false)
+const formElement = ref(null)
+const showValidation = ref(false)
 
 const roles = [
-    { name: 'Administracion' },
-    { name: 'Inventario' },
-    { name: 'Secretaria' },
-    { name: 'Docente' },
-    { name: 'Estudiante' }
-    ]
+  { name: 'Administracion' },
+  { name: 'Inventario' },
+  { name: 'Secretaria' },
+  { name: 'Docente' },
+  { name: 'Estudiante' }
+]
+
+const passwordsCoinciden = computed(() => form.contraseña === form.confirmarContraseña)
+
+const handleSubmit = (event) => {
+  const formEl = event.target
+
+  if (!formEl.checkValidity()) {
+    event.preventDefault()
+    event.stopPropagation()
+
+    // 🔴 Aquí se muestra el SweetAlert si el formulario no es válido
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: "¡Por favor completa todos los campos correctamente!",
+      footer: '<a href="#">¿Por qué tengo este error?</a>'
+    })
+  } else {
+    enviado.value = true
+    console.log('Formulario válido, enviando...', formEl)
+    // Aquí iría tu lógica real para enviar el formulario
+  }
+
+  formEl.classList.add('was-validated')
+}
+
 </script>
 
 <style scoped>
+body {
+  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif; 
+}
 .multiselect {
-  border: 1px solid #198754; /* color borde success */
-  border-radius: 4px;
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem;
   padding: 0.375rem 0.75rem;
   min-height: 38px;
+}
+.is-invalid {
+  border-color: #dc3545 !important;
+}
+.is-valid {
+  border-color: #198754 !important;
+}
+.valid-feedback,
+.invalid-feedback {
+  display: block;
 }
 </style>
