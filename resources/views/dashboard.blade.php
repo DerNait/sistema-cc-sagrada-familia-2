@@ -14,7 +14,13 @@
                         </div>
                     @endif
 
-                    {{ __('You are logged in!') }}
+                    <iframe
+                        src="http://localhost:3000/public/dashboard/d15c163c-05fc-4a68-b358-d6a4ea2107b7"
+                        frameborder="0"
+                        width="800"
+                        height="600"
+                        allowtransparency
+                    ></iframe>
                 </div>
             </div>
         </div>
