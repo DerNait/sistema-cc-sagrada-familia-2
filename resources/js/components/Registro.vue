@@ -15,7 +15,7 @@
           <!-- Nombre -->
           <div class="col-12">
             <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control" id="nombre" v-model="form.nombre"  />
+            <input type="text" class="form-control" id="nombre" v-model="form.nombre"/>
             <div class="invalid-feedback">Por favor ingresa tu nombre.</div>
             <div class="valid-feedback">¡Lindo nombre!</div>
           </div>
@@ -23,7 +23,7 @@
           <!-- Apellido -->
           <div class="col-12">
             <label for="apellido" class="form-label">Apellido</label>
-            <input type="text" class="form-control" id="apellido" v-model="form.apellido"  />
+            <input type="text" class="form-control" id="apellido" v-model="form.apellido"/>
             <div class="invalid-feedback">Por favor ingresa tu apellido.</div>
             <div class="valid-feedback"></div>
           </div>
@@ -31,7 +31,7 @@
           <!-- Correo -->
           <div class="col-12">
             <label for="correo" class="form-label">Correo</label>
-            <input type="email" class="form-control" id="correo" v-model="form.correo"  />
+            <input type="email" class="form-control" id="correo" v-model="form.correo"/>
             <div class="invalid-feedback">Por favor ingresa un correo válido.</div>
             <div class="valid-feedback">¡Se ve bien!</div>
           </div>
@@ -57,7 +57,7 @@
           <!-- Fecha de nacimiento -->
           <div class="col-12">
             <label for="fechaNacimiento" class="form-label">Fecha de nacimiento</label>
-            <input type="date" class="form-control" id="fechaNacimiento" v-model="form.fechaNacimiento"  />
+            <input type="date" class="form-control" id="fechaNacimiento" v-model="form.fechaNacimiento"/>
             <div class="invalid-feedback">Por favor ingresa tu fecha de nacimiento.</div>
             <div class="valid-feedback">¡Se ve bien!</div>
           </div>
