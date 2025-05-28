@@ -19,7 +19,7 @@
         <h4 class="mb-3">Filtros de Búsqueda</h4>
         
         <div class="row g-3">
-          <!-- Filtro por ID si se agruegan mas productos cambiar max -->
+          <!-- Filtro por ID -->
           <div class="col-md-4">
             <label for="filter-id" class="form-label">ID del Producto</label>
             <input
@@ -149,34 +149,31 @@
             </tbody>
           </table>
         </div>
-        </div>
-          <h1 class="mb-3">Descargar Inventario</h1>
-          <p class="text-muted">Haz clic en el botón para descargar la planilla de Inventario en formato Excel.</p>
-          
+      </div>
+
+      <!-- Sección de descarga -->
+      <div class="download-section mt-5 text-center">
+        <h4 class="mb-3">Descargar Inventario</h4>
+        <p class="text-muted mb-4">Haz clic en el botón para descargar la planilla de Inventario en formato Excel.</p>
         
-          <button
-            class="btn btn-success mt-4"
-            @click="exportarEmpleados"
-            :disabled="isExporting"
-          >
-            <span v-if="!isExporting">Descargar Inventario en Excel</span>
-            <span v-else>Generando archivo...</span>
-          </button>
-          
-      
-          <div v-if="isExporting" class="mt-3">
-            <p class="text-muted">Procesando... Por favor espera.</p>
-          </div>
-          
-        
-          <div v-if="errorMessage" class="mt-3 alert alert-danger">
-            {{ errorMessage }}
-        </div>
+        <button
+          class="btn btn-success"
+          @click="exportarProductos"
+          :disabled="isExporting"
+        >
+          <span v-if="!isExporting">Descargar Inventario en Excel</span>
+          <span v-else class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <span v-if="isExporting"> Generando archivo...</span>
+        </button>
       </div>
     </div>
+  </div>
 </template>
 
 <script>
+import Swal from 'sweetalert2';
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -191,9 +188,7 @@ export default {
       productos: [],
       tipos: [],
       loading: false,
-      error: null,
-      isExporting: false,  
-      errorMessage: ""   
+      isExporting: false
     }
   },
   created() {
@@ -208,7 +203,12 @@ export default {
           this.cargarProductos()
         ]);
       } catch (error) {
-        this.error = "Error al cargar datos iniciales";
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron cargar los datos iniciales',
+          footer: 'Por favor intenta nuevamente'
+        });
         console.error(error);
       } finally {
         this.loading = false;
@@ -219,6 +219,11 @@ export default {
         const { data } = await axios.get('/productos/tipos');
         this.tipos = data;
       } catch (error) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron cargar los tipos de productos',
+        });
         console.error('Error cargando tipos:', error);
         throw error;
       }
@@ -243,15 +248,30 @@ export default {
         });
         this.productos = data.data || [];
       } catch (error) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron cargar los productos',
+        });
         console.error('Error cargando productos:', error);
-        this.error = "Error al cargar productos";
         throw error;
       }
     },
-    aplicarFiltros() {
-      this.cargarProductos();
+    async aplicarFiltros() {
+      try {
+        await this.cargarProductos();
+        await Swal.fire({
+          title: 'Filtros aplicados',
+          text: `Se encontraron ${this.productos.length} productos`,
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } catch (error) {
+        console.error(error);
+      }
     },
-    resetFilters() {
+    async resetFilters() {
       this.filters = {
         id: null,
         nombre: '',
@@ -260,7 +280,17 @@ export default {
         precio_max: null,
         fecha_ingreso: ''
       };
-      this.cargarProductos();
+      try {
+        await this.cargarProductos();
+        await Swal.fire({
+          title: 'Filtros limpiados',
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      } catch (error) {
+        console.error(error);
+      }
     },
     formatDate(date) {
       if (!date) return '';
@@ -270,35 +300,50 @@ export default {
         return date;
       }
     },
-    exportarProductos() {
-      this.isExporting = true; 
-      this.errorMessage = "";
-     
-      const link = document.createElement('a');
-      link.href = '/exportar-productos';
-      link.setAttribute('download', 'prodcutos.xlsx'); 
-      document.body.appendChild(link);
+    async exportarProductos() {
+      this.isExporting = true;
       
-      
-      setTimeout(() => {
+      try {
+        // Simulamos un retraso para mostrar el spinner
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const link = document.createElement('a');
+        link.href = '/exportar-productos';
+        link.setAttribute('download', 'inventario.xlsx'); 
+        document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-       
-        setTimeout(() => {
-          this.isExporting = false;
-        }, 1500);
-      }, 500);
+        
+        await Swal.fire({
+          title: 'Descarga completada',
+          text: 'El inventario se ha descargado correctamente',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } catch (error) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo descargar el inventario',
+        });
+        console.error(error);
+      } finally {
+        this.isExporting = false;
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-.container-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+body {
+  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.filter-section {
+  background-color: #f8f9fa;
+  border-radius: 0.375rem;
 }
 
 .table-responsive {
@@ -306,23 +351,18 @@ export default {
   overflow-y: auto;
 }
 
-.filter-section {
-  background-color: #f8fafc;
-  border-radius: 8px;
+.download-section {
   padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  border-top: 1px solid #dee2e6;
 }
 
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+.btn-success {
+  padding: 0.5rem 1.5rem;
+  font-size: 1.1rem;
+}
+
+.spinner-border {
+  vertical-align: middle;
+  margin-right: 0.5rem;
 }
 </style>
