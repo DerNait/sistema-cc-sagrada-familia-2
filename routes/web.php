@@ -42,6 +42,11 @@ Route::get('/courses', function () {
     return view('cursos');
 });
 
+//Pendiente
+Route::get('/cursos', function () {
+    return view('cursos');
+});
+
 Route::get('/payment', function () {
     return view('pagos');
 });

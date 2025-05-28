@@ -5,7 +5,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Courses</title>
+    <title>Cursos</title>
     @vite('resources/js/app.js')
 </head>
 <body>
