@@ -80,3 +80,24 @@ INSERT INTO ajustes_salariales (pago_empleado_id, tipo_ajuste_id, descripcion, m
 -- Pago 10 – Empleado 10
 (10,3 , 'Horas extra mantenimiento',      150.00, '2025-04-30 18:20:00', '2025-04-30 18:20:00'),
 (10,12, 'Equipo extraviado',              100.00, '2025-04-30 18:20:00', '2025-04-30 18:20:00');
+
+--tipo productos
+INSERT INTO tipo_productos (nombre, created_at, updated_at) VALUES
+('Uniformes', NOW(), NOW()),
+('Útiles Escolares', NOW(), NOW()),
+('Otros', NOW(), NOW());
+--Insert de productos
+INSERT INTO productos (tipo_producto_id, nombre, fecha_ingreso, precio_unitario, cantidad, created_at, updated_at) VALUES
+-- Uniformes
+(1, 'Camisa Escolar Blanca', '2025-01-10', 45.00, 100, NOW(), NOW()),
+(1, 'Pantalón Azul Marino', '2025-01-10', 60.00, 80, NOW(), NOW()),
+(1, 'Suéter Escolar', '2025-02-05', 75.00, 50, NOW(), NOW()),
+-- Útiles
+(2, 'Cuaderno de Matemática', '2025-01-12', 15.00, 200, NOW(), NOW()),
+(2, 'Lapicero Azul', '2025-01-15', 2.50, 300, NOW(), NOW()),
+(2, 'Lápiz de Grafito', '2025-01-15', 1.50, 300, NOW(), NOW()),
+(2, 'Mochila Escolar', '2025-01-20', 120.00, 40, NOW(), NOW()),
+-- Otros
+(3, 'Botella de Agua Reutilizable', '2025-02-01', 25.00, 60, NOW(), NOW()),
+(3, 'Agenda Escolar', '2025-01-18', 20.00, 100, NOW(), NOW()),
+(3, 'Carnet Estudiantil', '2025-02-10', 10.00, 150, NOW(), NOW());
