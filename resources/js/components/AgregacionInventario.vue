@@ -14,9 +14,9 @@
       <h2 class="mb-3">Sección de Inventario</h2>
       <p class="text-muted fs-5">Registrar Movimiento de Inventario</p>
 
-      <form @submit.prevent="guardarMovimiento" class="text-start mt-4">
+      <form @submit.prevent="guardarMovimiento" class="row g-3 needs-validation mt-4" novalidate ref="inventoryForm">
         <!-- Nombre del producto -->
-        <div class="mb-3">
+        <div class="col-12">
           <label for="producto" class="form-label fs-5">Nombre del Producto</label>
           <select v-model="form.producto" id="producto" class="form-select form-select-lg" required>
             <option disabled value="">Selecciona un producto</option>
@@ -24,11 +24,14 @@
             <option value="utiles">Útiles</option>
             <option value="otros">Otros</option>
           </select>
+          <div class="invalid-feedback">
+            Por favor selecciona un producto.
+          </div>
         </div>
 
         <!-- Campos adicionales si es "uniformes" -->
-        <div v-if="form.producto === 'uniformes'">
-          <div class="mb-3">
+        <div v-if="form.producto === 'uniformes'" class="row">
+          <div class="col-md-6">
             <label for="tipoUniforme" class="form-label fs-5">Tipo de Uniforme</label>
             <select v-model="form.tipoUniforme" id="tipoUniforme" class="form-select form-select-lg" required>
               <option disabled value="">Selecciona un tipo</option>
@@ -37,8 +40,11 @@
               <option value="pantalon">Pantalón</option>
               <option value="falda">Falda</option>
             </select>
+            <div class="invalid-feedback">
+              Por favor selecciona un tipo de uniforme.
+            </div>
           </div>
-          <div class="mb-3">
+          <div class="col-md-6">
             <label for="talla" class="form-label fs-5">Talla</label>
             <input
               type="text"
@@ -48,11 +54,14 @@
               placeholder="Ej. S, M, L, 10, 12, etc."
               required
             />
+            <div class="invalid-feedback">
+              Por favor ingresa la talla.
+            </div>
           </div>
         </div>
 
         <!-- Campo adicional si es "otros" -->
-        <div class="mb-3" v-if="form.producto === 'otros'">
+        <div class="col-12" v-if="form.producto === 'otros'">
           <label for="productoPersonalizado" class="form-label fs-5">Especifica el producto</label>
           <input
             type="text"
@@ -62,10 +71,13 @@
             placeholder="Ej. Marcadores permanentes"
             required
           />
+          <div class="invalid-feedback">
+            Por favor especifica el producto.
+          </div>
         </div>
 
         <!-- Cantidad -->
-        <div class="mb-3">
+        <div class="col-md-6">
           <label for="cantidad" class="form-label fs-5">Cantidad a Ingresar</label>
           <input
             type="number"
@@ -75,10 +87,13 @@
             min="1"
             required
           />
+          <div class="invalid-feedback">
+            Por favor ingresa una cantidad válida (mínimo 1).
+          </div>
         </div>
 
         <!-- Fecha -->
-        <div class="mb-4">
+        <div class="col-md-6">
           <label for="fecha" class="form-label fs-5">Fecha</label>
           <input
             type="date"
@@ -87,22 +102,25 @@
             class="form-control form-control-lg"
             required
           />
+          <div class="invalid-feedback">
+            Por favor selecciona una fecha.
+          </div>
         </div>
 
         <!-- Botón -->
-        <button type="submit" class="btn btn-success btn-lg w-100">
-          Guardar Movimiento
-        </button>
+        <div class="col-12">
+          <button type="submit" class="btn btn-success btn-lg w-100">
+            Guardar Movimiento
+          </button>
+        </div>
       </form>
-
-      <div v-if="mensaje" class="alert alert-success mt-4">
-        {{ mensaje }}
-      </div>
     </div>
   </div>
 </template>
 
 <script>
+import Swal from 'sweetalert2';
+
 export default {
   data() {
     return {
@@ -113,12 +131,26 @@ export default {
         talla: '',
         cantidad: '',
         fecha: ''
-      },
-      mensaje: ''
+      }
     };
   },
   methods: {
-    guardarMovimiento() {
+    async guardarMovimiento() {
+      const form = this.$refs.inventoryForm;
+      
+      // Verificar la validez del formulario
+      if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        
+        // Mostrar alerta de error
+        await Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "¡Por favor completa todos los campos correctamente!",
+        });
+        return;
+      }
+
       let nombreFinalProducto = '';
 
       if (this.form.producto === 'uniformes') {
@@ -135,7 +167,13 @@ export default {
         fecha: this.form.fecha
       });
 
-      this.mensaje = `Movimiento guardado para "${nombreFinalProducto}".`;
+      // Mostrar alerta de éxito
+      await Swal.fire({
+        title: "Guardado Correctamente!",
+        text: `Movimiento registrado para "${nombreFinalProducto}"`,
+        icon: "success",
+        draggable: true
+      });
 
       // Resetear formulario
       this.form = {
@@ -147,10 +185,15 @@ export default {
         fecha: ''
       };
 
-      setTimeout(() => {
-        this.mensaje = '';
-      }, 3000);
+      // Resetear validación visual
+      form.classList.remove('was-validated');
     }
   }
 };
 </script>
+
+<style>
+body {
+  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif; 
+}
+</style>
