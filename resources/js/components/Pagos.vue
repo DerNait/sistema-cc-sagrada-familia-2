@@ -1,80 +1,90 @@
 <template>
-  <div class="container-fluid min-vh-100 bg-light py-5 px-3">
-    <div class="bg-white rounded shadow p-5 mx-auto" style="max-width: 900px;">
-      <div class="text-center mb-4">
-        <img
-          src="/images/logo_.jpg"
-          alt="Logo"
-          class="mb-3"
-          style="width: 150px;"
-        />
-        <h2>Sección de Pagos</h2>
-      </div>
+  <div class="container my-4">
+    <h3 class="text-center text-success mb-4">Saldos</h3>
 
-      <!-- Información del estudiante -->
-      <div class="mb-4">
-        <h4 class="mb-3">Estudiante: <strong>Juan Pérez</strong></h4>
-        <p><strong>Concepto:</strong> Deudores por cuotas</p>
-        <p><strong>Vence:</strong> 25/05/2025</p>
-        <p><strong>Detalle de cuenta corriente:</strong> Q.1500</p>
-        <h5 class="mt-4 text-danger">
-          Total saldo vencido: <strong>Q.1500</strong>
-        </h5>
-      </div>
+    <!-- Vencidos -->
+    <h5>Vencidos</h5>
+    <table class="table table-bordered text-center">
+      <thead>
+        <tr>
+          <th>Concepto</th>
+          <th>Vence</th>
+          <th>Detalle de cuenta corriente</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Deudores por cuotas</td>
+          <td>17/05/2025</td>
+          <td>Q.4,000.00</td>
+        </tr>
+        <tr class="table-danger">
+          <td><strong>Total saldo vencido</strong></td>
+          <td></td>
+          <td><strong>Q.4,000.00</strong></td>
+        </tr>
+        <tr class="table-success">
+          <td><strong>Monto a pagar</strong></td>
+          <td></td>
+          <td><strong>Q.4,000.00</strong></td>
+        </tr>
+      </tbody>
+    </table>
 
-      <!-- Subida de comprobante -->
-      <div class="mb-4">
-        <label for="comprobante" class="form-label fw-bold">
-          📎 Subir comprobante de pago:
-        </label>
-        <input
-          class="form-control"
-          type="file"
-          id="comprobante"
-          @change="handleFileUpload"
-        />
-      </div>
+    <!-- Por vencer -->
+    <h5>Por vencer</h5>
+    <table class="table table-bordered text-center">
+      <thead>
+        <tr>
+          <th>Concepto</th>
+          <th>Vence</th>
+          <th>Detalle de cuenta corriente</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="table-success">
+          <td><strong>Monto a pagar</strong></td>
+          <td></td>
+          <td><strong>Q0.00</strong></td>
+        </tr>
+      </tbody>
+    </table>
 
-      <!-- Botón de enviar -->
-      <div class="d-grid">
-        <button class="btn btn-primary btn-lg" @click="enviarPago">
-          Enviar para confirmar
-        </button>
-      </div>
+    <!-- Total operación -->
+    <h4 class="text-center text-danger my-4">
+      Total de la operación: Q4,000.00
+    </h4>
 
-      <!-- Mensaje de confirmación -->
-      <div v-if="confirmado" class="alert alert-success mt-4 text-center" role="alert">
-        ¡Comprobante enviado para confirmar!
+    <!-- Subir comprobante -->
+    <div class="mb-3">
+      <label for="fileInput" class="form-label">Subir comprobante de pago</label>
+      <div class="input-group">
+        <input type="file" class="form-control" id="fileInput" @change="handleFileUpload">
       </div>
+    </div>
+
+    <div class="text-center">
+      <button class="btn btn-success" @click="submitForm">Enviar</button>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  data() {
-    return {
-      comprobante: null,
-      confirmado: false,
-    };
-  },
   methods: {
     handleFileUpload(event) {
-      this.comprobante = event.target.files[0];
+      const file = event.target.files[0];
+      console.log("Archivo seleccionado:", file);
     },
-    enviarPago() {
-      if (this.comprobante) {
-        this.confirmado = true;
-      } else {
-        alert("Por favor, sube un comprobante antes de enviar.");
-      }
-    },
-  },
+    submitForm() {
+      alert("Comprobante enviado");
+    }
+  }
 };
 </script>
 
 <style scoped>
-input[type="file"] {
-  padding: 10px;
+table {
+  font-size: 0.95rem;
 }
 </style>
