@@ -105,4 +105,9 @@ class RegisterController extends Controller
 
         return $user;
     }
+
+    public function runValidator(array $data)
+    {
+        return $this->validator($data);
+    }
 }

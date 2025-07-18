@@ -22,10 +22,5 @@ class DatabaseSeeder extends Seeder
             NavigationSeeder::class,
             RolePermissionSeeder::class,
         ]);
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
     }
 }
