@@ -12,54 +12,37 @@
     @vite(['resources/sass/app.scss','resources/js/app.js'])
 </head>
 <body class="d-flex flex-column" style="min-height:100vh">
-    <nav class="navbar navbar-expand-md navbar-light bg-success shadow-sm">
-        <div class="container">
-            <a class="navbar-brand text-light" href="{{ url('/') }}">{{ config('app.name', 'Laravel') }}</a>
-            <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    @guest
-                        <li><a class="nav-link text-light" href="{{ route('login') }}">Login</a></li>
-                        <li><a class="nav-link text-light" href="{{ route('register') }}">Register</a></li>
-                    @else
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-light" href="#" data-bs-toggle="dropdown">{{ Auth::user()->name }}</a>
-                            <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="#" onclick="event.preventDefault();document.getElementById('logout-form').submit();">Logout</a>
-                                <form id="logout-form" method="POST" action="{{ route('logout') }}">@csrf</form>
-                            </div>
-                        </li>
-                    @endguest
-                </ul>
-            </div>
-        </div>
-    </nav>
 
     <div class="flex-grow-1 d-flex flex-column">
 
-        {{-- --------------- Navbar horizontal --------------- --}}
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-            {!! \App\Navigation\Navbar::render() !!}
+        {{-- --------------- Navbar --------------- --}}
+        <nav class="custom-navbar">
+            <div class="d-flex align-items-center gap-3 w-100">
+                {{-- Logo --}}
+                <a href="{{ route('dashboard.index') }}" class="navbar-logo">
+                    <img src="{{ asset('images/logo-sagrada-familia.png') }}" alt="Logo" height="60">
+                </a>
+
+                {{-- Contenedor del menú + botón user --}}
+                <div class="nav-bubble d-flex flex-grow-1 align-items-center justify-content-end">
+                    {{-- Menú principal --}}
+                    <div class="navbar-bg">
+                        {!! \App\Navigation\Navbar::render() !!}
+                    </div>
+
+                    {{-- Botón de perfil (por ahora vacío) --}}
+                    <button class="btn btn-user nav-user-bg ms-2" type="button">
+                        <i class="fa-regular fa-user fa-lg"></i>
+                    </button>
+                </div>
+            </div>
         </nav>
 
         {{-- --------------- Contenido --------------- --}}
-        <main id="app" class="flex-grow-1 p-3">
+        <main id="app" class="flex-grow-1">
             @yield('content')
         </main>
 
     </div>
-
-        {{-- Footer fijo con navegación --}}
-    @unless(isset($hideFooter) && $hideFooter)    
-    <footer class="bg-white border-top shadow-sm py-2">
-        <div class="container">
-            <div class="d-flex justify-content-around text-center small">
-                <div><span>🏠</span><br>Home</div>
-                <div><span>💰</span><br>Pagos</div>
-                <div><span>⚠️</span><br>Notificaciones</div>
-            </div>
-        </div>
-    </footer>
-    @endunless
 </body>
 </html>

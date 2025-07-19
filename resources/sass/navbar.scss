@@ -1,0 +1,78 @@
+/* === NAVBAR GENERAL === */
+.custom-navbar {
+    padding: 0.5rem 1.5rem;
+    background: transparent;      // el gradiente está en la burbuja
+    font-family: "Nunito", sans-serif;
+}
+
+/* Logo */
+.navbar-logo img {
+    display: block;
+}
+
+.navbar-bg {
+    display: block;
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+}
+
+.nav-user-bg {
+    display: block !important;
+    color: white !important;
+    background-color: $secondary !important;
+    border-radius: 100% !important;
+}
+
+/* === LISTA DE ENLACES === */
+.nav-pills .nav-link {
+    border-radius: 100%;
+    padding: 1rem 3rem;
+    color: black;
+    transition: background 180ms ease, color 180ms ease;
+}
+
+.nav-pills .nav-link.active {
+    background-color: $secondary !important;
+}
+
+.nav-pills .nav-link:hover,
+.nav-pills .nav-link:focus {
+    color: $primary;
+}
+
+.nav-pills > .nav-item > .nav-link {
+    border-radius: 999px !important;
+}
+
+/* === DROPDOWN === */
+.nav-item.dropdown:hover > .dropdown-menu {
+    display: block;          // show-on-hover
+}
+.dropdown-menu {
+    border-radius: 1rem;
+    margin-top: 0.5rem;
+    min-width: 12rem;
+}
+.dropdown-item {
+    padding: 0.5rem 1.25rem;
+}
+.dropdown-item:hover {
+    background-color: rgba($secondary, .1);
+    color: $secondary;
+}
+
+/* === BOTÓN DE USUARIO === */
+.btn-user {
+    background: $secondary;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    border: none;
+    transition: opacity 180ms ease;
+}
+.btn-user:hover { opacity: 0.8; }
