@@ -7,3 +7,13 @@ $font-size-base: 0.9rem;
 $line-height-base: 1.6;
 
 $fa-font-path: '@fortawesome/fontawesome-free/webfonts';
+
+$none: #ffffff00;
+$asparagus: #83aa6b; 
+$soft-asparagus: rgba(131, 170, 107, 0.5); 
+$oxford-blue: #00284B;
+
+$primary: $asparagus;
+$secondary: $oxford-blue;
+
+$main-background: linear-gradient(135deg, $none 0%, $soft-asparagus 100%);
