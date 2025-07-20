@@ -4,6 +4,8 @@ namespace App\Navigation;
 use App\Support\Forerunner\Forerunner;
 use App\Models\Menu;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 class Navbar
 {
@@ -28,7 +30,14 @@ class Navbar
             $icon = $node->icon ? "<i class=\"{$node->icon} me-1\"></i>" : '';
 
             // ¿Ruta actual? => clase active para resaltar
-            $isActive = request()->routeIs($node->route . '*') ? 'active' : '';
+            $currentRoute = Route::currentRouteName();
+            $routeBase = explode('.', $node->route)[0];
+
+            $isActive = Str::startsWith($currentRoute, $routeBase) ? 'active' : '';
+
+            \Log::info('Evaluando nodo: ' . $node->route);
+            \Log::info('Ruta actual: ' . $currentRoute);
+            \Log::info('¿Activo?: ' . $isActive);
 
             if ($hasChildren) {
                 $html .= '
