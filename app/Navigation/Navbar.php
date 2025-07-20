@@ -20,12 +20,9 @@ class Navbar
 
     private static function traverse($nodes): string
     {
-        // nav.nav-pills dará la base de Bootstrap
         $html = '<ul class="nav nav-pills gap-2">';
 
         foreach ($nodes as $node) {
-
-            // … (misma verificación de permisos) …
 
             $hasChildren = $node->children->isNotEmpty();
             $icon = $node->icon ? "<i class=\"{$node->icon} me-1\"></i>" : '';
@@ -36,7 +33,7 @@ class Navbar
             if ($hasChildren) {
                 $html .= '
                     <li class="nav-item dropdown">
-                        <a class="nav-link '.$isActive.' dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button">
+                        <a class="nav-link '.$isActive.' dropdown-toggle" href="#" role="button">
                             '.$icon.e($node->name).'
                         </a>
                         <ul class="dropdown-menu shadow-sm">';

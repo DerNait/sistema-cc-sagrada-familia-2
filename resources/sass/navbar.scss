@@ -1,7 +1,7 @@
 /* === NAVBAR GENERAL === */
 .custom-navbar {
     padding: 0.5rem 1.5rem;
-    background: transparent;      // el gradiente está en la burbuja
+    background: transparent;
     font-family: "Nunito", sans-serif;
 }
 
@@ -39,52 +39,77 @@
 .nav-pills .nav-link:hover,
 .nav-pills .nav-link:focus {
     color: $primary;
+    opacity: 0.8;
 }
 
 .nav-pills > .nav-item > .nav-link {
     border-radius: 999px !important;
 }
 
-/* === DROPDOWN === */
-.nav-item.dropdown:hover > .dropdown-menu {
-    display: block;          // show-on-hover
+/* === DROPDOWN ===*/
+.nav-item.dropdown > .dropdown-menu {
+    border: none !important;
+    border-radius: 0.75rem !important;
+    margin-top: 0.1rem;
+    min-width: 180px !important;
+    padding: 0.5rem 0 !important;
+    font-size: 0.95rem !important;
+    background-color: rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,.15) !important;
+    display: block !important;
+
+    opacity: 0 !important;
+    transform: translateY(5px) !important;
+    pointer-events: none !important;
+    transition: opacity .2s ease, transform .2s ease !important;
 }
-.dropdown-menu {
-    border-radius: 1rem;
-    margin-top: 0.5rem;
-    min-width: 12rem;
+
+.nav-item.dropdown:hover   > .dropdown-menu {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
 }
-.dropdown-item {
-    padding: 0.5rem 1.25rem;
+
+.nav-item.dropdown > .dropdown-menu .dropdown-item {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
 }
-.dropdown-item:hover {
-    background-color: rgba($secondary, .1);
-    color: $secondary;
+
+.nav-item.dropdown > .dropdown-menu .dropdown-item:hover {
+    background-color: rgba(#002b55, 0.8) !important;
+    color: #fff !important;
 }
 
 /* === BOTÓN DE USUARIO === */
 .btn-user {
-    background: $secondary;
+    height: 100%;
+    aspect-ratio: 1 / 1;
     border-radius: 50%;
-    width: 48px;
-    height: 48px;
+    background: $secondary;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
+    font-weight: 600;
     border: none;
-    transition: opacity 180ms ease;
+    transition: opacity .18s ease;
 }
 .btn-user:hover { opacity: 0.8; }
 
 .user-dropdown-wrapper {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
     position: relative;
 
     .dropdown-menu {
         border-radius: 0.75rem;
+        margin-top: 0.1rem !important;
         min-width: 180px;
         padding: 0.5rem 0;
         font-size: 0.95rem;
+        border: transparent;
+        background-color: rgb(255, 255, 255, 0.5);
     }
 
     .dropdown-item {
@@ -93,7 +118,26 @@
     }
 
     .dropdown-item:hover {
-        background-color: rgba(#002b55, 0.08);
-        color: #002b55;
+        background-color: rgba(#002b55, 0.8);
+        color: #ffffff !important;
     }
 }
+
+.user-dropdown-wrapper > .dropdown-menu {
+    opacity: 0;
+    transform: translateY(5px);
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+    display: block;
+    right: 0 !important;
+    left : auto !important;
+    top  : 100% !important;
+    margin-top: 0 !important; 
+}
+
+.user-dropdown-wrapper:hover > .dropdown-menu {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+

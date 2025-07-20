@@ -31,7 +31,7 @@
                         </div>
 
                         <div class="user-dropdown-wrapper dropdown ms-2">
-                            <button class="btn btn-user nav-user-bg" data-bs-toggle="dropdown" type="button">
+                            <button class="btn btn-user nav-user-bg" aria-expanded="false" type="button">
                                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                             </button>
 
