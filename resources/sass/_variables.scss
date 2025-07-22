@@ -13,14 +13,36 @@ $asparagus: #83aa6b;
 $soft-asparagus: rgba(131, 170, 107, 0.65); 
 $softer-asparagus: rgba(131, 170, 107, 0.5); 
 $oxford-blue: #00284B;
+$white: #ffffff;
 
 $primary: $asparagus;
 $secondary: $oxford-blue;
+$info: $white;
 
 $main-background: linear-gradient(135deg, $none 0%, $none 20%, $soft-asparagus 70%, $soft-asparagus 80%, $softer-asparagus 100%);
 
 // Botones
 .btn-primary {
-  --bs-btn-color: var(--bs-white);
+  color: white !important;
 }
+.btn-primary:hover {
+  background-color: #6d8f59 !important;
+  border: 1px solid #6d8f59;
+}
+
+.btn-info {
+  border: 0.5px solid #B5B5B5 !important;
+  color: #B5B5B5 !important;
+}
+.btn-info:hover {
+  background-color: #7a7a7a !important;
+  color: white !important;
+  border: 0.5px solid white !important;
+}
+
 $btn-border-radius: 0.8rem;
+
+// Backgrounds
+.bg-gray-soft {
+  background-color: rgba($color: #D9D9D9, $alpha: 0.3) !important;
+}
