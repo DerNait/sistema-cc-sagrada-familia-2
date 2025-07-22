@@ -18,3 +18,9 @@ $primary: $asparagus;
 $secondary: $oxford-blue;
 
 $main-background: linear-gradient(135deg, $none 0%, $none 20%, $soft-asparagus 70%, $soft-asparagus 80%, $softer-asparagus 100%);
+
+// Botones
+.btn-primary {
+  --bs-btn-color: var(--bs-white);
+}
+$btn-border-radius: 0.8rem;
