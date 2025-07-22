@@ -52,7 +52,7 @@
         @endauth
 
         {{-- --------------- Contenido --------------- --}}
-        <main id="app" class="flex-grow-1">
+        <main id="app" class="flex-grow-1 d-flex flex-column">
             @yield('content')
         </main>
 
