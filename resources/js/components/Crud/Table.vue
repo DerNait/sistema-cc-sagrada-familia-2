@@ -117,7 +117,7 @@ onMounted(async () => {
 
   dt = new DataTable('#dataTable', {
     language: {
-      url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+      url: '/lang/datatables/es-ES.json'
     },
     paging: true,
     searching: true,
