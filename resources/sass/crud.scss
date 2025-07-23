@@ -6,3 +6,35 @@
   flex-grow: 1;
   box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,.1);
 }
+
+/* ---------- Backdrop */
+.crud-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 1050;
+  display: flex;
+  justify-content: flex-end;   /* drawer entra desde la derecha */
+}
+
+/* ---------- Drawer */
+.crud-drawer {
+  width: 40vw;
+  max-width: 500px;
+  background: #fff;
+  height: 100%;
+  padding: 1.5rem;
+  overflow-y: auto;
+  box-shadow: -4px 0 8px rgba(0,0,0,.3);
+}
+
+/* ---------- Animaciones */
+.slide-enter-active, .slide-leave-active {
+  transition: transform .35s ease;
+}
+.slide-enter-from, .slide-leave-to   { transform: translateX(100%); }
+
+.backdrop-enter-active, .backdrop-leave-active {
+  transition: opacity .35s ease;
+}
+.backdrop-enter-from, .backdrop-leave-to { opacity: 0; }
