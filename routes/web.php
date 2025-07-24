@@ -7,6 +7,7 @@ use App\Http\Controllers\Catalogs\EstudiantesController;
 use App\Http\Controllers\Catalogs\ProductosController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Catalogs\CursosController;
 
 Route::get('/homepadres', function () {
     return view('Homepadres'); 
@@ -114,6 +115,15 @@ Route::prefix('catalogos')->name('catalogos.')->group(function () {
         Route::get('{id}/editar', [ProductosController::class, 'edit'])->name('edit');
         Route::put('{id}',        [ProductosController::class, 'update'])->name('update');
         Route::delete('{id}',     [ProductosController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('cursos')->name('cursos.')->group(function () {
+        Route::get('/',           [CursosController::class, 'index'])->name('index');
+        Route::get('crear',       [CursosController::class, 'create'])->name('create');
+        Route::post('crear',      [CursosController::class, 'store'])->name('store');
+        Route::get('{id}/editar', [CursosController::class, 'edit'])->name('edit');
+        Route::put('{id}',        [CursosController::class, 'update'])->name('update');
+        Route::delete('{id}',     [CursosController::class, 'destroy'])->name('destroy');
     });
 
 });
