@@ -12,30 +12,39 @@
       <div v-for="c in Object.values(columns)" :key="c.field" class="mb-3">
         <label class="form-label">{{ c.label }}</label>
 
-        <select v-if="c.type==='relation' && c.options"
-                v-model="form[c.field]"
-                class="form-select">
+        <select 
+          v-if="c.type==='relation' && c.options"
+          v-model="form[c.field]"
+          :disabled="props.readonly || !c.editable"
+          class="form-select"
+        >
           <option value="">-- Selecciona --</option>
           <option v-for="(label,val) in c.options" :key="val" :value="val">
             {{ label }}
           </option>
         </select>
 
-        <input v-else
-               :type="inputType(c.type)"
-               v-model="form[c.field]"
-               class="form-control" />
+        <input 
+          v-else
+          :type="inputType(c.type)"
+          v-model="form[c.field]"
+          class="form-control"
+          :readonly="props.readonly || !c.editable" 
+        />
       </div>
     </div>
 
     <div class="mt-4 d-flex gap-2">
-      <button class="btn btn-primary flex-grow-1">
+      <button 
+        v-if="!props.readonly" 
+        class="btn btn-primary flex-grow-1"
+      >
         <i class="fa-solid fa-floppy-disk"></i>
         Guardar
       </button>
       <button type="button" class="btn btn-secondary flex-grow-1" @click="$emit('cancel')">
         <i class="fa-solid fa-xmark"></i>
-        Cancelar
+        {{ props.readonly ? 'Cerrar' : 'Cancelar' }}
       </button>
     </div>
   </form>
@@ -45,7 +54,12 @@
 import { reactive, computed } from 'vue';
 import axios from 'axios';
 
-const props = defineProps({ item: Object, columns: Object, action: String });
+const props = defineProps({
+  item:     Object,
+  columns:  Object,
+  action:   String,
+  readonly: { type: Boolean, default: false }
+});
 const emit  = defineEmits(['saved', 'cancel']);
 
 const csrf = document
@@ -69,7 +83,10 @@ function getValue(obj, path) {
 }
 
 async function handleSubmit() {
+  if (props.readonly) return;  
+
   const method = props.item ? 'put' : 'post';
+  
   try {
     console.log('trying to save in: ' + props.action);
     const { data } = await axios[method](props.action, form);
