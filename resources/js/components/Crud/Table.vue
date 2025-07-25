@@ -81,6 +81,13 @@
           <td>
             <div class="d-flex justify-content-evenly">
               <button
+                v-if="abilities.read"
+                class="btn btn-sm btn-outline-secondary"
+                @click="openShow(row)"
+              >
+                <i class="fa-regular fa-eye"></i>
+              </button>
+              <button
                 v-if="abilities.update"
                 class="btn btn-sm btn-outline-primary" 
                 @click="openEdit(row)"
@@ -112,6 +119,7 @@
           :item="editingRow"
           :columns="columns"
           :action="formAction"
+          :readonly="formMode === 'show'"
           @saved="onSaved"
           @cancel="close" />
       </transition>
@@ -127,6 +135,7 @@ import DataTable from 'datatables.net-bs5';
 const showForm   = ref(false);
 const editingRow = ref(null);       // null = create
 const formAction = ref('');
+const formMode = ref('create');
 
 const props = defineProps(['data','columns','abilities','filters']);
 
@@ -146,6 +155,26 @@ function openCreate() {
   formAction.value = `${baseUrl}/crear`;      // POST /entidad
   open();
 }
+
+function openShow(row) {
+  formMode.value = 'show';
+  loadLatest(row.id).then(record => {
+    editingRow.value = record;
+    formAction.value = '';
+    open();
+  });
+}
+
+async function loadLatest(id) {
+  try {
+    const { data } = await axios.get(`${baseUrl}/${id}`);
+    return data;
+  } catch (e) {
+    console.error(e);
+    return rows.value.find(r => r.id === id);
+  }
+}
+
 function openEdit(row) {
   editingRow.value = { ...row };
   formAction.value = `${baseUrl}/${row.id}`; // PUT /entidad/{id}
