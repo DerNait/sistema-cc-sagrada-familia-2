@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+<div class="login-background d-flex justify-content-center align-items-center min-vh-100">
     <div class="bg-white px-6 py-3 rounded shadow d-flex flex-column justify-content-center align-items-center"
-        style="width: 600px; text-align: center; min-height: 500px;">
+        style="width: 600px; text-align: center; min-height: 500px; position: relative; z-index: 3;">
         
         <img src="/images/logo_.jpg" alt="Logo" class="mb-4 w-75" style="margin-top: 50px;" />
 
@@ -134,20 +134,21 @@
                     </div>
                 </div>
 
-                    <!---Fecha de Registro-->
-                    <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                        <label for="fecha_registro" class="form-label">Fecha de Registro</label>
-                        <input type="date"
-                            id="fecha_registro"
-                            name="fecha_registro"
-                            class="form-control border-success @error('fecha_registro') is-invalid @enderror"
-                            value="{{ old('fecha_registro') }}">
-                        @error('fecha_registro')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                    </div>
+                <!-- Fecha de Registro -->
+                <div class="mb-3 text-start w-100" style="max-width: 450px;">
+                    <label for="fecha_registro" class="form-label">Fecha de Registro</label>
+                    <input type="date"
+                        id="fecha_registro"
+                        name="fecha_registro"
+                        class="form-control border-success @error('fecha_registro') is-invalid @enderror"
+                        value="{{ old('fecha_registro') }}">
+                    @error('fecha_registro')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+
                 <!-- BOTÓN -->
-                <button type="submit" class="btn btn-success w-100" style="max-width: 450px;">
+                <button type="submit" class="btn custom-btn w-100" style="max-width: 450px;">
                     Registrar Usuario
                 </button>
             </form>
@@ -163,12 +164,7 @@
         
         if (select.selectedIndex > 0) {
             const rolNombre = select.options[select.selectedIndex].getAttribute('data-nombre');
-            
             const rolesEmpleado = ['docente', 'secretaria', 'inventario'];
-            
-            
-            console.log("Rol seleccionado:", rolNombre);
-            console.log("¿Es rol de empleado?", rolesEmpleado.includes(rolNombre));
             
             campos.style.display = rolesEmpleado.includes(rolNombre) ? 'block' : 'none';
         } else {
@@ -182,6 +178,68 @@
     });
 </script>
 @endsection
+
+@push('styles')
+<style>
+.login-background {
+    position: relative;
+    background-image: url('/images/colegio_fondo.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    z-index: 1;
+}
+
+.login-background::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+.login-background > * {
+    position: relative;
+    z-index: 3;
+}
+
+/* Botón personalizado */
+.custom-btn {
+    background-color: #83AA6B;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.custom-btn:hover {
+    background-color: #6f9658;
+}
+
+
+input.form-control,
+select.form-control,
+textarea.form-control {
+    border-color: #83AA6B !important;
+    box-shadow: none !important;
+    transition: border-color 0.3s ease;
+}
+
+input.form-control:focus,
+select.form-control:focus,
+textarea.form-control:focus {
+    border-color: #6f9658 !important;
+    box-shadow: 0 0 0 0.2rem rgba(131, 170, 107, 0.25) !important;
+    outline: none;
+}
+</style>
+@endpush
+
 @php
     $hideFooter = true; // Esto ocultará el footer
 @endphp

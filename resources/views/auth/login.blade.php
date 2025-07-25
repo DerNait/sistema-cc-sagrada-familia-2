@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+<div class="login-background d-flex justify-content-center align-items-center min-vh-100">
     <div class="bg-white px-4 py-5 rounded shadow d-flex flex-column justify-content-center align-items-center"
         style="width: 550px; text-align: center; min-height: 600px;">
         
@@ -49,21 +49,76 @@
 
                 <!-- BOTÓN -->
                 <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-success w-100" style="max-width: 400px;">
+                    <button type="submit" class="btn custom-btn w-100" style="max-width: 400px;">
                         Iniciar sesión
                     </button>
 
                     @if (Route::has('password.request'))
-                        <a class="btn btn-link ps-0 mt-2 text-success" href="{{ route('password.request') }}">
+                        <a class="btn btn-link ps-0 mt-2 custom-link" href="{{ route('password.request') }}">
                             ¿Olvidaste tu contraseña?
                         </a>
+                    @endif
                 </div>
-                @endif
             </form>
         </div>
     </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+.login-background {
+    position: relative;
+     background-image: url("{{ asset('images/colegio_fondo.jpg') }}"); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    z-index: 1;
+}
+
+.login-background::before{
+    content: "";
+    position: absolute;
+    top 0;
+    left 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+    .login-background > * {
+    position: relative;
+    z-index: 3; 
+    }
+
+.custom-btn {
+    background-color: #83AA6B;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.custom-btn:hover {
+    background-color: #6f9658;
+}
+
+.custom-link {
+    color: #83AA6B;
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+.custom-link:hover {
+    color: #6f9658;
+    text-decoration: underline;
+}
+</style>
+@endpush
+
 @php
     $hideFooter = true; // Esto ocultará el footer
 @endphp
