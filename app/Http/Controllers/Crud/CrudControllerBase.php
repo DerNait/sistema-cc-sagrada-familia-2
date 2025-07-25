@@ -152,6 +152,15 @@ abstract class CrudControllerBase extends Controller
         ]);
     }
 
+    public function show(Request $request, $id)
+    {
+        $this->configure($request);
+
+        abort_unless($this->abilities['read'] ?? true, 403);
+
+        return $this->newModelQuery()->findOrFail($id);
+    }
+
     public function create(Request $request)
     {
         $this->configure($request);
