@@ -8,6 +8,7 @@ use App\Http\Controllers\Catalogs\ProductosController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Catalogs\CursosController;
+use App\Http\Controllers\Catalogs\ActividadesController;
 
 Route::get('/homepadres', function () {
     return view('Homepadres'); 
@@ -126,4 +127,12 @@ Route::prefix('catalogos')->name('catalogos.')->group(function () {
         Route::delete('{id}',     [CursosController::class, 'destroy'])->name('destroy');
     });
 
+    Route::prefix('actividades')->name('actividades.')->group(function () {
+        Route::get('/',           [ActividadesController::class, 'index'])->name('index');
+        Route::get('crear',       [ActividadesController::class, 'create'])->name('create');
+        Route::post('crear',      [ActividadesController::class, 'store'])->name('store');
+        Route::get('{id}/editar', [ActividadesController::class, 'edit'])->name('edit');
+        Route::put('{id}',        [ActividadesController::class, 'update'])->name('update');
+        Route::delete('{id}',     [ActividadesController::class, 'destroy'])->name('destroy');
+    });
 });
