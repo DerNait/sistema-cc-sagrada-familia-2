@@ -10,6 +10,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Catalogs\CursosController;
 use App\Http\Controllers\Catalogs\ActividadesController;
 use App\Http\Controllers\Catalogs\SeccionesController;
+use App\Http\Controllers\CursosEstudianteController;
+
 
 Route::get('/homepadres', function () {
     return view('Homepadres'); 
@@ -72,6 +74,11 @@ Route::get('/edicion', function () {
 
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
+
+Route::get('/MisCursos', [App\Http\Controllers\CursosEstudianteController::class, 'index'])
+    ->middleware('auth')
+    ->name('estudiante.cursos');
+
 
 Auth::routes();
 

@@ -25,4 +25,9 @@ class Estudiante extends Model
     {
         return $this->belongsTo(Seccion::class);
     }
+    
+    public function secciones()
+    {
+        return $this->belongsToMany(Seccion::class, 'seccion_estudiante', 'estudiante_id', 'seccion_id');
+    }
 }
