@@ -7,6 +7,9 @@ use App\Http\Controllers\Catalogs\EstudiantesController;
 use App\Http\Controllers\Catalogs\ProductosController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Catalogs\CursosController;
+use App\Http\Controllers\Catalogs\ActividadesController;
+use App\Http\Controllers\Catalogs\SeccionesController;
 
 Route::get('/homepadres', function () {
     return view('Homepadres'); 
@@ -80,6 +83,7 @@ Route::get('/exportar-empleados', [App\Http\Controllers\ExportController::class,
 Route::prefix('catalogos')->name('catalogos.')->group(function () {
     Route::prefix('empleados')->name('empleados.')->group(function () {
         Route::get('/',           [EmpleadosController::class, 'index'])->name('index');
+        Route::get('{id}',        [EmpleadosController::class, 'show'])->name('show');
         Route::get('crear',       [EmpleadosController::class, 'create'])->name('create');
         Route::post('crear',      [EmpleadosController::class, 'store'])->name('store');
         Route::get('{id}/editar', [EmpleadosController::class, 'edit'])->name('edit');
@@ -91,6 +95,7 @@ Route::prefix('catalogos')->name('catalogos.')->group(function () {
 
     Route::prefix('usuarios')->name('usuarios.')->group(function () {
         Route::get('/',           [UsersController::class, 'index'])->name('index');
+        Route::get('{id}',        [UsersController::class, 'show'])->name('show');
         Route::get('crear',       [UsersController::class, 'create'])->name('create');
         Route::post('crear',      [UsersController::class, 'store'])->name('store');
         Route::get('{id}/editar', [UsersController::class, 'edit'])->name('edit');
@@ -100,6 +105,7 @@ Route::prefix('catalogos')->name('catalogos.')->group(function () {
 
     Route::prefix('estudiantes')->name('estudiantes.')->group(function () {
         Route::get('/',           [EstudiantesController::class, 'index'])->name('index');
+        Route::get('{id}',        [EstudiantesController::class, 'show'])->name('show');
         Route::get('crear',       [EstudiantesController::class, 'create'])->name('create');
         Route::post('crear',      [EstudiantesController::class, 'store'])->name('store');
         Route::get('{id}/editar', [EstudiantesController::class, 'edit'])->name('edit');
@@ -109,6 +115,7 @@ Route::prefix('catalogos')->name('catalogos.')->group(function () {
 
     Route::prefix('productos')->name('productos.')->group(function () {
         Route::get('/',           [ProductosController::class, 'index'])->name('index');
+        Route::get('{id}',        [EstudiantesController::class, 'show'])->name('show');
         Route::get('crear',       [ProductosController::class, 'create'])->name('create');
         Route::post('crear',      [ProductosController::class, 'store'])->name('store');
         Route::get('{id}/editar', [ProductosController::class, 'edit'])->name('edit');
@@ -116,4 +123,34 @@ Route::prefix('catalogos')->name('catalogos.')->group(function () {
         Route::delete('{id}',     [ProductosController::class, 'destroy'])->name('destroy');
     });
 
+    Route::prefix('cursos')->name('cursos.')->group(function () {
+        Route::get('/',           [CursosController::class, 'index'])->name('index');
+        Route::get('{id}',        [CursosController::class, 'show'])->name('show');
+        Route::get('crear',       [CursosController::class, 'create'])->name('create');
+        Route::post('crear',      [CursosController::class, 'store'])->name('store');
+        Route::get('{id}/editar', [CursosController::class, 'edit'])->name('edit');
+        Route::put('{id}',        [CursosController::class, 'update'])->name('update');
+        Route::delete('{id}',     [CursosController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('actividades')->name('actividades.')->group(function () {
+        Route::get('/',           [ActividadesController::class, 'index'])->name('index');
+        Route::get('{id}',        [ActividadesController::class, 'show'])->name('show');
+        Route::get('crear',       [ActividadesController::class, 'create'])->name('create');
+        Route::get('crear',       [ActividadesController::class, 'create'])->name('create');
+        Route::post('crear',      [ActividadesController::class, 'store'])->name('store');
+        Route::get('{id}/editar', [ActividadesController::class, 'edit'])->name('edit');
+        Route::put('{id}',        [ActividadesController::class, 'update'])->name('update');
+        Route::delete('{id}',     [ActividadesController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('secciones')->name('secciones.')->group(function () {
+        Route::get('/',           [SeccionesController::class, 'index'])->name('index');
+        Route::get('{id}',        [SeccionesController::class, 'show'])->name('show');
+        Route::get('/crear',      [SeccionesController::class, 'create'])->name('create');
+        Route::post('/',          [SeccionesController::class, 'store'])->name('store');
+        Route::get('{id}/editar', [SeccionesController::class, 'edit'])->name('edit');
+        Route::put('{id}',        [SeccionesController::class, 'update'])->name('update');
+        Route::delete('{id}',     [SeccionesController::class, 'destroy'])->name('destroy');
+    });
 });
