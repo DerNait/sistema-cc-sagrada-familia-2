@@ -20,4 +20,9 @@ class Estudiante extends Model
     {
         return $this->belongsTo(Beca::class, 'beca_id');
     }
+
+    public function seccion()
+    {
+        return $this->belongsTo(Seccion::class);
+    }
 }

@@ -53,4 +53,11 @@ class User extends Authenticatable
     public function role() {
         return $this->belongsTo(Role::class, 'rol_id');
     }       
+
+    public function cursosAsignados()
+    {
+        return $this->belongsToMany(Curso::class, 'maestro_cursos', 'maestro_id', 'curso_id')
+            ->withPivot('seccion_id')
+            ->withTimestamps();
+    }
 }
