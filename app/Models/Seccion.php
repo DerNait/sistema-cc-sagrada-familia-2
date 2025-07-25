@@ -25,4 +25,9 @@ class Seccion extends Model
     {
         return $this->belongsToMany(Estudiante::class, 'seccion_estudiante');
     }
+
+        public function cursos()
+    {
+        return $this->hasMany(Curso::class); 
+    }
 }
