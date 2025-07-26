@@ -50,7 +50,7 @@ class CursoController extends Controller
         $user = auth()->user();
         $rolId = $user->rol_id;
         
-        $estudiante = Estudiante::where('user_id', $user->id)->firstOrFail();
+        $estudiante = Estudiante::where('usuario_id', $user->id)->firstOrFail();
         $curso = Curso::where('id', $cursoId)->firstOrFail();
 
         $seccionEstudiante = SeccionEstudiante::where('estudiante_id', $estudiante->id)->first();
