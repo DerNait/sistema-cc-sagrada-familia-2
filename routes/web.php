@@ -74,6 +74,10 @@ Route::get('/edicion', function () {
     return view('edicionusuarios');
 });
 
+Route::get('/curso-edicion', function () {
+    return view('cursoedicion');
+});
+
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
 
