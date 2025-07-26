@@ -11,6 +11,8 @@ use App\Http\Controllers\Catalogs\CursosController;
 use App\Http\Controllers\Catalogs\ActividadesController;
 use App\Http\Controllers\Catalogs\SeccionesController;
 use App\Http\Controllers\CursosEstudianteController;
+use App\Http\Controllers\CursoController;
+
 
 
 Route::get('/homepadres', function () {
@@ -86,6 +88,12 @@ Route::get('/empleados/planilla', [EmpleadosController::class, 'planilla']);
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 Route::get('/exportar-empleados', [App\Http\Controllers\ExportController::class, 'export'])->name('export.empleados');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
+    Route::get('/cursos/{curso}', [CursoController::class, 'show'])->name('cursos.show');
+});
+
 
 Route::prefix('catalogos')->name('catalogos.')->group(function () {
     Route::prefix('empleados')->name('empleados.')->group(function () {
