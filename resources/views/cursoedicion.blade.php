@@ -1,0 +1,17 @@
+@extends('layouts.app')
+
+@section('content')
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Edicion Curso</title>
+    @vite('resources/js/app.js')
+</head>
+<body>
+    <div id="app">
+        <curso-edicion></curso-edicion>
+    </div>
+</body>
+</html>
+@endsection
