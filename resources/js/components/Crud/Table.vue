@@ -56,57 +56,49 @@
       </div>
     </div>
 
-    <table id="dataTable" class="table table-bordered display">
-      <thead>
-        <tr>
-          <template v-for="c in Object.values(columns)" :key="c.field">
-              <th v-if="c.visible">{{ c.label }}</th>
-          </template>
-          <th></th>
-        </tr>
-      </thead>
-  
-      <tbody>
-        <tr v-for="row in rows" :key="row.id" :data-id="row.id">
-          <template v-for="c in Object.values(columns)" :key="c.field">
-              <td v-if="c.visible">
-              <template v-if="c.type==='relation' && c.options">
-                  {{ c.options[row[c.field]] ?? '' }}
-              </template>
-              <template v-else>
-                  {{ getValue(row,c.field) }}
-              </template>
-              </td>
-          </template>
-          <td>
-            <div class="d-flex justify-content-evenly">
-              <button
-                v-if="abilities.read"
-                class="btn btn-sm btn-outline-secondary"
-                @click="openShow(row)"
-              >
-                <i class="fa-regular fa-eye"></i>
-              </button>
-              <button
-                v-if="abilities.update"
-                class="btn btn-sm btn-outline-primary" 
-                @click="openEdit(row)"
-              >
-                <i class="fa-regular fa-pen-to-square"></i>
-              </button>
-    
-              <button
-                v-if="abilities.delete"
-                class="btn btn-sm btn-outline-danger"
-                @click="deleteRow(row)"
-              >
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div style="max-width: 320px; flex:1">
+      <SearchBar v-model="globalSearch" />
+    </div>
+
+    <SortableTable
+      :columns="columns"
+      :rows="rows"
+    >
+      <template #row-actions="{ row }">
+        <div class="d-flex justify-content-evenly">
+          <button
+            v-if="abilities.read"
+            class="btn btn-sm btn-outline-secondary"
+            @click="openShow(row)"
+          >
+            <i class="fa-regular fa-eye" />
+          </button>
+          <button
+            v-if="abilities.update"
+            class="btn btn-sm btn-outline-primary"
+            @click="openEdit(row)"
+          >
+            <i class="fa-regular fa-pen-to-square" />
+          </button>
+          <button
+            v-if="abilities.delete"
+            class="btn btn-sm btn-outline-danger"
+            @click="deleteRow(row)"
+          >
+            <i class="fa-solid fa-trash" />
+          </button>
+        </div>
+      </template>
+
+      <!-- ejemplo de celda personalizada -->
+      <!--
+      <template #cell-status="{ value }">
+        <span :class="value ? 'badge bg-success' : 'badge bg-danger'">
+          {{ value ? 'Activo' : 'Inactivo' }}
+        </span>
+      </template>
+      -->
+    </SortableTable>
   </div>
   <transition name="backdrop">
     <div v-if="showForm"
@@ -129,8 +121,9 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
+import SortableTable from '../SortableTable.vue';
+//import SearchBar from '../SearchBar.vue';
 import Form from './Form.vue';
-import DataTable from 'datatables.net-bs5';
 
 const showForm   = ref(false);
 const editingRow = ref(null);       // null = create
@@ -141,6 +134,8 @@ const props = defineProps(['data','columns','abilities','filters']);
 
 const originalRows = ref([...props.data.data]);
 const rows         = ref([...originalRows.value]);
+
+const globalSearch = ref('');
 
 const localFilters = reactive(
   Object.fromEntries(
@@ -218,65 +213,6 @@ watch(
   { deep: true }
 );
 
-function initDataTable() {
-  dt = new DataTable('#dataTable', {
-    language: {
-      url: '/lang/datatables/es-ES.json'
-    },
-    paging: true,
-    searching: true,
-    ordering: true,
-    layout: {
-      topStart: null,
-      topEnd: 'search',
-      bottomStart: 'pageLength',
-      bottomEnd: 'paging'
-    }
-  });
-
-  setTimeout(() => {
-    placeFilters();
-  }, 100);
-}
-
-function placeFilters() {
-  const layoutTableEl = document.querySelector('.dt-layout-table');
-
-  if (layoutTableEl) {
-    const parent = layoutTableEl.closest('.row.mt-2');
-    if (parent) {
-      parent.classList.remove('mt-2');
-    }
-  }
-
-  const wrapper = document.getElementById('dataTable_wrapper');
-
-  if (wrapper) {
-    const firstRow = wrapper.querySelector('.row.mt-2.justify-content-between');
-
-    if (firstRow) {
-      firstRow.classList.remove('mt-2', 'row');
-      firstRow.classList.add('py-3', 'px-2', 'bg-gray-soft', 'd-flex', 'align-items-center');
-      
-      const filters = document.getElementById('filters');
-      if (filters) {
-        firstRow.prepend(filters);
-      }
-    }
-    
-    const matchingRows = wrapper.querySelectorAll('.row.mt-2.justify-content-between');
-    console.log(matchingRows);
-
-    if (matchingRows.length > 0) {
-      const lastRow = matchingRows[matchingRows.length - 1];
-      console.log(lastRow);
-
-      lastRow.classList.remove('mt-2', 'row');
-      lastRow.classList.add('mt-1', 'px-2', 'd-flex', 'align-items-center');
-    }
-  }
-}
-
 function modelSingularName(pluralName) {
   if (pluralName.endsWith('s')) {
     return pluralName.slice(0, -1);
@@ -308,8 +244,7 @@ function deleteRow (row) {
       const idx = rows.value.findIndex(r => r.id === row.id);
       
       if (idx > -1) {
-          rows.value.splice(idx, 1);
-          dt?.row(`tr[data-id="${row.id}"]`).remove().draw(false);
+        rows.value.splice(idx, 1);
       }
     })
     .catch(err => console.log(err.message));
