@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <div style="max-width: 320px; flex:1">
+    <div style="max-width: 270px; flex:1">
       <SearchBar v-model="globalSearch" />
     </div>
 
@@ -122,7 +122,7 @@
 <script setup>
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
 import SortableTable from '../SortableTable.vue';
-//import SearchBar from '../SearchBar.vue';
+import SearchBar from '../SearchBar.vue';
 import Form from './Form.vue';
 
 const showForm   = ref(false);
@@ -185,33 +185,40 @@ function onSaved(record) {
   close();
 }
 
-let dt = null;
-
 onMounted(async () => {
   await nextTick();
-
-  initDataTable();
 });
 
-watch(rows, async () => {
-  await nextTick();
+watch([localFilters, globalSearch], applyFilters, { deep: true });
 
-  if (dt) {
-    dt.clear();
-    const newRows = Array.from(
-      document.querySelectorAll('#dataTable tbody tr')
-    );
-    newRows.forEach(tr => dt.row.add(tr));
+function applyFilters () {
+  const term = globalSearch.value.trim().toLowerCase();
 
-    dt.draw(false);
-  }
-});
+  rows.value = originalRows.value.filter(row => {
+    /* 1 ) búsqueda global */
+    const matchesGlobal = !term || Object.values(props.columns).some(col => {
+      const cell = getValue(row, col.field);
+      return String(cell ?? '').toLowerCase().includes(term);
+    });
 
-watch(
-  localFilters,
-  () => applyFilters(),
-  { deep: true }
-);
+    /* 2 ) filtros por columna */
+    const matchesColumnFilters = Object.entries(localFilters).every(([field,val]) => {
+      if (!val) return true;
+
+      const col  = props.columns[field];
+      const cell = getValue(row, field);
+
+      switch (col.filterType) {
+        case 'numeric': return Number(cell) === Number(val);
+        case 'date':    return (cell ?? '').slice(0,10) === val;
+        case 'select':  return String(cell) === String(val);
+        default:        return String(cell ?? '').toLowerCase().includes(String(val).toLowerCase());
+      }
+    });
+
+    return matchesGlobal && matchesColumnFilters;
+  });
+}
 
 function modelSingularName(pluralName) {
   if (pluralName.endsWith('s')) {
@@ -254,29 +261,8 @@ const entityTitle = computed(() => {
   return segment.charAt(0).toUpperCase() + segment.slice(1);
 });
 
-function applyFilters () {
-  rows.value = originalRows.value.filter(row =>
-    Object.entries(localFilters).every(([field, val]) => {
-      if (!val) return true;
-
-      const col  = props.columns[field];
-      const cell = getValue(row, field);
-
-      switch (col.filterType) {
-        case 'numeric': return Number(cell) === Number(val);
-        case 'date':    return (cell ?? '').slice(0, 10) === val;
-        case 'select':  return String(cell) === String(val);
-        default:        return String(cell ?? '')
-                           .toLowerCase()
-                           .includes(String(val).toLowerCase());
-      }
-    })
-  );
-}
-
 function clearFilters () {
   Object.keys(localFilters).forEach(k => (localFilters[k] = ''));
-  dt.search('').draw(false);              // limpia búsqueda global, por si acaso
 }
 
 const hasActiveFilters = computed(() =>

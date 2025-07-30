@@ -106,7 +106,7 @@ const props = defineProps({
   columns:  { type: Object, required: true },
   rows:     { type: Array,  required: true },
   /* opcional: tamaños de página */
-  pageLengths: { type: Array, default: () => [1, 25, 50, 100, -1] }
+  pageLengths: { type: Array, default: () => [10, 25, 50, 100, -1] }
 });
 
 /* ---------- slots ---------- */
