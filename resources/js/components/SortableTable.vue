@@ -2,7 +2,7 @@
   <div>
     <!-- ========= TABLA ========= -->
     <div class="table-scroll mb-0">
-        <table class="table table-bordered mb-0">
+        <table class="table table-bordered mb-0 sortable-table">
           <thead>
             <tr>
               <template v-for="c in colArray" :key="c.field">
@@ -25,30 +25,37 @@
           </thead>
     
           <tbody>
-            <tr v-for="row in paginatedRows" :key="row.id">
-              <template v-for="c in colArray" :key="c.field">
-                <td v-if="c.visible">
-                  <slot
-                    v-if="$slots[`cell-${c.field}`]"
-                    :name="`cell-${c.field}`"
-                    :row="row"
-                    :value="getValue(row, c.field)"
-                  />
-                  <template v-else>
-                    <template v-if="c.type === 'relation' && c.options">
-                      {{ c.options[row[c.field]] ?? '' }}
-                    </template>
+            <template v-if="paginatedRows.length">
+              <tr v-for="row in paginatedRows" :key="row.id">
+                <template v-for="c in colArray" :key="c.field">
+                  <td v-if="c.visible">
+                    <slot
+                      v-if="$slots[`cell-${c.field}`]"
+                      :name="`cell-${c.field}`"
+                      :row="row"
+                      :value="getValue(row, c.field)"
+                    />
                     <template v-else>
-                      {{ getValue(row, c.field) }}
+                      <template v-if="c.type === 'relation' && c.options">
+                        {{ c.options[row[c.field]] ?? '' }}
+                      </template>
+                      <template v-else>
+                        {{ getValue(row, c.field) }}
+                      </template>
                     </template>
-                  </template>
+                  </td>
+                </template>
+      
+                <td v-if="hasRowActionsSlot">
+                  <slot name="row-actions" :row="row" />
                 </td>
-              </template>
-    
-              <td v-if="hasRowActionsSlot">
-                <slot name="row-actions" :row="row" />
+              </tr>
+            </template>
+            <template v-else>
+              <td :colspan="colSpan" class="text-center py-2 text-muted">
+                No hay registros aún
               </td>
-            </tr>
+            </template>
           </tbody>
         </table>
     </div>
@@ -56,7 +63,7 @@
     <!-- ========= BARRA INFERIOR ========= -->
     <div class="d-flex justify-content-between align-items-center mt-2 px-3">
       <div class="d-flex align-items-center gap-2">
-        <label class="mb-0 fw-semibold small">Mostrar</label>
+        <label class="mb-0 fw-semibold small text-secondary">Mostrar</label>
         <select
           v-model.number="pageLength"
           class="form-select form-select-sm w-auto"
@@ -68,7 +75,7 @@
             {{ opt === -1 ? 'Todos' : opt }}
           </option>
         </select>
-        <span class="small">registros</span>
+        <span class="small fw-semibold text-secondary">registros</span>
       </div>
 
       <nav v-if="pageCount > 1">
@@ -162,6 +169,10 @@ const paginatedRows = computed(() => {
   const start = (currentPage.value - 1) * pageLength.value;
   return sortedRows.value.slice(start, start + pageLength.value);
 });
+
+const colSpan = computed(() =>
+  colArray.value.filter(c => c.visible).length + (hasRowActionsSlot.value ? 1 : 0)
+);
 
 /* reiniciar página si cambia longitud o cantidad de filas */
 watch([pageLength, sortedRows], () => {

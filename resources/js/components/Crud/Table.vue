@@ -1,7 +1,7 @@
 <template>
   <div class="crud-container">
     <div class="m-3 d-flex justify-content-between align-items-center">
-      <h4>{{ entityTitle }}</h4>
+      <h4 class="fw-semibold">{{ entityTitle }}</h4>
 
       <div class="d-flex justify-content-evenly gap-2">
         <button
@@ -19,46 +19,44 @@
         </button>
       </div>
     </div>
+
+    <div class="filters-container d-flex px-3 py-4 d-flex justify-content-between align-items-center">
+      <div id="filters" class="d-flex flex-wrap g-2">
+        <template v-for="c in columns" :key="c.field">
+          <div v-if="c.filterable" class="col-auto">
+            <select
+              v-if="c.filterType==='select' && c.filterOptions"
+              v-model="localFilters[c.field]"
+              class="form-select"
+            >
+              <option value="">{{ c.label }}</option>
+              <option v-for="(label,val) in c.filterOptions" :key="val" :value="val">
+                {{ label }}
+              </option>
+            </select>
   
-    <!-- filtros: ya no es <form>, sino un simple wrapper -->
-    <div id="filters" class="d-flex flex-wrap g-2 mb-3">
-      <template v-for="c in columns" :key="c.field">
-        <div v-if="c.filterable" class="col-auto">
-          <!-- SELECT -->
-          <select
-            v-if="c.filterType==='select' && c.filterOptions"
-            v-model="localFilters[c.field]"
-            class="form-select"
-          >
-            <!-- valor inicial = '' (equivale a “sin filtro”), etiqueta = c.label -->
-            <option value="">{{ c.label }}</option>
-            <option v-for="(label,val) in c.filterOptions" :key="val" :value="val">
-              {{ label }}
-            </option>
-          </select>
-
-          <!-- INPUT -->
-          <input
-            v-else
-            :type="inputType(c.filterType)"
-            v-model="localFilters[c.field]"
-            class="form-control"
-            :placeholder="c.label"
-          />
+            <input
+              v-else
+              :type="inputType(c.filterType)"
+              v-model="localFilters[c.field]"
+              class="form-control"
+              :placeholder="c.label"
+            />
+          </div>
+        </template>
+  
+        <div v-if="hasActiveFilters" class="align-self-end ms-2">
+          <button class="btn btn-outline-secondary" @click="clearFilters">
+            Limpiar
+          </button>
         </div>
-      </template>
-
-      <!-- Botón limpiar -->
-      <div v-if="hasActiveFilters" class="align-self-end">
-        <button class="btn btn-outline-secondary" @click="clearFilters">
-          Limpiar
-        </button>
+      </div>
+  
+      <div style="max-width: 270px; flex:1">
+        <SearchBar v-model="globalSearch" />
       </div>
     </div>
-
-    <div style="max-width: 270px; flex:1">
-      <SearchBar v-model="globalSearch" />
-    </div>
+  
 
     <SortableTable
       :columns="columns"

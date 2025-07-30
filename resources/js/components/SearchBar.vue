@@ -27,7 +27,7 @@ const props = defineProps({
 .search-input {              /* input bonito */
   width: 100%;
   padding: .3rem 2.75rem .3rem 1rem;   /* hueco para la lupa */
-  border: 1px solid #bfbfbf;
+  border: 1px solid #B5B5B5;
   border-radius: 0.8rem;
   font-size: 1rem;         /* como el mock‑up */
   color: #777;
@@ -39,7 +39,7 @@ const props = defineProps({
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  color: #999;
+  color: #B5B5B5;
   font-size: 1rem;
 }
 </style>
