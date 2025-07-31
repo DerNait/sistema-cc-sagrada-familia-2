@@ -12,6 +12,7 @@ use App\Http\Controllers\Catalogs\ActividadesController;
 use App\Http\Controllers\Catalogs\SeccionesController;
 use App\Http\Controllers\CursosEstudianteController;
 use App\Http\Controllers\CursoController;
+use App\Http\Controllers\HomeController;
 
 
 
@@ -78,6 +79,7 @@ Route::get('/curso-edicion', function () {
     return view('cursoedicion');
 });
 
+Route::get('/home', [HomeController::class, 'index']);
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
 Route::resource('/notas', NotasController::class)->only(['store', 'update']); 
