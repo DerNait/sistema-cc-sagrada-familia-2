@@ -80,6 +80,7 @@ Route::get('/curso-edicion', function () {
 
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
+Route::resource('/notas', NotasController::class)->only(['store', 'update']); 
 
 Route::get('/MisCursos', [App\Http\Controllers\CursosEstudianteController::class, 'index'])
     ->middleware('auth')
