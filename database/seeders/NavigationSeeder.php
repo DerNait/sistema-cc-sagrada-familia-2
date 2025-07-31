@@ -17,7 +17,8 @@ class NavigationSeeder extends Seeder
         // 2) Definir el nav
         $modules = collect([
             new NavModule('Dashboard','dashboard',100,'fas fa-home',   null, NavModule::READ),
-            new NavModule('Catálogos','catalogos',200,'fas fa-book',    null, NavModule::READ),
+            new NavModule('Cursos','cursos',200,'fas fa-courses',null, NavModule::READ),
+            new NavModule('Catálogos','catalogos',300,'fas fa-book',    null, NavModule::READ),
             new NavModule('Usuarios', 'usuarios', 100, 'fas fa-user', 'catalogos', NavModule::READ),
             new NavModule('Empleados','empleados',200,'fas fa-user','catalogos', NavModule::READ),
             new NavModule('Estudiantes','estudiantes',300,'fas fa-user','catalogos', NavModule::READ),
