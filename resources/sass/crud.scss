@@ -28,6 +28,10 @@
   box-shadow: -4px 0 8px rgba(0,0,0,.3);
 }
 
+.filters-container {
+  background-color: rgba($color: #D9D9D9, $alpha: 0.3);
+}
+
 /* ---------- Animaciones */
 .slide-enter-active, .slide-leave-active {
   transition: transform .35s ease;

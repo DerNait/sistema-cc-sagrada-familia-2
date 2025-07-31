@@ -1,7 +1,7 @@
 <template>
   <div class="crud-container">
     <div class="m-3 d-flex justify-content-between align-items-center">
-      <h4>{{ entityTitle }}</h4>
+      <h4 class="fw-semibold">{{ entityTitle }}</h4>
 
       <div class="d-flex justify-content-evenly gap-2">
         <button
@@ -19,94 +19,84 @@
         </button>
       </div>
     </div>
-  
-    <!-- filtros: ya no es <form>, sino un simple wrapper -->
-    <div id="filters" class="d-flex flex-wrap g-2 mb-3">
-      <template v-for="c in columns" :key="c.field">
-        <div v-if="c.filterable" class="col-auto">
-          <!-- SELECT -->
-          <select
-            v-if="c.filterType==='select' && c.filterOptions"
-            v-model="localFilters[c.field]"
-            class="form-select"
-          >
-            <!-- valor inicial = '' (equivale a “sin filtro”), etiqueta = c.label -->
-            <option value="">{{ c.label }}</option>
-            <option v-for="(label,val) in c.filterOptions" :key="val" :value="val">
-              {{ label }}
-            </option>
-          </select>
 
-          <!-- INPUT -->
-          <input
-            v-else
-            :type="inputType(c.filterType)"
-            v-model="localFilters[c.field]"
-            class="form-control"
-            :placeholder="c.label"
-          />
+    <div class="filters-container d-flex px-3 py-4 d-flex justify-content-between align-items-center">
+      <div id="filters" class="d-flex flex-wrap g-2">
+        <template v-for="c in columns" :key="c.field">
+          <div v-if="c.filterable" class="col-auto">
+            <select
+              v-if="c.filterType==='select' && c.filterOptions"
+              v-model="localFilters[c.field]"
+              class="form-select"
+            >
+              <option value="">{{ c.label }}</option>
+              <option v-for="(label,val) in c.filterOptions" :key="val" :value="val">
+                {{ label }}
+              </option>
+            </select>
+  
+            <input
+              v-else
+              :type="inputType(c.filterType)"
+              v-model="localFilters[c.field]"
+              class="form-control"
+              :placeholder="c.label"
+            />
+          </div>
+        </template>
+  
+        <div v-if="hasActiveFilters" class="align-self-end ms-2">
+          <button class="btn btn-outline-secondary" @click="clearFilters">
+            Limpiar
+          </button>
+        </div>
+      </div>
+  
+      <div style="max-width: 270px; flex:1">
+        <SearchBar v-model="globalSearch" />
+      </div>
+    </div>
+  
+
+    <SortableTable
+      :columns="columns"
+      :rows="rows"
+    >
+      <template #row-actions="{ row }">
+        <div class="d-flex justify-content-evenly">
+          <button
+            v-if="abilities.read"
+            class="btn btn-sm btn-outline-secondary"
+            @click="openShow(row)"
+          >
+            <i class="fa-regular fa-eye" />
+          </button>
+          <button
+            v-if="abilities.update"
+            class="btn btn-sm btn-outline-primary"
+            @click="openEdit(row)"
+          >
+            <i class="fa-regular fa-pen-to-square" />
+          </button>
+          <button
+            v-if="abilities.delete"
+            class="btn btn-sm btn-outline-danger"
+            @click="deleteRow(row)"
+          >
+            <i class="fa-solid fa-trash" />
+          </button>
         </div>
       </template>
 
-      <!-- Botón limpiar -->
-      <div v-if="hasActiveFilters" class="align-self-end">
-        <button class="btn btn-outline-secondary" @click="clearFilters">
-          Limpiar
-        </button>
-      </div>
-    </div>
-
-    <table id="dataTable" class="table table-bordered display">
-      <thead>
-        <tr>
-          <template v-for="c in Object.values(columns)" :key="c.field">
-              <th v-if="c.visible">{{ c.label }}</th>
-          </template>
-          <th></th>
-        </tr>
-      </thead>
-  
-      <tbody>
-        <tr v-for="row in rows" :key="row.id" :data-id="row.id">
-          <template v-for="c in Object.values(columns)" :key="c.field">
-              <td v-if="c.visible">
-              <template v-if="c.type==='relation' && c.options">
-                  {{ c.options[row[c.field]] ?? '' }}
-              </template>
-              <template v-else>
-                  {{ getValue(row,c.field) }}
-              </template>
-              </td>
-          </template>
-          <td>
-            <div class="d-flex justify-content-evenly">
-              <button
-                v-if="abilities.read"
-                class="btn btn-sm btn-outline-secondary"
-                @click="openShow(row)"
-              >
-                <i class="fa-regular fa-eye"></i>
-              </button>
-              <button
-                v-if="abilities.update"
-                class="btn btn-sm btn-outline-primary" 
-                @click="openEdit(row)"
-              >
-                <i class="fa-regular fa-pen-to-square"></i>
-              </button>
-    
-              <button
-                v-if="abilities.delete"
-                class="btn btn-sm btn-outline-danger"
-                @click="deleteRow(row)"
-              >
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+      <!-- ejemplo de celda personalizada -->
+      <!--
+      <template #cell-status="{ value }">
+        <span :class="value ? 'badge bg-success' : 'badge bg-danger'">
+          {{ value ? 'Activo' : 'Inactivo' }}
+        </span>
+      </template>
+      -->
+    </SortableTable>
   </div>
   <transition name="backdrop">
     <div v-if="showForm"
@@ -129,8 +119,9 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
+import SortableTable from '../SortableTable.vue';
+import SearchBar from '../SearchBar.vue';
 import Form from './Form.vue';
-import DataTable from 'datatables.net-bs5';
 
 const showForm   = ref(false);
 const editingRow = ref(null);       // null = create
@@ -141,6 +132,8 @@ const props = defineProps(['data','columns','abilities','filters']);
 
 const originalRows = ref([...props.data.data]);
 const rows         = ref([...originalRows.value]);
+
+const globalSearch = ref('');
 
 const localFilters = reactive(
   Object.fromEntries(
@@ -190,91 +183,39 @@ function onSaved(record) {
   close();
 }
 
-let dt = null;
-
 onMounted(async () => {
   await nextTick();
-
-  initDataTable();
 });
 
-watch(rows, async () => {
-  await nextTick();
+watch([localFilters, globalSearch], applyFilters, { deep: true });
 
-  if (dt) {
-    dt.clear();
-    const newRows = Array.from(
-      document.querySelectorAll('#dataTable tbody tr')
-    );
-    newRows.forEach(tr => dt.row.add(tr));
+function applyFilters () {
+  const term = globalSearch.value.trim().toLowerCase();
 
-    dt.draw(false);
-  }
-});
+  rows.value = originalRows.value.filter(row => {
+    /* 1 ) búsqueda global */
+    const matchesGlobal = !term || Object.values(props.columns).some(col => {
+      const cell = getValue(row, col.field);
+      return String(cell ?? '').toLowerCase().includes(term);
+    });
 
-watch(
-  localFilters,
-  () => applyFilters(),
-  { deep: true }
-);
+    /* 2 ) filtros por columna */
+    const matchesColumnFilters = Object.entries(localFilters).every(([field,val]) => {
+      if (!val) return true;
 
-function initDataTable() {
-  dt = new DataTable('#dataTable', {
-    language: {
-      url: '/lang/datatables/es-ES.json'
-    },
-    paging: true,
-    searching: true,
-    ordering: true,
-    layout: {
-      topStart: null,
-      topEnd: 'search',
-      bottomStart: 'pageLength',
-      bottomEnd: 'paging'
-    }
-  });
+      const col  = props.columns[field];
+      const cell = getValue(row, field);
 
-  setTimeout(() => {
-    placeFilters();
-  }, 100);
-}
-
-function placeFilters() {
-  const layoutTableEl = document.querySelector('.dt-layout-table');
-
-  if (layoutTableEl) {
-    const parent = layoutTableEl.closest('.row.mt-2');
-    if (parent) {
-      parent.classList.remove('mt-2');
-    }
-  }
-
-  const wrapper = document.getElementById('dataTable_wrapper');
-
-  if (wrapper) {
-    const firstRow = wrapper.querySelector('.row.mt-2.justify-content-between');
-
-    if (firstRow) {
-      firstRow.classList.remove('mt-2', 'row');
-      firstRow.classList.add('py-3', 'px-2', 'bg-gray-soft', 'd-flex', 'align-items-center');
-      
-      const filters = document.getElementById('filters');
-      if (filters) {
-        firstRow.prepend(filters);
+      switch (col.filterType) {
+        case 'numeric': return Number(cell) === Number(val);
+        case 'date':    return (cell ?? '').slice(0,10) === val;
+        case 'select':  return String(cell) === String(val);
+        default:        return String(cell ?? '').toLowerCase().includes(String(val).toLowerCase());
       }
-    }
-    
-    const matchingRows = wrapper.querySelectorAll('.row.mt-2.justify-content-between');
-    console.log(matchingRows);
+    });
 
-    if (matchingRows.length > 0) {
-      const lastRow = matchingRows[matchingRows.length - 1];
-      console.log(lastRow);
-
-      lastRow.classList.remove('mt-2', 'row');
-      lastRow.classList.add('mt-1', 'px-2', 'd-flex', 'align-items-center');
-    }
-  }
+    return matchesGlobal && matchesColumnFilters;
+  });
 }
 
 function modelSingularName(pluralName) {
@@ -308,8 +249,7 @@ function deleteRow (row) {
       const idx = rows.value.findIndex(r => r.id === row.id);
       
       if (idx > -1) {
-          rows.value.splice(idx, 1);
-          dt?.row(`tr[data-id="${row.id}"]`).remove().draw(false);
+        rows.value.splice(idx, 1);
       }
     })
     .catch(err => console.log(err.message));
@@ -319,29 +259,8 @@ const entityTitle = computed(() => {
   return segment.charAt(0).toUpperCase() + segment.slice(1);
 });
 
-function applyFilters () {
-  rows.value = originalRows.value.filter(row =>
-    Object.entries(localFilters).every(([field, val]) => {
-      if (!val) return true;
-
-      const col  = props.columns[field];
-      const cell = getValue(row, field);
-
-      switch (col.filterType) {
-        case 'numeric': return Number(cell) === Number(val);
-        case 'date':    return (cell ?? '').slice(0, 10) === val;
-        case 'select':  return String(cell) === String(val);
-        default:        return String(cell ?? '')
-                           .toLowerCase()
-                           .includes(String(val).toLowerCase());
-      }
-    })
-  );
-}
-
 function clearFilters () {
   Object.keys(localFilters).forEach(k => (localFilters[k] = ''));
-  dt.search('').draw(false);              // limpia búsqueda global, por si acaso
 }
 
 const hasActiveFilters = computed(() =>

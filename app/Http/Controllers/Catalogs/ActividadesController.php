@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Catalogs;
 
 use Illuminate\Http\Request;
-use App\Models\Actividade;
+use App\Models\Actividad;
 use App\Models\GradoCurso;
 use App\Http\Controllers\Crud\CrudControllerBase;
 
@@ -11,7 +11,7 @@ class ActividadesController extends CrudControllerBase
 {
     protected function configure(Request $request): void{
 
-        $this->model(Actividade::class);
+        $this->model(Actividad::class);
 
         $gradoCursoOptions = GradoCurso::with(['grado', 'curso'])
             ->get()

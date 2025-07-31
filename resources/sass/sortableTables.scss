@@ -1,10 +1,10 @@
-.dt-container table thead th {
+.sortable-table thead th {
   background-color: $secondary !important;
   color: white;
   border: 1px solid white;
 }
 
-.dt-container table tbody {
+.sortable-table tbody {
   td {
     border: 1px solid #D2D2D2;
   }
@@ -20,11 +20,4 @@
   tr:hover td{
     background-color: rgba($primary, .1) !important;
   }
-}
-
-.dt-custom-padding {
-  padding-right: calc(var(--bs-gutter-x) * 0.5) !important;
-  padding-left: calc(var(--bs-gutter-x) * 0.5) !important;
-  padding-top: $spacer !important;
-  padding-bottom: $spacer !important;
 }
