@@ -72,7 +72,7 @@ class MassiveDataSeeder extends Seeder
             DB::table('grado')->insert([
                 'id' => $g,
                 'nombre' => "grado $g",
-                'anio' => Carbon::now()->year,
+                '2025' => Carbon::now()->year,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);

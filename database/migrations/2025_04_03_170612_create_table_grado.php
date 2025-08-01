@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('grado', function (Blueprint $table) {
             $table->id();
             $table->string('nombre',100)->nullable(false);
-            $table->string('anio')->nullable(false);
+            $table->string('2025')->nullable(false);
             $table->timestamps();
         });
     }
