@@ -69,7 +69,9 @@
 <style>
 .login-background {
     position: relative;
-     background-image: url("{{ asset('images/colegio_fondo.jpg') }}"); 
+     background-image:
+        linear-gradient(to top, rgba(45, 58, 38, 0.7), rgba(45, 58, 38, 0)),
+        url("{{ asset('images/colegio_fondo.jpg') }}"); 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
