@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Catalogs\EmpleadosController;
 use App\Http\Controllers\Catalogs\UsersController;
+use App\Http\Controllers\Catalogs\RolesController;
 use App\Http\Controllers\Catalogs\EstudiantesController;
 use App\Http\Controllers\Catalogs\ProductosController;
 use App\Http\Controllers\ProductoController;
@@ -10,9 +11,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Catalogs\CursosController;
 use App\Http\Controllers\Catalogs\ActividadesController;
 use App\Http\Controllers\Catalogs\SeccionesController;
-use App\Http\Controllers\CursosEstudianteController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NotasController;
 
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
@@ -48,6 +49,16 @@ Route::middleware('auth')->group(function () {
             Route::get('{id}/editar', [UsersController::class, 'edit'])->name('edit');
             Route::put('{id}',        [UsersController::class, 'update'])->name('update');
             Route::delete('{id}',     [UsersController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('roles')->name('roles.')->group(function () {
+            Route::get('/',           [RolesController::class, 'index'])->name('index');
+            Route::get('{id}',        [RolesController::class, 'show'])->name('show');
+            Route::get('crear',       [RolesController::class, 'create'])->name('create');
+            Route::post('crear',      [RolesController::class, 'store'])->name('store');
+            Route::get('{id}/editar', [RolesController::class, 'edit'])->name('edit');
+            Route::put('{id}',        [RolesController::class, 'update'])->name('update');
+            Route::delete('{id}',     [RolesController::class, 'destroy'])->name('destroy');
         });
     
         Route::prefix('estudiantes')->name('estudiantes.')->group(function () {
