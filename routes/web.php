@@ -79,7 +79,7 @@ Route::get('/curso-edicion', function () {
     return view('cursoedicion');
 });
 
-Route::get('/home', [HomeController::class, 'index']);
+Route::get('/', [HomeController::class, 'index'])->name('home.index');
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
 Route::resource('/notas', NotasController::class)->only(['store', 'update']); 
@@ -88,12 +88,11 @@ Route::get('/MisCursos', [App\Http\Controllers\CursosEstudianteController::class
     ->middleware('auth')
     ->name('estudiante.cursos');
 
-
 Auth::routes();
 
 Route::get('/empleados/planilla', [EmpleadosController::class, 'planilla']);
 
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 Route::get('/exportar-empleados', [App\Http\Controllers\ExportController::class, 'export'])->name('export.empleados');
 
 Route::middleware('auth')->group(function () {

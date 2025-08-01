@@ -1,0 +1,51 @@
+.login-background {
+    position: relative;
+     background-image:
+        linear-gradient(to top, rgba($color: #83AA6B, $alpha: 0.7), rgba($color: #83AA6B, $alpha: 0)),
+        url('/public/images/colegio_fondo.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    z-index: 1;
+}
+
+.login-background::before{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 2;
+}
+
+    .login-background > * {
+    position: relative;
+    z-index: 3; 
+    }
+
+.custom-btn {
+    background-color: #83AA6B;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.custom-btn:hover {
+    background-color: #6f9658;
+}
+
+.custom-link {
+    color: #83AA6B;
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+.custom-link:hover {
+    color: #6f9658;
+    text-decoration: underline;
+}
