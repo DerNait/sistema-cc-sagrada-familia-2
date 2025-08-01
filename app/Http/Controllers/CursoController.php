@@ -49,10 +49,46 @@ class CursoController extends Controller
     {
         $user = auth()->user();
         $rolId = $user->rol_id;
-        
-        $estudiante = Estudiante::where('usuario_id', $user->id)->firstOrFail();
+
         $curso = Curso::where('id', $cursoId)->firstOrFail();
 
+        // Vista para ADMINISTRADOR (rol_id = 1)
+        if ($rolId === 1) {
+            // TODO: Puedes agregar aquí más lógica si el admin necesita más datos
+            $params = [
+                'curso' => $curso,
+                'modo' => 'admin',
+            ];
+
+            return view('component', [
+                'component' => 'admin-curso-detalle',
+                'params'    => $params,
+            ]);
+        }
+
+        // Vista para DOCENTE (rol_id = 4)
+        if ($rolId === 4) {
+            $actividades = Actividad::whereHas('gradoCurso', function ($q) use ($cursoId) {
+                    $q->where('curso_id', $cursoId);
+                })
+                ->with('notas') // Aquí el docente puede ver todas las notas de todos los estudiantes
+                ->select('id', 'nombre')
+                ->get();
+
+            $params = [
+                'curso' => $curso,
+                'actividades' => $actividades,
+                'modo' => 'docente',
+            ];
+
+            return view('component', [
+                'component' => 'docente-curso-detalle',
+                'params'    => $params,
+            ]);
+        }
+
+        // Vista para ESTUDIANTE (rol_id = otro)
+        $estudiante = Estudiante::where('usuario_id', $user->id)->firstOrFail();
         $seccionEstudiante = SeccionEstudiante::where('estudiante_id', $estudiante->id)->first();
 
         if (!$seccionEstudiante) {
@@ -70,15 +106,16 @@ class CursoController extends Controller
 
         $actividadesConNotas = $actividades->map(function ($actividad) {
             return [
-                'id'       => $actividad->id,
-                'nombre'   => $actividad->nombre,
-                'nota'     => optional($actividad->notas->first())->nota,
+                'id'     => $actividad->id,
+                'nombre' => $actividad->nombre,
+                'nota'   => optional($actividad->notas->first())->nota,
             ];
         });
 
         $params = [
             'curso'      => $curso,
             'actividades'=> $actividadesConNotas,
+            'modo'       => 'estudiante',
         ];
 
         return view('component', [
