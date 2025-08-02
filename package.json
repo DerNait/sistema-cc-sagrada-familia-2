@@ -27,6 +27,8 @@
         "datatables.net": "^2.3.1",
         "datatables.net-bs5": "^2.3.2",
         "datatables.net-dt": "^2.3.1",
+        "highcharts": "^12.3.0",
+        "highcharts-vue": "^2.0.1",
         "sweetalert2": "^11.22.0",
         "vue-multiselect": "^3.2.0"
     }
