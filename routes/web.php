@@ -14,6 +14,7 @@ use App\Http\Controllers\Catalogs\SeccionesController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotasController;
+use App\Http\Controllers\ExportController;
 
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
@@ -25,7 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
     Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
     Route::get('/cursos/{curso}', [CursoController::class, 'show'])->name('cursos.show');
-
+    Route::get('/exportar', [ExportController::class, 'export'])->name('exportar');
     Route::resource('/notas', NotasController::class)->only(['store', 'update']);
 
     Route::prefix('catalogos')->name('catalogos.')->group(function () {
