@@ -18,19 +18,19 @@ class CursoController extends Controller
         $cursos = collect();
 
         if ($rolId === 1) {
-            $cursos = Curso::select('id', 'nombre')
+            $cursos = Curso::select('id', 'nombre', 'imagen', 'icono', 'color')
                 ->orderBy('nombre')
                 ->get();
         } elseif ($rolId === 4) {
             $cursos = $user->cursosAsignados()
-                ->select('cursos.id', 'cursos.nombre')
+                ->select('cursos.id', 'cursos.nombre', 'cursos.imagen', 'cursos.icono', 'cursos.color')
                 ->orderBy('cursos.nombre')
                 ->get();
         } else {
             $cursos = Curso::whereHas('grado.secciones.estudiantes', function ($query) use ($user) {
                     $query->where('user_id', $user->id);
                 })
-                ->select('id', 'nombre')
+                ->select('id', 'nombre', 'imagen', 'icono', 'color')
                 ->orderBy('nombre')
                 ->get();
         }
