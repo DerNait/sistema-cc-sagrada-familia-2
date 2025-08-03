@@ -183,15 +183,14 @@ abstract class CrudControllerBase extends Controller
         $this->configure($request);
         abort_unless($this->abilities['create'] ?? false, 403);
 
-        $data = $this->validatedData($request);
-        $item = $this->newModelQuery()->create($data);
+        DB::transaction(function () use ($request, &$item) {
+            $item = $this->newModelQuery()->create(
+                $this->validatedData($request)
+            );
+            $this->syncPivotRelations($request, $item);
+        });
 
-        $full   = $request->route()->getName();
-        $base   = Str::beforeLast($full, '.');
-
-        return redirect()
-            ->route("{$base}.index")
-            ->with('success', 'Registro creado con éxito');
+        return response()->json('ok');
     }
 
     public function edit(Request $request, $id)
@@ -219,14 +218,13 @@ abstract class CrudControllerBase extends Controller
         abort_unless($this->abilities['update'] ?? false, 403);
 
         $item = $this->newModelQuery()->findOrFail($id);
-        $item->update($this->validatedData($request));
 
-        $full   = $request->route()->getName();
-        $base   = Str::beforeLast($full, '.');
+        DB::transaction(function () use ($request, $item) {
+            $item->update($this->validatedData($request));
+            $this->syncPivotRelations($request, $item);
+        });
 
-        return redirect()
-            ->route("{$base}.index")
-            ->with('success', 'Registro actualizado con éxito');
+        return response()->json('ok');
     }
 
     public function destroy(Request $request, $id)
@@ -283,6 +281,17 @@ abstract class CrudControllerBase extends Controller
             }
         });
     }
+
+    /** Sincroniza belongsToMany que lo pidan */
+    protected function syncPivotRelations(Request $req, Model $item): void
+    {
+        foreach ($this->columns as $col) {
+            if ($col->pivotRelation) {
+                $ids = $req->input($col->field, []);
+                $item->{$col->pivotRelation}()->sync($ids);
+            }
+        }
+    }
 }
 
 /* ---------------------------------------------------------------
@@ -292,11 +301,13 @@ class ColumnConfig
 {
     public string $field;
     public string $label;
-    public string $type      = 'string'; // string|numeric|datetime|relation…
-    public bool   $visible   = true;
-    public bool   $editable  = true;
-    public array  $rules     = [];
-    public ?array $options   = null;
+    public string $type           = 'string'; // string|numeric|datetime|relation…
+    public bool   $visible        = true;
+    public bool   $editable       = true;
+    public array  $rules          = [];
+    public ?array $options        = null;
+    public ?string $pivotRelation = null;
+    public bool $isMultiRelation = false;
 
     public function __construct(string $field)
     {
@@ -304,12 +315,14 @@ class ColumnConfig
         $this->label = ucfirst(str_replace('_', ' ', $field));
     }
 
-    public function label(string $label): self   { $this->label = $label;   return $this; }
-    public function type(string $type): self     { $this->type  = $type;     return $this; }
-    public function hide(): self                 { $this->visible = false;   return $this; }
-    public function readonly(): self             { $this->editable = false;  return $this; }
-    public function rules(array $rules): self    { $this->rules = $rules;    return $this; }
-    public function options(array $opts): self   { $this->options = $opts;   return $this; }
+    public function label(string $label): self             { $this->label = $label;   return $this; }
+    public function type(string $type): self               { $this->type  = $type;     return $this; }
+    public function hide(): self                           { $this->visible = false;   return $this; }
+    public function readonly(): self                       { $this->editable = false;  return $this; }
+    public function rules(array $rules): self              { $this->rules = $rules;    return $this; }
+    public function options(array $opts): self             { $this->options = $opts;   return $this; }
+    public function pivot(string $relation): self          { $this->pivotRelation = $relation; return $this; }
+    public function multiRelation(bool $flag = true): self { $this->isMultiRelation = $flag; return $this; }
 
     public bool   $filterable    = false;
     public string $filterType    = 'text';   // 'text'|'select'|'date'|'numeric'

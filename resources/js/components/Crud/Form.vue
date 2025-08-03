@@ -13,7 +13,7 @@
         <label class="form-label">{{ c.label }}</label>
 
         <select 
-          v-if="c.type==='relation' && c.options"
+          v-if="c.type==='relation' && c.options && !c.isMultiRelation"
           v-model="form[c.field]"
           :disabled="props.readonly || !c.editable"
           class="form-select"
@@ -23,6 +23,30 @@
             {{ label }}
           </option>
         </select>
+
+        <div v-else-if="c.type==='relation' && c.isMultiRelation">
+          <div v-for="(val, idx) in form[c.field]" :key="idx" class="d-flex gap-2 mb-2">
+            <select 
+              v-model="form[c.field][idx]" 
+              class="form-select"
+            >
+              <option value="">-- Selecciona --</option>
+              <option 
+                v-for="(label,id) in filteredOptions(c.options, idx, form[c.field])" 
+                :key="id" 
+                :value="id"
+              >
+                {{ label }}
+              </option>
+            </select>
+            <button type="button" class="btn btn-outline-danger" @click="removeRelation(c.field, idx)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+          <button type="button" class="btn btn-sm btn-primary" @click="addRelation(c.field)">
+            <i class="fa fa-plus"></i> Agregar {{ c.label }}
+          </button>
+        </div>
 
         <input 
           v-else
@@ -67,9 +91,14 @@ const csrf = document
   .getAttribute('content');
 
 const form = reactive({});
-Object.values(props.columns).forEach(c =>
-  (form[c.field] = props.item ? getValue(props.item, c.field) ?? '' : '')
-);
+Object.values(props.columns).forEach(c => {
+  if (c.isMultiRelation) {
+    const val = props.item ? getValue(props.item, c.field) : [];
+    form[c.field] = Array.isArray(val) ? [...val] : [];
+  } else {
+    form[c.field] = props.item ? getValue(props.item, c.field) ?? '' : '';
+  }
+});
 
 function inputType(t) {
   if (t === 'date') return 'date';
@@ -80,6 +109,23 @@ function inputType(t) {
 }
 function getValue(obj, path) {
   return path.split('.').reduce((o, p) => (o ? o[p] : null), obj);
+}
+
+function addRelation(field) {
+  form[field].push('');
+}
+
+function removeRelation(field, idx) {
+  form[field].splice(idx, 1);
+}
+
+function filteredOptions(options, currentIdx, values) {
+  const used = values.filter((v, i) => i !== currentIdx && v !== '');
+  const filtered = {};
+  Object.entries(options).forEach(([id, label]) => {
+    if (!used.includes(id)) filtered[id] = label;
+  });
+  return filtered;
 }
 
 async function handleSubmit() {
