@@ -2,7 +2,10 @@
 import Card from './Card.vue'
 
 const props = defineProps({
-  cursos: Array
+  cursos: {
+    type: Array,
+    default: () => []
+  }
 })
 
 const verDetalle = (cursoId) => {
@@ -16,9 +19,7 @@ const verDetalle = (cursoId) => {
 
     <div class="row g-3">
       <div class="col-12 col-md-6 col-lg-4" v-for="curso in cursos" :key="curso.id">
-        <Card @click="verDetalle(curso.id)">
-          <h5 class="card-title">{{ curso.nombre }}</h5>
-        </Card>
+        <Card :curso="curso" @click="verDetalle(curso.id)" />
       </div>
     </div>
   </div>
