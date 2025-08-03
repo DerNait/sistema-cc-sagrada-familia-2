@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Catalogs;
 
 use Illuminate\Http\Request;
@@ -28,41 +29,46 @@ class UsersController extends CrudControllerBase
 
         $this->column('email')
              ->label('Correo')
-             // Para unique ignoramos el propio registro al editar:
              ->rules([
                  'required',
                  'email',
                  'max:255',
-                 'unique:users,email,'.($request->route('id') ?? 'NULL'),
+                 'unique:users,email,' . ($request->route('id') ?? 'NULL'),
              ]);
 
+        $this->column('password')
+               ->label('Contraseña')
+               ->type('password')
+               ->rules([
+               $request->route('id') ? 'nullable' : 'required',
+               'string',
+               'min:8',
+               ])
+               ->hide();
+
         $this->column('rol_id')
-               ->label('Rol')
-               ->type('relation')
-               ->filterable('select')
-               ->filterOptions(
-                    Role::orderBy('nombre')
-                         ->pluck('nombre','id')
-                         ->toArray()
-               )
-               ->options(
-                    Role::orderBy('nombre')
-                         ->pluck('nombre','id')
-                         ->toArray()
-               )
-               ->rules(['required','exists:roles,id']);
+             ->label('Rol')
+             ->type('relation')
+             ->filterable('select')
+             ->filterOptions(
+                 Role::orderBy('nombre')->pluck('nombre', 'id')->toArray()
+             )
+             ->options(
+                 Role::orderBy('nombre')->pluck('nombre', 'id')->toArray()
+             )
+             ->rules(['required', 'exists:roles,id']);
 
         $this->column('fecha_registro')
              ->label('Fecha registro')
              ->type('date')
-             ->rules(['nullable','date']);
+             ->rules(['nullable', 'date']);
 
         $this->column('fecha_nacimiento')
              ->label('Fecha nacimiento')
              ->type('date')
-             ->rules(['nullable','date']);
+             ->rules(['nullable', 'date']);
 
-        // Campos de auditoría
+        
         $this->column('created_at')
              ->label('Creado')
              ->type('datetime')
