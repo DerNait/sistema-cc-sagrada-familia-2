@@ -14,4 +14,9 @@ class Grado extends Model
     {
         return $this->hasMany(Curso::class);
     }
+
+    public function secciones()
+    { 
+        return $this->hasMany(Seccion::class);
+    }
 }
