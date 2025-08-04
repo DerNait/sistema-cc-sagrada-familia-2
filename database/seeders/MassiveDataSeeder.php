@@ -473,5 +473,14 @@ for($i = 1; $i <= 500; $i++) {
             NavigationSeeder::class,
             RolePermissionSeeder::class
         ]);
+
+        foreach ($tables as $table) {
+            DB::statement("
+                SELECT setval(
+                    pg_get_serial_sequence('$table', 'id'),
+                    COALESCE((SELECT MAX(id) FROM $table), 1)
+                )
+            ");
+        }
     }
 }
