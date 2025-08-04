@@ -14,6 +14,7 @@
         </button>
         <button
           class="btn btn-info"
+          @click="exportData"
         >
           <i class="fa-solid fa-download"></i>
         </button>
@@ -266,4 +267,36 @@ function clearFilters () {
 const hasActiveFilters = computed(() =>
   Object.values(localFilters).some(v => v !== '')
 );
+//Funcion para poder exportar la data
+function exportData() {
+  axios.get(`${baseUrl}/export`, { responseType: 'blob' })
+    .then(response => {
+      // Crear un enlace temporal para descargar el archivo
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Obtener el nombre del archivo del header o generarlo
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = 'export.csv';
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (fileNameMatch && fileNameMatch[1]) {
+          fileName = fileNameMatch[1];
+        }
+      }
+      
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      
+      // Limpiar
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    })
+    .catch(error => {
+      console.error('Error al exportar:', error);
+      alert('Error al exportar los datos');
+    });
+}
 </script>
