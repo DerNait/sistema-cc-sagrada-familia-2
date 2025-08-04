@@ -339,3 +339,66 @@ class ColumnConfig
         return $this;
     }
 }
+/* ---------------------------------------------------------------
+ *  Funcion de exportar archivos csv
+ * ------------------------------------------------------------- */
+public function export(Request $request)
+{
+    $this->configure($request);
+    abort_unless($this->abilities['read'] ?? true, 403);
+
+    // Obtener todos los datos sin paginación
+    $data = $this->newModelQuery()->get();
+
+    // Filtrar solo las columnas visibles
+    $visibleColumns = array_filter($this->columns, fn($col) => $col->visible);
+    
+    // Generar contenido CSV
+    $csvContent = $this->generateCsv($data, $visibleColumns);
+
+    // Configurar respuesta de descarga
+    $modelName = class_basename($this->modelClass);
+    $filename = strtolower($modelName) . '_export_' . date('Ymd_His') . '.csv';
+
+    return response()->streamDownload(
+        fn() => print($csvContent),
+        $filename,
+        [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]
+    );
+}
+
+protected function generateCsv($data, $columns): string
+{
+    $output = fopen('php://temp', 'r+');
+    
+    // Escribir encabezados
+    fputcsv($output, array_map(fn($col) => $col->label, $columns));
+    
+    // Escribir datos
+    foreach ($data as $item) {
+        $row = [];
+        foreach ($columns as $field => $column) {
+            $row[] = $this->getExportValue($item, $field);
+        }
+        fputcsv($output, $row);
+    }
+    
+    rewind($output);
+    $csv = stream_get_contents($output);
+    fclose($output);
+    
+    return $csv;
+}
+
+protected function getExportValue($item, $field)
+{
+    if (str_contains($field, '.')) {
+        // Para relaciones anidadas
+        return data_get($item, $field) ?? '';
+    }
+    
+    return $item->{$field} ?? '';
+}
