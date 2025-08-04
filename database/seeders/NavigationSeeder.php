@@ -20,13 +20,13 @@ class NavigationSeeder extends Seeder
             new NavModule('Dashboard','dashboard',200,'fas fa-chart-pie',   null, NavModule::READ),
             new NavModule('Cursos','cursos',300,'fas fa-graduation-cap',null, NavModule::READ),
             new NavModule('Catálogos','catalogos',400,'fas fa-book',    null, NavModule::READ),
-            new NavModule('Usuarios', 'usuarios', 100, 'fas fa-user', 'catalogos', NavModule::READ),
-            new NavModule('Roles', 'roles', 200, 'fas fa-key', 'catalogos', NavModule::READ),
-            new NavModule('Empleados','empleados', 300,'fas fa-user','catalogos', NavModule::READ),
-            new NavModule('Estudiantes','estudiantes', 400,'fas fa-user','catalogos', NavModule::READ),
-            new NavModule('Productos','productos', 600,'fas fa-user','catalogos', NavModule::READ),
-            new NavModule('Cursos','cursos', 700,'fas fa-user','catalogos', NavModule::READ),
-            new NavModule('Actividades', 'actividades', 800, 'fas fa-user', 'catalogos', NavModule::READ),
+            new NavModule('Usuarios', 'usuarios', 100, 'fas fa-user', 'catalogos', NavModule::CRUD),
+            new NavModule('Roles', 'roles', 200, 'fas fa-key', 'catalogos', NavModule::CRUD),
+            new NavModule('Empleados','empleados', 300,'fas fa-user','catalogos', NavModule::CRUD),
+            new NavModule('Estudiantes','estudiantes', 400,'fas fa-user','catalogos', NavModule::CRUD),
+            new NavModule('Productos','productos', 600,'fas fa-user','catalogos', NavModule::CRUD),
+            new NavModule('Cursos','cursos', 700,'fas fa-user','catalogos', NavModule::CRUD),
+            new NavModule('Actividades', 'actividades', 800, 'fas fa-user', 'catalogos', NavModule::CRUD),
         ]);
 
         // 3) Inserta módulos y permisos
