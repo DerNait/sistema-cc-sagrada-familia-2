@@ -32,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('catalogos')->name('catalogos.')->group(function () {
         Route::prefix('empleados')->name('empleados.')->group(function () {
             Route::get('/',           [EmpleadosController::class, 'index'])->name('index');
+            Route::get('/export',     [EmpleadosController::class, 'export'])->name('export');
             Route::get('{id}',        [EmpleadosController::class, 'show'])->name('show');
             Route::get('crear',       [EmpleadosController::class, 'create'])->name('create');
             Route::post('crear',      [EmpleadosController::class, 'store'])->name('store');
@@ -44,6 +45,7 @@ Route::middleware('auth')->group(function () {
     
         Route::prefix('usuarios')->name('usuarios.')->group(function () {
             Route::get('/',           [UsersController::class, 'index'])->name('index');
+            Route::get('/export',     [UsersController::class, 'export'])->name('export');
             Route::get('{id}',        [UsersController::class, 'show'])->name('show');
             Route::get('crear',       [UsersController::class, 'create'])->name('create');
             Route::post('crear',      [UsersController::class, 'store'])->name('store');
@@ -54,6 +56,7 @@ Route::middleware('auth')->group(function () {
 
         Route::prefix('roles')->name('roles.')->group(function () {
             Route::get('/',           [RolesController::class, 'index'])->name('index');
+            Route::get('/export',     [RolesController::class, 'export'])->name('export');
             Route::get('{id}',        [RolesController::class, 'show'])->name('show');
             Route::get('crear',       [RolesController::class, 'create'])->name('create');
             Route::post('crear',      [RolesController::class, 'store'])->name('store');
@@ -64,6 +67,7 @@ Route::middleware('auth')->group(function () {
     
         Route::prefix('estudiantes')->name('estudiantes.')->group(function () {
             Route::get('/',           [EstudiantesController::class, 'index'])->name('index');
+            Route::get('/export',     [EstudiantesController::class, 'export'])->name('export');
             Route::get('{id}',        [EstudiantesController::class, 'show'])->name('show');
             Route::get('crear',       [EstudiantesController::class, 'create'])->name('create');
             Route::post('crear',      [EstudiantesController::class, 'store'])->name('store');
@@ -74,7 +78,8 @@ Route::middleware('auth')->group(function () {
     
         Route::prefix('productos')->name('productos.')->group(function () {
             Route::get('/',           [ProductosController::class, 'index'])->name('index');
-            Route::get('{id}',        [EstudiantesController::class, 'show'])->name('show');
+            Route::get('/export',     [ProductosController::class, 'export'])->name('export');
+            Route::get('{id}',        [ProductosController::class, 'show'])->name('show');
             Route::get('crear',       [ProductosController::class, 'create'])->name('create');
             Route::post('crear',      [ProductosController::class, 'store'])->name('store');
             Route::get('{id}/editar', [ProductosController::class, 'edit'])->name('edit');
@@ -84,6 +89,7 @@ Route::middleware('auth')->group(function () {
     
         Route::prefix('cursos')->name('cursos.')->group(function () {
             Route::get('/',           [CursosController::class, 'index'])->name('index');
+            Route::get('/export',     [CursosController::class, 'export'])->name('export');
             Route::get('{id}',        [CursosController::class, 'show'])->name('show');
             Route::get('crear',       [CursosController::class, 'create'])->name('create');
             Route::post('crear',      [CursosController::class, 'store'])->name('store');
@@ -94,8 +100,8 @@ Route::middleware('auth')->group(function () {
     
         Route::prefix('actividades')->name('actividades.')->group(function () {
             Route::get('/',           [ActividadesController::class, 'index'])->name('index');
+            Route::get('/export',     [ActividadesController::class, 'export'])->name('export');
             Route::get('{id}',        [ActividadesController::class, 'show'])->name('show');
-            Route::get('crear',       [ActividadesController::class, 'create'])->name('create');
             Route::get('crear',       [ActividadesController::class, 'create'])->name('create');
             Route::post('crear',      [ActividadesController::class, 'store'])->name('store');
             Route::get('{id}/editar', [ActividadesController::class, 'edit'])->name('edit');
@@ -105,6 +111,7 @@ Route::middleware('auth')->group(function () {
     
         Route::prefix('secciones')->name('secciones.')->group(function () {
             Route::get('/',           [SeccionesController::class, 'index'])->name('index');
+            Route::get('/export',     [SeccionesController::class, 'export'])->name('export');
             Route::get('{id}',        [SeccionesController::class, 'show'])->name('show');
             Route::get('/crear',      [SeccionesController::class, 'create'])->name('create');
             Route::post('/',          [SeccionesController::class, 'store'])->name('store');
