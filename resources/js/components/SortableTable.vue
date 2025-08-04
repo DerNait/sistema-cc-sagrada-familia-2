@@ -61,7 +61,7 @@
     </div>
 
     <!-- ========= BARRA INFERIOR ========= -->
-    <div class="d-flex justify-content-between align-items-center mt-2 px-3">
+    <div class="d-flex justify-content-between align-items-center my-2 px-3">
       <div class="d-flex align-items-center gap-2">
         <label class="mb-0 fw-semibold small text-secondary">Mostrar</label>
         <select

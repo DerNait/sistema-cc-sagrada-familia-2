@@ -130,7 +130,7 @@ const formMode = ref('create');
 
 const props = defineProps(['data','columns','abilities','filters']);
 
-const originalRows = ref([...props.data.data]);
+const originalRows = ref([...props.data]);
 const rows         = ref([...originalRows.value]);
 
 const globalSearch = ref('');

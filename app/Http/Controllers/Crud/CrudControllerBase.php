@@ -130,10 +130,8 @@ abstract class CrudControllerBase extends Controller
             });
         }
 
-        // 5) Paginamos manteniendo los filtros en la querystring
-        $data = $query
-            ->paginate($request->query('per_page', 20))
-            ->withQueryString();
+        // 5) Obtenemos toda la data
+        $data = $query->get();
 
             
         // 6) Enviamos todo a la vista
