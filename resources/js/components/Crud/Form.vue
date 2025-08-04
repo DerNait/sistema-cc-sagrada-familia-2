@@ -48,6 +48,42 @@
           </button>
         </div>
 
+        <template v-else-if="c.type === 'password'">
+          <!-- Contraseña -->
+          <div class="input-group mb-2">
+            <input
+              :type="showPass ? 'text' : 'password'"
+              v-model="form[c.field]"
+              class="form-control"
+              :readonly="props.readonly || !c.editable"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              @click="showPass = !showPass"
+            >
+              <i :class="showPass ? 'fa fa-eye-slash' : 'fa fa-eye'" />
+            </button>
+          </div>
+
+          <!-- Confirmar contraseña (solo en modo edición / creación) -->
+          <div v-if="!props.readonly" class="input-group">
+            <input
+              :type="showPass ? 'text' : 'password'"
+              v-model="form.password_confirmation"
+              class="form-control"
+              placeholder="Confirmar contraseña"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              @click="showPass = !showPass"
+            >
+              <i :class="showPass ? 'fa fa-eye-slash' : 'fa fa-eye'" />
+            </button>
+          </div>
+        </template>
+
         <input 
           v-else
           :type="inputType(c.type)"
@@ -75,7 +111,7 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, computed, ref } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -90,6 +126,8 @@ const csrf = document
   .querySelector('meta[name="csrf-token"]')
   .getAttribute('content');
 
+const showPass = ref(false);
+
 const form = reactive({});
 Object.values(props.columns).forEach(c => {
   if (c.isMultiRelation) {
@@ -99,6 +137,9 @@ Object.values(props.columns).forEach(c => {
     form[c.field] = props.item ? getValue(props.item, c.field) ?? '' : '';
   }
 });
+
+const hasPassword = computed(() => Object.values(props.columns).some(c => c.type==='password'));
+if (hasPassword.value) form.password_confirmation = '';
 
 function inputType(t) {
   if (t === 'date') return 'date';
