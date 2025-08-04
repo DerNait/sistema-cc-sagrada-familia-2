@@ -145,8 +145,9 @@ const localFilters = reactive(
 );
 
 function openCreate() {
+  formMode.value  = 'create';
   editingRow.value = null;
-  formAction.value = `${baseUrl}/crear`;      // POST /entidad
+  formAction.value = baseUrl;      // POST /entidad
   open();
 }
 
@@ -170,6 +171,7 @@ async function loadLatest(id) {
 }
 
 function openEdit(row) {
+  formMode.value  = 'edit';
   editingRow.value = { ...row };
   formAction.value = `${baseUrl}/${row.id}`; // PUT /entidad/{id}
   open();
@@ -177,13 +179,20 @@ function openEdit(row) {
 function open()  { showForm.value = true; document.body.style.overflow = 'hidden'; }
 function close() { showForm.value = false; document.body.style.overflow = '';      }
 
-function onSaved(record) {
+function onSaved (record) {
   const idx = rows.value.findIndex(r => r.id === record.id);
-  if (idx > -1) rows.value[idx] = record;
-  else rows.value.unshift(record);
+
+  if (idx > -1) {
+    // UPDATE
+    rows.value[idx]         = record;
+    originalRows.value[idx] = record;
+  } else {
+    // CREATE
+    rows.value.unshift(record);
+    originalRows.value.unshift(record);
+  }
   close();
 }
-
 onMounted(async () => {
   await nextTick();
 });
@@ -248,9 +257,9 @@ function deleteRow (row) {
     .delete(`${baseUrl}/${row.id}`)
     .then(() => {
       const idx = rows.value.findIndex(r => r.id === row.id);
-      
       if (idx > -1) {
         rows.value.splice(idx, 1);
+        originalRows.value.splice(idx, 1);
       }
     })
     .catch(err => console.log(err.message));
@@ -267,6 +276,7 @@ function clearFilters () {
 const hasActiveFilters = computed(() =>
   Object.values(localFilters).some(v => v !== '')
 );
+
 //Funcion para poder exportar la data
 function exportData() {
   axios.get(`${baseUrl}/export`, { responseType: 'blob' })
