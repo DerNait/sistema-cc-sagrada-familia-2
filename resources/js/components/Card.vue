@@ -1,8 +1,8 @@
 <template>
-  <div 
-    class="card text-white position-relative overflow-hidden h-100 shadow rounded"
+  <a 
+    :href="`/cursos/${curso.id}`"
+    class="card text-white position-relative overflow-hidden h-100 shadow rounded-4 text-decoration-none"
     style="cursor: pointer; border: none; min-height: 250px;"
-    @click="$emit('click')"
   >
     <div 
       class="position-absolute top-0 start-0 w-100 h-100 bg-cover bg-center"
@@ -20,14 +20,14 @@
         v-if="curso.icono"
         :class="['fa', curso.icono]" 
         class="mb-2"
-        style="font-size: 3rem;"
+        style="font-size: 6rem;"
       ></i>
 
-      <div class="position-absolute bottom-0 start-0 p-3 fs-5 fw-semibold text-white text-shadow">
+      <div class="position-absolute bottom-0 start-0 p-3 fs-4 fw-semibold text-white">
         {{ curso.nombre }}
       </div>
     </div>
-  </div>
+  </a>
 </template>
 
 <script setup>
@@ -62,5 +62,12 @@ const overlayColor = computed(() => hexToRgba(props.curso.color, 0.5))
 }
 .text-shadow {
   text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+}
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 </style>

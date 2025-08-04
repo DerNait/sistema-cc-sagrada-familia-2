@@ -1,6 +1,6 @@
 <template>
   <div class="container py-4">
-    <h2 class="mb-4">Mis Cursos</h2>
+    <h2 class="mb-4 text-center fw-normal">Selecciona el <span class="fw-semibold text-primary">curso</span> que deseas ver</h2>
 
     <Filtro>
       <div class="position-relative w-100">
@@ -13,7 +13,7 @@
       </div>
     </Filtro>
 
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="row row-cols-1 row-cols-md-4 g-4">
       <div
         v-for="curso in cursosFiltrados"
         :key="curso.id"
