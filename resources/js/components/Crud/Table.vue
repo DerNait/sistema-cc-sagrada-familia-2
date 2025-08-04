@@ -66,6 +66,15 @@
       <template #row-actions="{ row }">
         <div class="d-flex justify-content-evenly">
           <button
+            v-for="act in (custom_actions || []).filter(a => !a.ability || abilities[a.ability])"
+            :key="act.name"
+            :class="['btn btn-sm', act.btnClass]"
+            @click="onCustomClick(act, row)"
+          >
+            <i :class="['fa', act.icon]" />
+          </button>
+
+          <button
             v-if="abilities.read"
             class="btn btn-sm btn-outline-secondary"
             @click="openShow(row)"
@@ -129,7 +138,7 @@ const editingRow = ref(null);       // null = create
 const formAction = ref('');
 const formMode = ref('create');
 
-const props = defineProps(['data','columns','abilities','filters']);
+const props = defineProps(['data','columns','abilities','filters','custom_actions']);
 
 const originalRows = ref([...props.data]);
 const rows         = ref([...originalRows.value]);
@@ -308,5 +317,19 @@ function exportData() {
       console.error('Error al exportar:', error);
       alert('Error al exportar los datos');
     });
+}
+
+// Accion custom
+function resolveUrl(action, row) {
+  return action.url.replace('__ID__', row.id);
+}
+/* 
+function canShow(action) {
+  if (!action.ability) return true;
+  return abilities.value[action.ability] ?? true;
+} */
+
+function onCustomClick(action, row) {
+  window.location.href = resolveUrl(action, row);
 }
 </script>

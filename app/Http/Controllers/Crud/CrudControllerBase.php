@@ -20,6 +20,9 @@ abstract class CrudControllerBase extends Controller
     /** Permisos calculados en runtime */
     protected array $abilities = [];
 
+    /**  Acciones extra por fila */
+    protected array $customActions = [];
+
     /* ===============================================================
      *  API pública que la clase hija DEBE implementar / llamar
      * ============================================================= */
@@ -39,6 +42,12 @@ abstract class CrudControllerBase extends Controller
     protected function column(string $field): ColumnConfig
     {
         return $this->columns[$field] = $this->columns[$field] ?? new ColumnConfig($field);
+    }
+
+    protected function action(string $name): ActionConfigRow
+    {
+        return $this->customActions[$name] =
+            $this->customActions[$name] ?? new ActionConfigRow($name);
     }
 
     /* ===============================================================
@@ -136,10 +145,11 @@ abstract class CrudControllerBase extends Controller
             
         // 6) Enviamos todo a la vista
         $params = [
-            'data'      => $data,
-            'columns'   => $this->columns,
-            'abilities' => $this->abilities,
-            'filters'   => $request->only(
+            'data'          => $data,
+            'columns'       => $this->columns,
+            'abilities'     => $this->abilities,
+            'custom_actions' => array_values($this->customActions), 
+            'filters'       => $request->only(
                 array_filter($all, fn($f) => $this->columns[$f]->filterable)
             ),
         ];
@@ -403,4 +413,30 @@ class ColumnConfig
         $this->filterOptions = $opts;
         return $this;
     }
+}
+
+/** Configurador fluido de acciones (solo usa string con __ID__) */
+class ActionConfigRow
+{
+    public string  $name;
+    public string  $label    = '';
+    public string  $icon     = 'fa-asterisk';
+    public string  $btnClass = 'btn-outline-secondary';
+
+    /**
+     * String con el marcador __ID__ que será reemplazado en el front
+     *   p.ej. '/usuarios/__ID__/reset-password'
+     */
+    public ?string $url = null;
+
+    /** Habilidad necesaria para mostrar el botón (read, update, delete, …) */
+    public ?string $ability = null;
+
+    public function __construct(string $name) { $this->name = $name; }
+
+    public function label(string $t): self   { $this->label    = $t;  return $this; }
+    public function icon(string $fa): self   { $this->icon     = $fa; return $this; }
+    public function btn(string $cls): self   { $this->btnClass = $cls;return $this; }
+    public function url(string $u): self     { $this->url      = $u;  return $this; }
+    public function ability(string $a): self { $this->ability  = $a;  return $this; }
 }
