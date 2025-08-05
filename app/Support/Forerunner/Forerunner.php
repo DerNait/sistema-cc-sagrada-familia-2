@@ -31,7 +31,7 @@ class Forerunner
 
     public static function crudMatrix(string $module): array
     {
-        return collect(['create','read','update','delete'])
+        return collect(['create','read','update','delete','export'])
             ->mapWithKeys(fn($p)=>[$p=>self::allows("$module.$p")])
             ->toArray();
     }
