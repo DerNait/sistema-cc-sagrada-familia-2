@@ -13,6 +13,7 @@
           Agregar {{ modelSingularName(entityTitle) }}
         </button>
         <button
+          v-if="abilities.export"
           class="btn btn-info"
           @click="exportData"
         >
