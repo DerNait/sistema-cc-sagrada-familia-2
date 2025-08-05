@@ -55,3 +55,30 @@ $btn-border-radius: 0.8rem;
 .bg-gray-soft {
   background-color: rgba($color: #D9D9D9, $alpha: 0.3) !important;
 }
+
+.card {
+  background-color: transparent !important;
+  border-radius: 1rem !important;
+}
+
+.card-header {
+  background-color: $secondary !important;
+  border-color: $secondary !important;
+  color: white !important;
+  border-top-left-radius: 1rem !important;
+  border-top-right-radius: 1rem !important;
+}
+
+.card-body {
+  background-color: transparent !important;
+}
+
+.form-check-input {
+  border: 2px solid $secondary !important;
+  background-color: transparent !important;
+}
+
+.form-check-input:checked {
+  border: 2px solid $primary !important;
+  background-color: $primary !important;
+}

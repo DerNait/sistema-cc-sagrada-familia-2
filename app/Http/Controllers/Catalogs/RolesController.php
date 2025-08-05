@@ -32,7 +32,66 @@ class RolesController extends CrudControllerBase
              ->type('datetime')
              ->readonly();
 
+		$this->action('permissions')
+             ->label('Permisos')
+             ->icon('fa-lock')
+             ->btn('btn-outline-warning')
+             ->url('/catalogos/roles/__ID__/permisos');
+
         // 4) Calcular permisos CRUD (modulo "usuarios")
         $this->syncAbilities('usuarios');
     }
+
+		public function permisos() {
+
+			$params = [
+				'modulos' => [
+					[
+						'id' => 1,
+						'modulo' => 'Usuarios',
+						'permissions' => 'read, write, delete',
+					],
+					[
+						'id' => 2,
+						'modulo' => 'Roles',
+						'permissions' => 'read, write',
+					],
+					[
+						'id' => 3,
+						'modulo' => 'Permisos',
+						'permissions' => 'read',
+					],
+					[
+						'id' => 4,
+						'modulo' => 'Productos',
+						'permissions' => 'read, write, delete',
+					],
+					[
+						'id' => 5,
+						'modulo' => 'Pedidos',
+						'permissions' => 'read, write',
+					],
+					[
+						'id' => 6,
+						'modulo' => 'Reportes',
+						'permissions' => 'read',
+					],
+					[
+						'id' => 7,
+						'modulo' => 'Clientes',
+						'permissions' => 'read, write, delete',
+					],
+					[
+						'id' => 8,
+						'modulo' => 'Categorías',
+						'permissions' => 'read, write',
+					],
+				]
+			];
+
+			return view('component', [
+				'component' => 'roles-permisos',
+				'params'    => $params,
+			]);
+		}
 }

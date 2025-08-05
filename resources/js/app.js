@@ -28,6 +28,9 @@ import Home from './components/Home.vue';
 import Table from './components/Crud/Table.vue';
 import Form from './components/Crud/Form.vue';
 
+// Roles
+import RolesPermisos from './pages/RolesPermisos.vue';
+
 const app = createApp({});
 
 app.component('hello-world', HelloWorld);
@@ -54,6 +57,9 @@ app.component('home', Home);
 // CRUD
 app.component('crud-table', Table);
 app.component('crud-form', Form);
+
+// Roles
+app.component('roles-permisos', RolesPermisos);
 
 // app.component('students',Students);
 // app.component('profesores',Profesores);
