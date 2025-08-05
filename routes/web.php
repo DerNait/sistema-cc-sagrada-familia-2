@@ -35,7 +35,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/export',     [EmpleadosController::class, 'export'])->name('export');
             Route::get('{id}',        [EmpleadosController::class, 'show'])->name('show');
             Route::get('crear',       [EmpleadosController::class, 'create'])->name('create');
-            Route::post('crear',      [EmpleadosController::class, 'store'])->name('store');
+            Route::post('/',          [EmpleadosController::class, 'store'])->name('store');
             Route::get('{id}/editar', [EmpleadosController::class, 'edit'])->name('edit');
             Route::put('{id}',        [EmpleadosController::class, 'update'])->name('update');
             Route::delete('{id}',     [EmpleadosController::class, 'destroy'])->name('destroy');
@@ -48,7 +48,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/export',     [UsersController::class, 'export'])->name('export');
             Route::get('{id}',        [UsersController::class, 'show'])->name('show');
             Route::get('crear',       [UsersController::class, 'create'])->name('create');
-            Route::post('crear',      [UsersController::class, 'store'])->name('store');
+            Route::post('/',          [UsersController::class, 'store'])->name('store');
             Route::get('{id}/editar', [UsersController::class, 'edit'])->name('edit');
             Route::put('{id}',        [UsersController::class, 'update'])->name('update');
             Route::delete('{id}',     [UsersController::class, 'destroy'])->name('destroy');
@@ -60,7 +60,7 @@ Route::middleware('auth')->group(function () {
             Route::get('{id}/permisos', [RolesController::class, 'permisos'])->name('permissions');
             Route::get('{id}',          [RolesController::class, 'show'])->name('show');
             Route::get('crear',         [RolesController::class, 'create'])->name('create');
-            Route::post('crear',        [RolesController::class, 'store'])->name('store');
+            Route::post('/',            [RolesController::class, 'store'])->name('store');
             Route::get('{id}/editar',   [RolesController::class, 'edit'])->name('edit');
             Route::put('{id}',          [RolesController::class, 'update'])->name('update');
             Route::delete('{id}',       [RolesController::class, 'destroy'])->name('destroy');
@@ -71,7 +71,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/export',     [EstudiantesController::class, 'export'])->name('export');
             Route::get('{id}',        [EstudiantesController::class, 'show'])->name('show');
             Route::get('crear',       [EstudiantesController::class, 'create'])->name('create');
-            Route::post('crear',      [EstudiantesController::class, 'store'])->name('store');
+            Route::post('/',          [EstudiantesController::class, 'store'])->name('store');
             Route::get('{id}/editar', [EstudiantesController::class, 'edit'])->name('edit');
             Route::put('{id}',        [EstudiantesController::class, 'update'])->name('update');
             Route::delete('{id}',     [EstudiantesController::class, 'destroy'])->name('destroy');
@@ -82,7 +82,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/export',     [ProductosController::class, 'export'])->name('export');
             Route::get('{id}',        [ProductosController::class, 'show'])->name('show');
             Route::get('crear',       [ProductosController::class, 'create'])->name('create');
-            Route::post('crear',      [ProductosController::class, 'store'])->name('store');
+            Route::post('/',          [ProductosController::class, 'store'])->name('store');
             Route::get('{id}/editar', [ProductosController::class, 'edit'])->name('edit');
             Route::put('{id}',        [ProductosController::class, 'update'])->name('update');
             Route::delete('{id}',     [ProductosController::class, 'destroy'])->name('destroy');
@@ -93,7 +93,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/export',     [CursosController::class, 'export'])->name('export');
             Route::get('{id}',        [CursosController::class, 'show'])->name('show');
             Route::get('crear',       [CursosController::class, 'create'])->name('create');
-            Route::post('crear',      [CursosController::class, 'store'])->name('store');
+            Route::post('/',          [CursosController::class, 'store'])->name('store');
             Route::get('{id}/editar', [CursosController::class, 'edit'])->name('edit');
             Route::put('{id}',        [CursosController::class, 'update'])->name('update');
             Route::delete('{id}',     [CursosController::class, 'destroy'])->name('destroy');
@@ -104,7 +104,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/export',     [ActividadesController::class, 'export'])->name('export');
             Route::get('{id}',        [ActividadesController::class, 'show'])->name('show');
             Route::get('crear',       [ActividadesController::class, 'create'])->name('create');
-            Route::post('crear',      [ActividadesController::class, 'store'])->name('store');
+            Route::post('/',          [ActividadesController::class, 'store'])->name('store');
             Route::get('{id}/editar', [ActividadesController::class, 'edit'])->name('edit');
             Route::put('{id}',        [ActividadesController::class, 'update'])->name('update');
             Route::delete('{id}',     [ActividadesController::class, 'destroy'])->name('destroy');
