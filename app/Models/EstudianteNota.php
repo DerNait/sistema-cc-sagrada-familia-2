@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class EstudianteNota extends Model
 {
+    protected $table = 'estudiantes_notas';
+
     use HasFactory;
 
     protected $guarded = ['id'];
