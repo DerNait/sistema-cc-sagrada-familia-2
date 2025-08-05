@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Catalogs;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Crud\CrudControllerBase;
 use App\Models\Role;
+use App\Models\Module;
 
 class RolesController extends CrudControllerBase
 {
@@ -42,56 +43,35 @@ class RolesController extends CrudControllerBase
         $this->syncAbilities('usuarios');
     }
 
-		public function permisos() {
+	public function permisos(Request $request, int $rolId)
+	{
+		$rol = Role::with('permissions:id')->findOrFail($rolId);
 
-			$params = [
-				'modulos' => [
-					[
-						'id' => 1,
-						'modulo' => 'Usuarios',
-						'permissions' => 'read, write, delete',
-					],
-					[
-						'id' => 2,
-						'modulo' => 'Roles',
-						'permissions' => 'read, write',
-					],
-					[
-						'id' => 3,
-						'modulo' => 'Permisos',
-						'permissions' => 'read',
-					],
-					[
-						'id' => 4,
-						'modulo' => 'Productos',
-						'permissions' => 'read, write, delete',
-					],
-					[
-						'id' => 5,
-						'modulo' => 'Pedidos',
-						'permissions' => 'read, write',
-					],
-					[
-						'id' => 6,
-						'modulo' => 'Reportes',
-						'permissions' => 'read',
-					],
-					[
-						'id' => 7,
-						'modulo' => 'Clientes',
-						'permissions' => 'read, write, delete',
-					],
-					[
-						'id' => 8,
-						'modulo' => 'Categorías',
-						'permissions' => 'read, write',
-					],
-				]
-			];
+		$rolPermisosIds = $rol->permissions->pluck('id')->all();
 
-			return view('component', [
-				'component' => 'roles-permisos',
-				'params'    => $params,
-			]);
-		}
+		$modulos = Module::with('permissions:id,modulo_id,permiso')
+			->orderBy('modulo')
+			->get()
+			->map(function ($m) use ($rolPermisosIds) {
+				return [
+					'id'        => $m->id,
+					'modulo'    => $m->modulo,
+					'permisos'  => $m->permissions->map(function ($p) use ($rolPermisosIds) {
+						return [
+							'id'      => $p->id,
+							'nombre'  => $p->permiso,
+							'checked' => in_array($p->id, $rolPermisosIds, true),
+						];
+					}),
+				];
+			});
+
+		return view('component', [
+			'component' => 'roles-permisos',
+			'params'    => [
+				'rol'     => $rol,
+				'modulos' => $modulos,
+			],
+		]);
+	}
 }

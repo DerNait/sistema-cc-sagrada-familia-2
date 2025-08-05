@@ -35,10 +35,6 @@ class Navbar
 
             $isActive = Str::startsWith($currentRoute, $routeBase) ? 'active' : '';
 
-            \Log::info('Evaluando nodo: ' . $node->route);
-            \Log::info('Ruta actual: ' . $currentRoute);
-            \Log::info('¿Activo?: ' . $isActive);
-
             if ($hasChildren) {
                 $html .= '
                     <li class="nav-item dropdown">
