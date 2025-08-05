@@ -55,14 +55,15 @@ Route::middleware('auth')->group(function () {
         });
 
         Route::prefix('roles')->name('roles.')->group(function () {
-            Route::get('/',           [RolesController::class, 'index'])->name('index');
-            Route::get('/export',     [RolesController::class, 'export'])->name('export');
-            Route::get('{id}',        [RolesController::class, 'show'])->name('show');
-            Route::get('crear',       [RolesController::class, 'create'])->name('create');
-            Route::post('crear',      [RolesController::class, 'store'])->name('store');
-            Route::get('{id}/editar', [RolesController::class, 'edit'])->name('edit');
-            Route::put('{id}',        [RolesController::class, 'update'])->name('update');
-            Route::delete('{id}',     [RolesController::class, 'destroy'])->name('destroy');
+            Route::get('/',             [RolesController::class, 'index'])->name('index');
+            Route::get('/export',       [RolesController::class, 'export'])->name('export');
+            Route::get('{id}/permisos', [RolesController::class, 'permisos'])->name('permissions');
+            Route::get('{id}',          [RolesController::class, 'show'])->name('show');
+            Route::get('crear',         [RolesController::class, 'create'])->name('create');
+            Route::post('crear',        [RolesController::class, 'store'])->name('store');
+            Route::get('{id}/editar',   [RolesController::class, 'edit'])->name('edit');
+            Route::put('{id}',          [RolesController::class, 'update'])->name('update');
+            Route::delete('{id}',       [RolesController::class, 'destroy'])->name('destroy');
         });
     
         Route::prefix('estudiantes')->name('estudiantes.')->group(function () {
