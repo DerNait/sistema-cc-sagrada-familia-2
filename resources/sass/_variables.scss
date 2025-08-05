@@ -13,10 +13,13 @@ $asparagus: #83aa6b;
 $soft-asparagus: rgba(131, 170, 107, 0.65); 
 $softer-asparagus: rgba(131, 170, 107, 0.5); 
 $oxford-blue: #00284B;
+$yellow-greenish: #cec411;
 $white: #ffffff;
 
 $primary: $asparagus;
 $secondary: $oxford-blue;
+$warning: $yellow-greenish;
+
 $info: $white;
 
 $main-background: linear-gradient(135deg, $none 0%, $none 20%, $soft-asparagus 70%, $soft-asparagus 80%, $softer-asparagus 100%);

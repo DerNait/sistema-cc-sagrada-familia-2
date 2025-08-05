@@ -21,7 +21,7 @@ Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
 
 Auth::routes();
 
-Route::middleware('auth')->group(function () {
+Route::group(['middleware' => ['auth', 'forerunner']], function () {
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
     Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');

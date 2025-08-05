@@ -38,8 +38,8 @@ class Kernel extends HttpKernel
     /**
      * Middleware individual con nombre, como 'auth', 'ability', etc.
      */
-    protected $routeMiddleware = [
-        'auth'    => \App\Http\Middleware\Authenticate::class,
-        'ability' => \App\Http\Middleware\CheckAbility::class, // ← Aquí registras tu middleware personalizado
+    protected array $middlewareAliases = [
+        'auth'       => \App\Http\Middleware\Authenticate::class,
+        'forerunner' => \App\Http\Middleware\ForerunnerAbility::class,// ← Aquí registras tu middleware personalizado
     ];
 }

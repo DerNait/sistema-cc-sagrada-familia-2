@@ -1,6 +1,29 @@
 <?php
 
 return [
+    
+    // Acciones CRUD estándar
+    'crud' => [
+        'index'   => 'read',
+        'show'    => 'read',
+        'export'  => 'export',
+        'create'  => 'create',
+        'store'   => 'create',
+        'edit'    => 'update',
+        'update'  => 'update',
+        'destroy' => 'delete',
+    ],
+
+    // Alias por módulo (cuando el nombre NO coincide con CRUD)
+    'aliases' => [
+        'empleados' => [
+            'planilla' => 'export',     // catalogos.empleados.planilla
+        ],
+        'roles' => [
+            'permisos' => 'update',     // catalogos.roles.permisos
+        ],
+        // agrega más si sale algo especial
+    ],
 
     /*
     |--------------------------------------------------------------------------
