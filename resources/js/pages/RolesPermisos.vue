@@ -1,7 +1,7 @@
 <template>
   <div class="crud-container">
     <div class="d-flex justify-content-between p-3">
-      <h4 class="fw-semibold">Rol – Permisos</h4>
+      <h4 class="fw-semibold">{{ rol.nombre }} – Permisos</h4>
       <button 
         class="btn btn-primary" 
         @click="save"
@@ -9,10 +9,15 @@
         <i class="fas fa-floppy-disk"></i> Guardar
       </button>
     </div>
-
+    <div class="filters-container d-flex px-3 py-4 d-flex justify-content-between align-items-center">
+      <div></div>
+      <div style="max-width: 270px; flex:1">
+        <SearchBar v-model="globalSearch" />
+      </div>
+    </div>
     <div class="row mx-4 my-5">
       <div
-        v-for="mod in props.modulos"
+        v-for="mod in filteredModulos"
         :key="mod.id"
         class="col-12 col-sm-6 col-md-4 col-lg-3 mb-5"
       >
@@ -27,18 +32,27 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, computed, ref } from 'vue'
 import RoleModuleCard from '../components/RoleModuleCard.vue'
+import SearchBar from '../components/SearchBar.vue'
 
 const props = defineProps(['rol', 'modulos'])
 
-// Estructura reactiva que irá al backend
+const globalSearch = ref('')
+
 const seleccion = reactive(
   props.modulos.reduce((acc, m) => {
     m.permisos.forEach(p => { acc[p.id] = p.checked })
     return acc
   }, {})
 )
+
+const filteredModulos = computed(() => {
+  if (!globalSearch.value) return props.modulos
+  return props.modulos.filter(mod => 
+    mod.modulo.toLowerCase().includes(globalSearch.value.toLowerCase())
+  )
+})
 
 async function save () {
   const elegidos = Object.entries(seleccion)

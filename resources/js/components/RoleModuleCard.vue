@@ -1,7 +1,7 @@
 <template>
   <div class="card h-100">
     <div class="card-header">
-      <p class="fw-semibold my-2">{{ title }}</p>
+      <p class="fw-semibold my-2">{{ formatTitle(title) }}</p>
     </div>
     <div class="card-body">
       <div
@@ -27,5 +27,12 @@
 <script setup>
 const props = defineProps(['title', 'permissions'])
 const model = defineModel()
+
+function formatTitle(text) {
+  const parts = text.split('.')
+  return parts
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' - ')
+}
 </script>
 
