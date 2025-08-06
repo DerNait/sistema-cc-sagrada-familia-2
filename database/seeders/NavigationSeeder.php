@@ -20,13 +20,13 @@ class NavigationSeeder extends Seeder
             new NavModule('Dashboard','dashboard',200,'fas fa-chart-pie', null, NavModule::READ),
             new NavModule('Cursos','cursos',300,'fas fa-graduation-cap', null, NavModule::READ),
             new NavModule('Catálogos','catalogos',400,'fas fa-book', null, NavModule::READ),
-            new NavModule('Usuarios', 'usuarios', 100, 'fas fa-user', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
-            new NavModule('Roles', 'roles', 200, 'fas fa-key', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
-            new NavModule('Empleados','empleados', 300,'fas fa-user','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
-            new NavModule('Estudiantes','estudiantes', 400,'fas fa-user','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
-            new NavModule('Productos','productos', 600,'fas fa-user','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
-            new NavModule('Cursos','cursos', 700,'fas fa-user','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
-            new NavModule('Actividades', 'actividades', 800, 'fas fa-user', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Usuarios', 'catalogos.usuarios', 100, 'fas fa-user', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Roles', 'catalogos.roles', 200, 'fas fa-key', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Empleados','catalogos.empleados', 300,'fas fa-user','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Estudiantes','catalogos.estudiantes', 400,'fas fa-user','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Productos','catalogos.productos', 600,'fas fa-user','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Cursos','catalogos.cursos', 700,'fas fa-user','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Actividades', 'catalogos.actividades', 800, 'fas fa-user', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
         ]);
 
         // 3) Inserta módulos y permisos

@@ -39,12 +39,7 @@ class NavModule
             // si explícitamente me pasaron uno, lo uso
             $this->routeName = $routeName;
         } else {
-            // sino: si hay parent, lo antepongo
-            if ($parentKey) {
-                $this->routeName = "{$parentKey}.{$key}.index";
-            } else {
-                $this->routeName = "{$key}.index";
-            }
+            $this->routeName = "{$key}.index";
         }
     }
 }
