@@ -2,7 +2,7 @@
   <div class="home-container d-flex flex-column justify-content-center align-items-center min-vh-100 px-3">
     <div class="text-center mb-5">
       <h1 class="fw-bold">
-        ¡Bienvenido, <span class="text-success">Nombre</span>!
+        ¡Bienvenido, <span class="text-success">{{ usuarioNombre }}</span>!
       </h1>
       <h2 class="text-muted">Selecciona una opción para comenzar.</h2>
     </div>
@@ -16,8 +16,9 @@
       >
         <CardModulo
           v-for="(modulo, index) in fila"
-          :key="modulo.title"
-          :title="modulo.title"
+          :key="modulo.id"
+          :title="modulo.modulo"
+          :ruta="generarRuta(modulo.modulo)"
           :colorClass="getColorClass(filaIndex * 3 + index)"
         />
       </div>
@@ -29,12 +30,19 @@
 import { computed } from 'vue'
 import CardModulo from '@/components/CardModulo.vue'
 
-const modulos = [
-  { title: 'Dashboard' },
-  { title: 'Catálogos' },
-  { title: 'Cursos' },
-  { title: 'Secciones' }
-]
+const props = defineProps({
+  modulos: {
+    type: Array,
+    required: true
+  },
+  usuario: {
+    type: Object,
+    required: true
+  }
+})
+
+const modulos = computed(() => props.modulos ?? [])
+const usuarioNombre = props.usuario?.nombre ?? 'Usuario'
 
 // Agrupar en filas de 3
 const chunkArray = (arr, size) => {
@@ -45,10 +53,17 @@ const chunkArray = (arr, size) => {
   return chunked
 }
 
-const chunkedModulos = computed(() => chunkArray(modulos, 3))
+const chunkedModulos = computed(() => chunkArray(modulos.value, 3))
 
 const getColorClass = (index) => {
-  return `custom-green-${index}`
+  const classes = ['custom-green-0', 'custom-green-1', 'custom-green-2', 'custom-green-3']
+  return classes[index % classes.length]
+}
+
+// Función para generar una ruta sencilla a partir del nombre del módulo
+const generarRuta = (moduloNombre) => {
+  // Convertimos el nombre a minúsculas y reemplazamos espacios por guiones
+  return '/modulos/' + moduloNombre.toLowerCase().replace(/\s+/g, '-')
 }
 </script>
 

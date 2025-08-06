@@ -3,83 +3,45 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\ModulePermission;
+use App\Models\Module;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $totalCalificado = 90;
-        $totalCurso = 100;
+        $user = Auth::user();
+        $rolId = $user->rol_id;
 
-        // Opciones para la gráfica de Total Calificado
-        $chartTotalCalificado = [
-            'chart' => [
-                'type' => 'pie',
-                'backgroundColor' => 'transparent',
-            ],
-            'title' => ['text' => 'Total calificado'],
-            'plotOptions' => [
-                'pie' => [
-                    'innerSize' => '80%',
-                    'dataLabels' => ['enabled' => false]
-                ]
-            ],
-            'tooltip' => ['enabled' => false],
-            'series' => [[
-                'name' => 'Calificación',
-                'data' => [
-                    ['name' => 'Calificado', 'y' => $totalCalificado, 'color' => '#00284B'],
-                    ['name' => 'Restante', 'y' => 100 - $totalCalificado, 'color' => '#ffffff']
-                ]
-            ]]
-        ];
+        $modulos = collect();
 
-        // Opciones para la gráfica de Total del curso
-        $chartTotalCurso = [
-            'chart' => [
-                'type' => 'pie',
-                'backgroundColor' => 'transparent',
-            ],
-            'title' => ['text' => 'Total del curso'],
-            'plotOptions' => [
-                'pie' => [
-                    'innerSize' => '80%',
-                    'dataLabels' => ['enabled' => false]
-                ]
-            ],
-            'tooltip' => ['enabled' => false],
-            'series' => [[
-                'name' => 'Curso',
-                'data' => [
-                    ['name' => 'Completado', 'y' => 66, 'color' => '#00284B'],
-                    ['name' => 'Restante', 'y' => 67 - 66, 'color' => '#ffffff']
-                ]
-            ]]
-        ];
+        if ($rolId === 1) {
+            // Admin ve todos los módulos
+            $modulos = Module::orderBy('modulo')->get(['id', 'modulo']);
+        } else {
+            // Los módulos permitidos para el rol del usuario
+            $modulos = ModulePermission::whereHas('roles', function ($query) use ($rolId) {
+                $query->where('rol_id', $rolId);
+            })
+            ->with('module') // cargamos módulo relacionado
+            ->get()
+            ->pluck('module')
+            ->unique('id')
+            ->sortBy('modulo')
+            ->values();
+        }
 
         $params = [
-            'curso_name' => 'Matemáticas',
-            'actividades' => [
-                [
-                    'asignacion' => ['nombre' => 'Tarea 1', 'total' => 100],
-                    'fecha_inicio' => '2025-08-01',
-                    'fecha_fin' => '2025-08-10',
-                    'comentario' => 'Completar ejercicios',
-                    'nota' => 90
-                ]
+            'modulos' => $modulos,
+            'usuario' => [
+                'nombre' => $user->name,
             ],
-            'cursos' => [],
-            'total_calificado' => $chartTotalCalificado,
-            'total_del_curso' => $chartTotalCurso,
-            'center_labels' => [
-                'total_calificado' => '90/100',
-                'total_del_curso'  => '66/67'
-            ]
         ];
 
-        return view('component',[
-            'component' => 'estudiante-curso',
-            'params' => $params,
+        return view('component', [
+            'component' => 'Home',
+            'params'    => $params,
         ]);
     }
 }
