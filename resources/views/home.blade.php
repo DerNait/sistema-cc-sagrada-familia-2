@@ -10,7 +10,7 @@
 </head>
 <body>
     <div id="app">
-        <home></home>
+        <home :params='@json($params)'></home>
     </div>
 </body>
 </html>
