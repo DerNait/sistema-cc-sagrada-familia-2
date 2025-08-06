@@ -43,6 +43,7 @@ class ActividadesController extends CrudControllerBase
             ->label('Actualizado en')
             ->type('datetime')
             ->readonly();
-
+        
+        $this->syncAbilities('actividades');
     }
 }
