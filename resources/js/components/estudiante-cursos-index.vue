@@ -3,13 +3,16 @@
     <h2 class="mb-4 text-center fw-normal">Selecciona el <span class="fw-semibold text-primary">curso</span> que deseas ver</h2>
 
     <Filtro>
-      <div class="position-relative w-100">
-        <input
+      <div class="input-group">
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Buscar curso..." 
           v-model="busqueda"
-          class="form-control ps-5"
-          placeholder="Buscar curso..."
         />
-        <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+        <span class="input-group-text">
+          <i class="fas fa-search"></i>
+        </span>
       </div>
     </Filtro>
 
