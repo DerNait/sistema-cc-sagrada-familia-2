@@ -1,15 +1,12 @@
 <template>
-  <div class="col-4 d-flex justify-content-center card-column">
-    <router-link
-      :to="ruta"
-      class="text-decoration-none w-100"
-    >
+  <div class="col-4 d-flex justify-content-center card-column mb-4">
+    <a :href="ruta" class="text-decoration-none w-100">
       <div
         :class="`text-center ${colorClass} shadow d-flex align-items-center justify-content-center card-box`"
       >
         <p class="fw-semibold fs-5 m-0 text-white">{{ title }}</p>
       </div>
-    </router-link>
+    </a>
   </div>
 </template>
 
