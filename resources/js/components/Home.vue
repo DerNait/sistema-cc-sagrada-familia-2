@@ -17,7 +17,7 @@
         <CardModulo
           v-for="(modulo, index) in fila"
           :key="modulo.id"
-          :title="modulo.modulo"
+          :title="capitalizeFirstLetter(modulo.modulo)"
           :ruta="generarRuta(modulo.modulo)"
           :colorClass="getColorClass(filaIndex * 3 + index)"
         />
@@ -62,9 +62,27 @@ const getColorClass = (index) => {
 
 // Función para generar una ruta sencilla a partir del nombre del módulo
 const generarRuta = (moduloNombre) => {
-  // Convertimos el nombre a minúsculas y reemplazamos espacios por guiones
-  return '/modulos/' + moduloNombre.toLowerCase().replace(/\s+/g, '-')
+  const rutas = {
+    'empleados': '/catalogos/empleados',
+    'usuarios': '/catalogos/usuarios',
+    'roles': '/catalogos/roles',
+    'estudiantes': '/catalogos/estudiantes',
+    'productos': '/productos',
+    'cursos': '/cursos',
+    'actividades': '/catalogos/actividades',
+    'home': '/',
+    'notas': '/notas',
+    'dashboard': '/dashboard'
+  }
+
+  return rutas[moduloNombre] ?? '/modulo-no-definido'
 }
+
+const capitalizeFirstLetter = (string) => {
+  if (!string) return ''
+  return string.charAt(0).toUpperCase() + string.slice(1)
+}
+
 </script>
 
 <style scoped>
