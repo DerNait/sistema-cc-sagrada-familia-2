@@ -312,8 +312,14 @@ class MassiveDataSeeder extends Seeder
             ['id' => 4, 'ajuste' => 'Deducción'],
         ]);
 
+        DB::table('tipo_pagos')->insert([
+            ['nombre' => 'Efectivo'], ['nombre' => 'Tarjeta'],
+            ['nombre' => 'Transferencia'], ['nombre' => 'Cheque'],
+            ['nombre' => 'Depósito'],
+        ]);
+
         /* =============================================================
-         * 12. Pagos empleados (para cada empleado)
+         * 13. Pagos empleados (para cada empleado)
          * =========================================================== */
         foreach ($employeeIds as $empId) {
             foreach (range(1, $faker->numberBetween(3, 12)) as $_) {
@@ -345,7 +351,7 @@ class MassiveDataSeeder extends Seeder
         }
 
         /* =============================================================
-         * 13. Productos, bolsas, pedidos, etc.  (sin cambios lógicos ➜ FK usuario_id)
+         * 14. Productos, bolsas, pedidos, etc.  (sin cambios lógicos ➜ FK usuario_id)
          *     Solo asegúrate de que vendedor_id use $employeeIds cuando elija
          * =========================================================== */
         // — tipo_productos —
@@ -416,7 +422,7 @@ class MassiveDataSeeder extends Seeder
                 DB::table('pedido_detalles')->insert([
                     'pedido_id'   => $pedidoId,
                     'producto_id' => $prodId,
-                    'bolsa_id'    => $faker->optional(0.7)->randomElement($bagIds),
+                    'bolsa_id'    => $faker->randomElement($bagIds),
                     'created_at'  => $date,
                     'updated_at'  => now(),
                 ]);
@@ -432,18 +438,24 @@ class MassiveDataSeeder extends Seeder
         }
 
         /* =============================================================
-         * 14. estudiante_pagos con FK correcta
+         * 15. estudiante_pagos con FK correcta
          * =========================================================== */
         foreach ($studentIds as $estId) {
             $gradoId = DB::table('seccion_estudiantes')
                 ->join('secciones', 'seccion_estudiantes.seccion_id', '=', 'secciones.id')
                 ->where('seccion_estudiantes.estudiante_id', $estId)
                 ->value('secciones.grado_id');
+
+            $gradoPrecioId = DB::table('grado_precio')
+                ->where('grado_id', $gradoId)
+                ->value('id');
+
             foreach (range(1, $faker->numberBetween(5, 12)) as $_) {
                 $months = $faker->numberBetween(1, 6);
                 $start  = $faker->dateTimeBetween('-4 years');
+
                 DB::table('estudiante_pagos')->insert([
-                    'grado_precio_id' => $gradoId,
+                    'grado_precio_id' => $gradoPrecioId,
                     'estudiante_id'   => $estId,
                     'tipo_pago_id'    => $faker->numberBetween(1, 5),
                     'monto_pagado'    => $faker->randomFloat(2, 300, 1500),
@@ -456,23 +468,6 @@ class MassiveDataSeeder extends Seeder
                 ]);
             }
         }
-
-        /* =============================================================
-         * 15. Tablas catálogo simples
-         * =========================================================== */
-        DB::table('tipo_pagos')->insert([
-            ['nombre' => 'Efectivo'], ['nombre' => 'Tarjeta'],
-            ['nombre' => 'Transferencia'], ['nombre' => 'Cheque'],
-            ['nombre' => 'Depósito'],
-        ]);
-        DB::table('tipo_estados')->insert([
-            ['tipo' => 'Pendiente'], ['tipo' => 'Completado'], ['tipo' => 'Cancelado'],
-            ['tipo' => 'Reembolsado'], ['tipo' => 'En proceso'],
-        ]);
-        DB::table('tipo_ajustes')->insert([
-            ['ajuste' => 'Bonificación'], ['ajuste' => 'Descuento'],
-            ['ajuste' => 'Incentivo'], ['ajuste' => 'Deducción'],
-        ]);
 
         /* =============================================================
          * 16. Seeders secundarios (menus, permisos…)
