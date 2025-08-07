@@ -17,4 +17,9 @@ class EstudianteNota extends Model
     {
         return $this->belongsTo(Actividad::class);
     }
+
+    public function seccionEstudiante()
+    {
+        return $this->belongsTo(SeccionEstudiante::class);
+    }
 }

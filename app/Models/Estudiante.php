@@ -28,6 +28,11 @@ class Estudiante extends Model
     
     public function secciones()
     {
-        return $this->belongsToMany(Seccion::class, 'seccion_estudiante', 'estudiante_id', 'seccion_id');
+        return $this->belongsToMany(
+            Seccion::class,
+            'seccion_estudiantes',   // ← plural
+            'estudiante_id',
+            'seccion_id'
+        );
     }
 }

@@ -15,8 +15,8 @@
       <!-- Columna personalizada para Fechas -->
       <template #cell-fechas="{ row }">
         <div>
-          Del: <span class="text-primary">{{ row.fecha_inicio }}</span>  <br>
-          Al: <span class="text-primary">{{ row.fecha_fin }}</span> 
+          Del: <span class="text-primary" v-if="row.fecha_inicio">{{ row.fecha_inicio }}</span><span v-else>-</span>  <br>
+          Al: <span class="text-primary" v-if="row.fecha_fin">{{ row.fecha_fin }}</span><span v-else>-</span> 
         </div>
       </template>
       
@@ -33,14 +33,14 @@
           v-if="total_calificado"
           :options="total_calificado"
         />
-        <span class="chart-center-text mt-3">{{ center_labels.total_calificado }}</span>
+        <span v-if="center_labels" class="chart-center-text mt-3">{{ center_labels.total_calificado }}</span>
       </div>
       <div class="chart-container">
         <Chart 
           v-if="total_del_curso"
           :options="total_del_curso"
         />
-        <span class="chart-center-text mt-3">{{ center_labels.total_del_curso }}</span>
+        <span v-if="center_labels" class="chart-center-text mt-3">{{ center_labels.total_del_curso }}</span>
       </div>
     </div>
   </div>

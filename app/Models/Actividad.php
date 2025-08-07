@@ -13,7 +13,18 @@ class Actividad extends Model
         return $this->belongsTo(GradoCurso::class);
     }
 
-    // Actividad.php
+    public function grado()
+    {
+        return $this->hasOneThrough(
+            Grado::class,
+            GradoCurso::class,
+            'id',          // local key en GradoCurso
+            'id',          // local key en Grado
+            'grado_curso_id',
+            'grado_id'
+        );
+    }
+
     public function notas()
     {
         return $this->hasMany(EstudianteNota::class, 'actividad_id');

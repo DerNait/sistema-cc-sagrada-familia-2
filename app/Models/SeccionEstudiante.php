@@ -10,4 +10,9 @@ class SeccionEstudiante extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+
+    public function seccion()
+    {
+        return $this->belongsTo(Seccion::class);
+    }
 }

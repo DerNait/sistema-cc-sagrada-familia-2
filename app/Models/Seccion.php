@@ -23,7 +23,13 @@ class Seccion extends Model
 
     public function estudiantes()
     {
-        return $this->belongsToMany(Estudiante::class, 'seccion_estudiante');
+        // ⚠️ especifica la tabla pivote + claves:
+        return $this->belongsToMany(
+            Estudiante::class,
+            'seccion_estudiantes',   // ← plural
+            'seccion_id',
+            'estudiante_id'
+        );
     }
 
         public function cursos()
