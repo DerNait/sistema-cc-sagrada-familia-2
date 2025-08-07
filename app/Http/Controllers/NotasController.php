@@ -50,7 +50,7 @@ class NotasController extends Controller
      * Actualiza una nota existente
      */
     public function update(Request $request, $id)
-    {
+    {        
         $nota = EstudianteNota::findOrFail($id);
 
         $rules = [

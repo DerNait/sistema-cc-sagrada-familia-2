@@ -102,34 +102,42 @@ class CursoController extends Controller
 
         /* -------- Actividades del curso y grado del alumno -------- */
         $actividades = Actividad::whereHas('gradoCurso', function ($q) use ($cursoId, $gradoId) {
-                                $q->where('curso_id', $cursoId)
-                                ->where('grado_id', $gradoId);
-                            })
-                            ->with(['notas' => fn ($q) =>
-                                $q->where('seccion_estudiante_id', $seccionEstId)
-                            ])
-                            ->select('id', 'nombre')          // ya no pedimos total/fechas
-                            ->orderBy('nombre')
-                            ->get()
-                            ->map(function ($act) {
-                                $nota = $act->notas->first();      // puede ser null
+                        $q->where('curso_id', $cursoId)
+                          ->where('grado_id', $gradoId);
+                    })
+                    ->with(['notas' => fn ($q) =>
+                        $q->where('seccion_estudiante_id', $seccionEstId)
+                    ])
+                    ->select('id', 'nombre', 'total', 'fecha_inicio', 'fecha_fin')
+                    ->orderBy('nombre')
+                    ->get()
+                    ->map(function ($act) {
+                        $nota = $act->notas->first();          // puede ser null
 
-                                return [
-                                    'id'         => $act->id,
-                                    'nombre'     => $act->nombre,
-                                    'comentario' => optional($nota)->comentario,  // ← viene de la nota
-                                    'nota'       => optional($nota)->nota,
-                                    // objeto usado por los slots Vue
-                                    'asignacion' => [
-                                        'nombre' => $act->nombre,
-                                        'total'  => 100,            // fijo a 100 hasta que migres
-                                    ],
-                                ];
-                            });
+                        return [
+                            'id'            => $act->id,
+                            'nombre'        => $act->nombre,
+                            'comentario'    => optional($nota)->comentario,
+                            'nota'          => optional($nota)->nota,
+                            // ← dejamos los strings tal cual; tu Vue ya los muestra
+                            'fecha_inicio'  => $act->fecha_inicio,
+                            'fecha_fin'     => $act->fecha_fin,
+                            'asignacion'    => [
+                                'nombre' => $act->nombre,
+                                'total'  => $act->total ?? 100,   // si llega null, usa 100
+                            ],
+                        ];
+                    });
 
-        /* --------- Datos para los gráficos circulares --------- */
-        $totalPosible   = $actividades->count() * 100;           // 100 por actividad
-        $totalObtenido  = $actividades->sum('nota');
+        /* --------- Métricas para los charts --------- */
+        $totalObtenido = $actividades->sum('nota');
+
+        // Solo actividades que tienen nota (calificadas)
+        $actividadesCalificadas = $actividades->filter(fn($a) => !is_null($a['nota']));
+
+        // Suma total solo de actividades calificadas
+        $totalPosible = $actividadesCalificadas->sum(fn($a) => $a['asignacion']['total']);
+
         $porcCompletado = $totalPosible ? round(($totalObtenido / $totalPosible) * 100) : 0;
 
         /* --------- Configuración Highcharts --------- */
@@ -140,8 +148,8 @@ class CursoController extends Controller
             'tooltip'      => ['enabled' => false],
             'series'       => [[
                 'data' => [
-                    ['name' => 'Calificado', 'y' => $totalObtenido,               'color' => '#00284B'],
-                    ['name' => 'Restante',   'y' => $totalPosible - $totalObtenido,'color' => '#ffffff'],
+                    ['name' => 'Calificado', 'y' => $totalObtenido,                   'color' => '#00284B'],
+                    ['name' => 'Restante',   'y' => $totalPosible - $totalObtenido,   'color' => '#ffffff'],
                 ],
             ]],
         ];
