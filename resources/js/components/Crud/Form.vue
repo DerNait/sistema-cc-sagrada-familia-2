@@ -10,88 +10,91 @@
 
     <div class="flex-grow-1 overflow-auto pe-1">
       <div v-for="c in Object.values(columns)" :key="c.field" class="mb-3">
-        <label class="form-label">{{ c.label }}</label>
-
-        <select 
-          v-if="c.type==='relation' && c.options && !c.isMultiRelation"
-          v-model="form[c.field]"
-          :disabled="props.readonly || !c.editable"
-          class="form-select"
-        >
-          <option value="">-- Selecciona --</option>
-          <option v-for="(label,val) in c.options" :key="val" :value="val">
-            {{ label }}
-          </option>
-        </select>
-
-        <div v-else-if="c.type==='relation' && c.isMultiRelation">
-          <div v-for="(val, idx) in form[c.field]" :key="idx" class="d-flex gap-2 mb-2">
-            <select 
-              v-model="form[c.field][idx]" 
-              class="form-select"
-            >
-              <option value="">-- Selecciona --</option>
-              <option 
-                v-for="(label,id) in filteredOptions(c.options, idx, form[c.field])" 
-                :key="id" 
-                :value="id"
+        <div v-if="(!props.readonly && c.editable) || props.readonly">
+          <label class="form-label">{{ c.label }}</label>
+  
+          <select 
+            v-if="c.type==='relation' && c.options && !c.isMultiRelation"
+            v-model="form[c.field]"
+            :disabled="props.readonly || !c.editable"
+            class="form-select"
+          >
+            <option value="">-- Selecciona --</option>
+            <option v-for="(label,val) in c.options" :key="val" :value="val">
+              {{ label }}
+            </option>
+          </select>
+  
+          <div v-else-if="c.type==='relation' && c.isMultiRelation">
+            <div v-for="(val, idx) in form[c.field]" :key="idx" class="d-flex gap-2 mb-2">
+              <select 
+                v-model="form[c.field][idx]" 
+                class="form-select"
+                :disabled="props.readonly || !c.editable"
               >
-                {{ label }}
-              </option>
-            </select>
-            <button type="button" class="btn btn-outline-danger" @click="removeRelation(c.field, idx)">
-              <i class="fa fa-trash"></i>
+                <option value="">-- Selecciona --</option>
+                <option 
+                  v-for="(label,id) in filteredOptions(c.options, idx, form[c.field])" 
+                  :key="id" 
+                  :value="id"
+                >
+                  {{ label }}
+                </option>
+              </select>
+              <button v-if="!props.readonly" type="button" class="btn btn-outline-danger" @click="removeRelation(c.field, idx)">
+                <i class="fa fa-trash"></i>
+              </button>
+            </div>
+            <button v-if="!props.readonly" type="button" class="btn btn-sm btn-primary" @click="addRelation(c.field)">
+              <i class="fa fa-plus"></i> Agregar {{ c.label }}
             </button>
           </div>
-          <button type="button" class="btn btn-sm btn-primary" @click="addRelation(c.field)">
-            <i class="fa fa-plus"></i> Agregar {{ c.label }}
-          </button>
+  
+          <template v-else-if="c.type === 'password'">
+            <!-- Contraseña -->
+            <div class="input-group mb-2">
+              <input
+                :type="showPass ? 'text' : 'password'"
+                v-model="form[c.field]"
+                class="form-control"
+                :readonly="props.readonly || !c.editable"
+              />
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                @click="showPass = !showPass"
+              >
+                <i :class="showPass ? 'fa fa-eye-slash' : 'fa fa-eye'" />
+              </button>
+            </div>
+  
+            <!-- Confirmar contraseña (solo en modo edición / creación) -->
+            <div v-if="!props.readonly" class="input-group">
+              <input
+                :type="showPass ? 'text' : 'password'"
+                v-model="form.password_confirmation"
+                class="form-control"
+                placeholder="Confirmar contraseña"
+              />
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                @click="showPass = !showPass"
+              >
+                <i :class="showPass ? 'fa fa-eye-slash' : 'fa fa-eye'" />
+              </button>
+            </div>
+          </template>
+          
+          <input 
+            v-else
+            :type="inputType(c.type)"
+            v-model="form[c.field]"
+            class="form-control"
+            :readonly="props.readonly || !c.editable" 
+          />
         </div>
-
-        <template v-else-if="c.type === 'password'">
-          <!-- Contraseña -->
-          <div class="input-group mb-2">
-            <input
-              :type="showPass ? 'text' : 'password'"
-              v-model="form[c.field]"
-              class="form-control"
-              :readonly="props.readonly || !c.editable"
-            />
-            <button
-              type="button"
-              class="btn btn-outline-secondary"
-              @click="showPass = !showPass"
-            >
-              <i :class="showPass ? 'fa fa-eye-slash' : 'fa fa-eye'" />
-            </button>
-          </div>
-
-          <!-- Confirmar contraseña (solo en modo edición / creación) -->
-          <div v-if="!props.readonly" class="input-group">
-            <input
-              :type="showPass ? 'text' : 'password'"
-              v-model="form.password_confirmation"
-              class="form-control"
-              placeholder="Confirmar contraseña"
-            />
-            <button
-              type="button"
-              class="btn btn-outline-secondary"
-              @click="showPass = !showPass"
-            >
-              <i :class="showPass ? 'fa fa-eye-slash' : 'fa fa-eye'" />
-            </button>
-          </div>
-        </template>
-
-        <input 
-          v-else
-          :type="inputType(c.type)"
-          v-model="form[c.field]"
-          class="form-control"
-          :readonly="props.readonly || !c.editable" 
-        />
-      </div>
+        </div>
     </div>
 
     <div class="mt-4 d-flex gap-2">
@@ -185,9 +188,11 @@ async function handleSubmit() {
 }
 
 const entity = computed(() => {
-  const seg = window.location.pathname.split('/')[1] || '';
-  return seg.charAt(0).toUpperCase() + seg.slice(1);
+  const segments = window.location.pathname.split('/').filter(Boolean);
+  const lastSegment = segments[segments.length - 1] || '';
+  return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
 });
+
 </script>
 
 <style scoped>
