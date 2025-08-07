@@ -1,9 +1,13 @@
 <template>
   <div class="center-container">
     <h3 class="p-3 fw-bold m-0">{{ curso_name }}</h3>
+
+    <!-- Filtros -->
+    <Filters v-model:filtros="filtros" />
+
     <SortableTable 
       :columns="columns"
-      :rows="actividades"
+      :rows="actividadesFiltradas"
     >
       <!-- Columna personalizada para la Nota -->
       <template #cell-nota="{ row }">
@@ -27,6 +31,8 @@
         </div>
       </template>
     </SortableTable>
+
+    <!-- Gráficas -->
     <div class="d-flex justify-content-center align-items-center charts-wrapper" style="padding: 5rem 10rem;">
       <div class="chart-container">
         <Chart 
@@ -47,11 +53,36 @@
 </template>
 
 <script setup>
+import { ref, computed } from 'vue';
 import SortableTable from '../components/SortableTable.vue';
-import { Chart } from 'highcharts-vue'
+import Filters from '../components/Filters.vue';
+import { Chart } from 'highcharts-vue';
 
 const props = defineProps(['curso_name', 'actividades', 'cursos', 
   'total_calificado', 'total_del_curso', 'center_labels']);
+
+const filtros = ref({
+  nombre: '',
+  fecha_inicio: '',
+  fecha_fin: ''
+});
+
+const actividadesFiltradas = computed(() => {
+  return props.actividades.filter((a) => {
+    const nombre = a.asignacion?.nombre?.toLowerCase() || '';
+    const filtroNombre = filtros.value.nombre.toLowerCase();
+
+    const nombreCoincide = nombre.includes(filtroNombre);
+    const desde = filtros.value.fecha_inicio;
+    const hasta = filtros.value.fecha_fin;
+
+    const enRango =
+      (!desde || a.fecha_inicio >= desde) &&
+      (!hasta || a.fecha_fin <= hasta);
+
+    return nombreCoincide && enRango;
+  });
+});
 
 const columns = {
   nombre: {
@@ -61,7 +92,7 @@ const columns = {
   },
   fechas: {
     label: 'Fechas',
-    field: 'fechas', // usamos slot
+    field: 'fechas',
     visible: true
   },
   comentario: {
