@@ -1,13 +1,13 @@
-@extends('layouts/app')
+@extends('layouts.app')
 
 @section('content')
     <{{ $component }}
         @if(isset($params))
             @foreach($params as $param => $val)
                 @if(is_object($val) || is_array($val))
-                    :{{$param}} = "{{ json_encode($val) }}"
+                    :{{ $param }}='@json($val)'
                 @else
-                    {{$param}} = "{{$val}}"
+                    {{ $param }}="{{ $val }}"
                 @endif
             @endforeach
         @endif

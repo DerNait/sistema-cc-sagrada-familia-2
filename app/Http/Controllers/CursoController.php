@@ -86,7 +86,7 @@ class CursoController extends Controller
             ];
 
             return view('component', [
-                'component' => 'docente-curso-detalle',
+                'component' => 'estudiante-cursos-detalle',
                 'params'    => $params,
             ]);
         }
