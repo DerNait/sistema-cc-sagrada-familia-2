@@ -8,30 +8,34 @@ class Forerunner
 {
     public static function allows(string $ability): bool
     {
-        if (!Auth::check()) return false;
+        if (!\Auth::check()) return false;
         if (self::isRoot()) return true;
 
-        [$moduleKey, $permKey] = explode('.', $ability);
+        // cortar por el ÚLTIMO punto: modulo puede llevar puntos
+        $pos = strrpos($ability, '.');
+        if ($pos === false) return false;
 
-        $moduleId = Module::where('modulo', $moduleKey)->value('id');
+        $moduleKey = substr($ability, 0, $pos);        // p.ej. 'catalogos.secciones'
+        $permKey   = substr($ability, $pos + 1);       // p.ej. 'read'
+
+        $moduleId = \App\Models\Module::where('modulo', $moduleKey)->value('id');
         if (!$moduleId) return false;
 
-        $permissionId = ModulePermission::where('modulo_id', $moduleId)
-                                        ->where('permiso', $permKey)
-                                        ->value('id');
+        $permissionId = \App\Models\ModulePermission::where('modulo_id', $moduleId)
+                        ->where('permiso', $permKey)
+                        ->value('id');
         if (!$permissionId) return false;
 
-        $rolId = Auth::user()->rol_id;        // ← aquí
+        $rolId = \Auth::user()->rol_id;
         if (!$rolId) return false;
 
-        return RoleModulePermission::where('rol_id', $rolId)
-                                   ->where('modulo_permiso_id', $permissionId)
-                                   ->exists();
+        return \App\Models\RoleModulePermission::where('rol_id', $rolId)
+                ->where('modulo_permiso_id', $permissionId)
+                ->exists();
     }
-
     public static function crudMatrix(string $module): array
     {
-        return collect(['create','read','update','delete','export'])
+        return collect(['create','read','update','delete','export', 'randomize'])
             ->mapWithKeys(fn($p)=>[$p=>self::allows("$module.$p")])
             ->toArray();
     }

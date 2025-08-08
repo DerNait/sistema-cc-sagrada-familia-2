@@ -26,7 +26,8 @@ class NavigationSeeder extends Seeder
             new NavModule('Estudiantes','catalogos.estudiantes', 400,'fas fa-user','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
             new NavModule('Productos','catalogos.productos', 600,'fas fa-user','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
             new NavModule('Cursos','catalogos.cursos', 700,'fas fa-user','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
-            new NavModule('Actividades', 'catalogos.actividades', 800, 'fas fa-user', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Secciones','catalogos.secciones', 800,'fas fa-user','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT, NavModule::RANDOMIZE)),
+            new NavModule('Actividades', 'catalogos.actividades', 900, 'fas fa-user', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
         ]);
 
         // 3) Inserta módulos y permisos
