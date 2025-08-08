@@ -84,7 +84,7 @@ class UsersController extends CrudControllerBase
              ->readonly()
              ->hide();
 
-        $this->syncAbilities('usuarios');
+        $this->syncAbilities('catalogos.usuarios');
     }
 
     public function store(Request $request)

@@ -57,7 +57,7 @@ class ProductosController extends CrudControllerBase
             ->type('datetime')
             ->readonly();
 
-        $this->syncAbilities('productos');
+        $this->syncAbilities('catalogos.productos');
     }
 }
 
