@@ -24,9 +24,18 @@ Auth::routes();
 Route::group(['middleware' => ['auth', 'forerunner']], function () {
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
-    Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
-    Route::get('/cursos/{curso}', [CursoController::class, 'show'])->name('cursos.show');
-    Route::resource('/notas', NotasController::class)->only(['store', 'update']);
+
+    Route::prefix('cursos')->name('cursos.')->group(function () {
+        Route::get('/',        [CursoController::class, 'index'])->name('index');
+        Route::get('/{curso}', [CursoController::class, 'show'])->name('show');
+
+        Route::resource('{curso}/notas', NotasController::class)->only(['store', 'update'])
+        ->names([
+            'store'  => 'notas.store',
+            'update' => 'notas.update',
+        ]);
+    });
+
 
     Route::post('/catalogos/roles/{role}/permisos', [RoleModulePermissionController::class, 'update'])->name('roles.permisos.update');
 

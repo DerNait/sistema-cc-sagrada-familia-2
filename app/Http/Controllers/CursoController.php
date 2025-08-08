@@ -165,8 +165,9 @@ class CursoController extends Controller
 
                 return [
                     'estudiante_id'          => (int) $estId,
-                    'seccion_estudiante_id'  => $seId,
                     'estudiante_nombre'      => $info['nombre'] ?? '',
+                    'seccion_estudiante_id'  => $seId,
+                    'id'                     => $n->id ?? null,
                     'nota'                   => $n->nota ?? null,
                     'comentario'             => $n->comentario ?? null,
                     'has_comentario'         => filled($n?->comentario),
@@ -270,7 +271,7 @@ class CursoController extends Controller
 
         $chartTotalCurso = [
             'chart'        => ['type' => 'pie', 'backgroundColor' => 'transparent'],
-            'title'        => ['text' => 'Avance del curso'],
+            'title'        => ['text' => 'Promedio del curso'],
             'plotOptions'  => ['pie' => ['innerSize' => '80%', 'dataLabels' => ['enabled' => false]]],
             'tooltip'      => ['enabled' => false],
             'series'       => [[
