@@ -6,6 +6,7 @@ class NavModule
     public const CRUD  = ['create', 'read', 'update', 'delete'];
     public const READ  = ['read'];
     public const EXPORT  = ['read', 'export'];
+    public const RANDOMIZE  = ['randomize'];
     public const NONE  = [];
 
     public string  $label;
@@ -36,7 +37,7 @@ class NavModule
         $this->menuAction = $menuAction;
 
         if ($routeName) {
-            // si explícitamente me pasaron uno, lo uso
+            // si explÃ­citamente me pasaron uno, lo uso
             $this->routeName = $routeName;
         } else {
             $this->routeName = "{$key}.index";
