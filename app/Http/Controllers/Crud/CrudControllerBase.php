@@ -23,6 +23,9 @@ abstract class CrudControllerBase extends Controller
     /**  Acciones extra por fila */
     protected array $customActions = [];
 
+    /**  Acciones globales del módulo (no por fila) */
+    protected array $globalActions = []; 
+
     /* ===============================================================
      *  API pública que la clase hija DEBE implementar / llamar
      * ============================================================= */
@@ -48,6 +51,13 @@ abstract class CrudControllerBase extends Controller
     {
         return $this->customActions[$name] =
             $this->customActions[$name] ?? new ActionConfigRow($name);
+    }
+
+    /** Registrar acciones globales (misma API fluida que ActionConfigRow) */
+    protected function globalAction(string $name): GlobalActionConfig
+    {
+        return $this->globalActions[$name] =
+            $this->globalActions[$name] ?? new GlobalActionConfig($name);
     }
 
     /* ===============================================================
@@ -145,11 +155,12 @@ abstract class CrudControllerBase extends Controller
             
         // 6) Enviamos todo a la vista
         $params = [
-            'data'          => $data,
-            'columns'       => $this->columns,
-            'abilities'     => $this->abilities,
-            'custom_actions' => array_values($this->customActions), 
-            'filters'       => $request->only(
+            'data'           => $data,
+            'columns'        => $this->columns,
+            'abilities'      => $this->abilities,
+            'custom_actions' => array_values($this->customActions),
+            'global_actions' => array_values($this->globalActions), 
+            'filters'        => $request->only(
                 array_filter($all, fn($f) => $this->columns[$f]->filterable)
             ),
         ];
@@ -439,4 +450,47 @@ class ActionConfigRow
     public function btn(string $cls): self   { $this->btnClass = $cls;return $this; }
     public function url(string $u): self     { $this->url      = $u;  return $this; }
     public function ability(string $a): self { $this->ability  = $a;  return $this; }
+}
+
+class GlobalActionConfig
+{
+    public string  $name;
+    public string  $label    = '';
+    public string  $icon     = 'fa-asterisk';
+    public string  $btnClass = 'btn-outline-secondary';
+
+    public ?string $url = null;
+    public ?string $ability = null;
+
+    public string $method = 'GET';              // GET | POST | PUT | PATCH | DELETE
+    public string $confirmMode = 'none';        // none | alert | confirm
+    public string $confirmText = '';
+    public array  $payload = [];                // datos extra para requests no-GET
+
+    public function __construct(string $name) { $this->name = $name; }
+
+    public function label(string $t): self   { $this->label    = $t;  return $this; }
+    public function icon(string $fa): self   { $this->icon     = $fa; return $this; }
+    public function btn(string $cls): self   { $this->btnClass = $cls;return $this; }
+    public function url(string $u): self     { $this->url      = $u;  return $this; }
+    public function ability(string $a): self { $this->ability  = $a;  return $this; }
+
+    public function method(string $m): self
+    {
+        $this->method = strtoupper($m);
+        return $this;
+    }
+
+    public function confirm(string $mode = 'confirm', string $text = ''): self
+    {
+        $this->confirmMode = $mode;
+        $this->confirmText = $text;
+        return $this;
+    }
+
+    public function payload(array $data): self
+    {
+        $this->payload = $data;
+        return $this;
+    }
 }
