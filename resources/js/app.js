@@ -21,6 +21,7 @@ import Calificaciones from './components/Calificaciones.vue';
 import estudianteCursosIndex from './components/estudiante-cursos-index.vue';
 import estudianteCursosDetalle from './components/estudiante-curso-detalle.vue';
 import EstudianteCurso from './pages/EstudianteCurso.vue';
+import DocenteCurso from './pages/DocenteCurso.vue';
 import CursoEdicion from './components/Curso-edicion.vue';
 import Home from './components/Home.vue';
 
@@ -52,6 +53,7 @@ app.component('estudiante-cursos-index', estudianteCursosIndex);
 app.component('estudiante-cursos-detalle', estudianteCursosDetalle);
 app.component('curso-edicion', CursoEdicion);
 app.component('estudiante-curso', EstudianteCurso);
+app.component('docente-curso', DocenteCurso);
 app.component('home', Home);
 
 // CRUD

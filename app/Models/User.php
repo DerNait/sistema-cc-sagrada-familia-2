@@ -59,4 +59,12 @@ class User extends Authenticatable
             ->withPivot('seccion_id')
             ->withTimestamps();
     }
+
+    public function empleado() {
+        return $this->hasOne(Empleado::class, 'usuario_id');
+    } 
+
+    public function estudiante() {
+        return $this->hasOne(Estudiante::class, 'usuario_id');
+    } 
 }
