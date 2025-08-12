@@ -50,7 +50,7 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
-const overlayColor = computed(() => hexToRgba(props.curso.color, 0.5))
+const overlayColor = computed(() => hexToRgba(props.curso.color, 0.8))
 </script>
 
 <style scoped>

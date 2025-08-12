@@ -3,8 +3,7 @@
     <h3 class="p-3 fw-bold m-0">{{ curso_name }}</h3>
 
     <!-- Filtros -->
-    <Filters v-model:filtros="filtros" />
-
+     
     <SortableTable 
       :columns="columns"
       :rows="actividadesFiltradas"
