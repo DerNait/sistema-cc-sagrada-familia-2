@@ -99,6 +99,17 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
             Route::put('{id}',        [CursosController::class, 'update'])->name('update');
             Route::delete('{id}',     [CursosController::class, 'destroy'])->name('destroy');
         });
+
+        Route::prefix('pagos')->name('pagos.')->group(function () {
+            Route::get('/',           [CursosController::class, 'index'])->name('index');
+            Route::get('/export',     [CursosController::class, 'export'])->name('export');
+            Route::get('{id}',        [CursosController::class, 'show'])->name('show');
+            Route::get('crear',       [CursosController::class, 'create'])->name('create');
+            Route::post('/',          [CursosController::class, 'store'])->name('store');
+            Route::get('{id}/editar', [CursosController::class, 'edit'])->name('edit');
+            Route::put('{id}',        [CursosController::class, 'update'])->name('update');
+            Route::delete('{id}',     [CursosController::class, 'destroy'])->name('destroy');
+        });
     
         Route::prefix('actividades')->name('actividades.')->group(function () {
             Route::get('/',           [ActividadesController::class, 'index'])->name('index');
