@@ -109,6 +109,7 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
             Route::get('{id}/editar', [CursosController::class, 'edit'])->name('edit');
             Route::put('{id}',        [CursosController::class, 'update'])->name('update');
             Route::delete('{id}',     [CursosController::class, 'destroy'])->name('destroy');
+            
         });
     
         Route::prefix('actividades')->name('actividades.')->group(function () {
