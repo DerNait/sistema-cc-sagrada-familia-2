@@ -89,16 +89,16 @@
           <!-- ==== FILE (imagen -> URL) ==== -->
           <div v-else-if="c.type === 'file'">
             <div class="d-flex flex-column gap-2">
+              <input
+                ref="fileInputs"
+                type="file"
+                class="form-control d-none"
+                :accept="c.accept || 'image/*'"
+                :data-field="c.field"
+                @change="onFileChange($event, c)"
+                :disabled="props.readonly || !c.editable || isUploading[c.field]"
+              />
               <div class="input-group">
-                <input
-                  ref="fileInputs"
-                  type="file"
-                  class="form-control d-none"
-                  :accept="c.accept || 'image/*'"
-                  :data-field="c.field"
-                  @change="onFileChange($event, c)"
-                  :disabled="props.readonly || !c.editable || isUploading[c.field]"
-                />
                 <button
                   type="button"
                   class="btn btn-outline-primary"
