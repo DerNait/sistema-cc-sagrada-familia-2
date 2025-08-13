@@ -15,6 +15,8 @@ use App\Http\Controllers\CursoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotasController;
 use App\Http\Controllers\RoleModulePermissionController;
+use App\Http\Controllers\PagosController;
+use App\Http\Controllers\CSVController;
 
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
@@ -107,6 +109,21 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
             Route::get('{id}/editar', [CursosController::class, 'edit'])->name('edit');
             Route::put('{id}',        [CursosController::class, 'update'])->name('update');
             Route::delete('{id}',     [CursosController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('pagos')->name('pagos.')->group(function () {
+            Route::get('/', [PagosController::class, 'index'])->name('index');
+            Route::get('crear', [PagosController::class, 'create'])->name('create');
+            Route::post('/', [PagosController::class, 'store'])->name('store');
+            Route::get('{id}', [PagosController::class, 'show'])->name('show');
+            Route::get('{id}/editar', [PagosController::class, 'edit'])->name('edit');
+            Route::put('{id}', [PagosController::class, 'update'])->name('update');
+            Route::delete('{id}', [PagosController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('cargar_csv')->name('cargar_csv.')->group(function () {
+            Route::get('/', [CSVController::class, 'index'])->name('index');
+            Route::post('/procesar', [CSVController::class, 'procesar'])->name('procesar');
         });
     
         Route::prefix('actividades')->name('actividades.')->group(function () {
