@@ -40,7 +40,32 @@ class CursosController extends CrudControllerBase
             ->rules(['array', 'exists:grado,id'])
             ->pivot('grados')
             ->multiRelation()
-            ->hide(); 
+            ->hide();
+            
+        // Imagen (URL devuelta por el endpoint de subida)
+        $this->column('imagen')
+            ->label('Imagen')
+            ->type('file')
+            ->options([
+                'accept'     => 'image/*',
+                'uploadUrl'  => '/admin/uploads', // opcional; usa el props.uploadUrl si no lo pones
+                'folder'     => 'images/cursos',  // opcional; el backend puede guardarlo allí
+                'buttonText' => 'Subir imagen',
+                'placeholder'=> 'URL del archivo (se llena al subir)',
+            ])
+            ->rules(['nullable','string','max:255']); // guardas la URL (string)
+
+        // Color (hex)
+        $this->column('color')
+            ->label('Color')
+            ->type('color')
+            ->options([
+                'placeholder' => '#RRGGBB',
+            ])
+            ->rules([
+                'nullable',
+                'regex:/^#([0-9A-Fa-f]{6})$/',
+            ]);
 
         $this->column('created_at')
             ->label('Creado en')
