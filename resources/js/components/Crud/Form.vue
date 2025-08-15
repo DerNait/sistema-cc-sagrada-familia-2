@@ -93,7 +93,7 @@
                 ref="fileInputs"
                 type="file"
                 class="form-control d-none"
-                :accept="c.accept || 'image/*'"
+                :accept="c.options?.accept || 'image/*'"
                 :data-field="c.field"
                 @change="onFileChange($event, c)"
                 :disabled="props.readonly || !c.editable || isUploading[c.field]"
@@ -106,14 +106,14 @@
                   @click="triggerFile(c.field)"
                 >
                   <i class="fa fa-upload"></i>
-                  {{ isUploading[c.field] ? 'Subiendo...' : (c.buttonText || 'Seleccionar archivo') }}
+                  {{ isUploading[c.field] ? 'Subiendo...' : (c.options?.buttonText || 'Seleccionar archivo') }}
                 </button>
 
                 <input
                   type="text"
                   class="form-control"
                   v-model="form[c.field]"
-                  :placeholder="c.placeholder || 'URL del archivo (se llena al subir)'"
+                  :placeholder="c.options?.placeholder || 'URL del archivo (se llena al subir)'"
                   :readonly="true"
                 />
                 <button
@@ -199,7 +199,7 @@ const props = defineProps({
   columns:  Object,
   action:   String,
   readonly: { type: Boolean, default: false },
-  uploadUrl: { type: String, default: '/admin/uploads' }
+  uploadUrl: String,
 
 });
 const emit  = defineEmits(['saved', 'cancel']);
@@ -278,19 +278,23 @@ async function onFileChange(e, c) {
   try {
     const fd = new FormData();
     fd.append('file', file);
-    if (c.folder) fd.append('folder', c.folder);
 
-    const { data } = await axios.post(c.uploadUrl || props.uploadUrl, fd, {
+    // Enviar path (o mantener compat con 'folder')
+    if (c.options?.path)   fd.append('path', c.options.path);
+    else if (c.options?.folder) fd.append('path', c.options.folder);
+
+    const targetUrl = c.options?.uploadUrl || props.uploadUrl;
+
+    const { data } = await axios.post(targetUrl, fd, {
       headers: { 'Content-Type': 'multipart/form-data', 'X-CSRF-TOKEN': csrf },
       onUploadProgress: (evt) => {
-        if (evt.total) {
-          uploadProgress[field] = Math.round((evt.loaded * 100) / evt.total);
-        }
+        if (evt.total) uploadProgress[field] = Math.round((evt.loaded * 100) / evt.total);
       }
     });
 
-    form[field] = data.url || '';
-    preview[field] = looksLikeImage(form[field]) ? form[field] : '';
+    form[field]    = data.url_decorated ?? data.path ?? '';
+    preview[field] = data.url ?? ('/storage/' + (data.path ?? ''));
+
   } catch (err) {
     console.error(err);
     alert('Error al subir el archivo');
@@ -298,6 +302,7 @@ async function onFileChange(e, c) {
     isUploading[field] = false;
   }
 }
+
 
 function clearFile(field) {
   form[field] = '';

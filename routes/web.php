@@ -17,6 +17,7 @@ use App\Http\Controllers\NotasController;
 use App\Http\Controllers\RoleModulePermissionController;
 use App\Http\Controllers\PagosController;
 use App\Http\Controllers\CSVController;
+use App\Http\Controllers\UploadController;
 
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
@@ -38,6 +39,7 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
         ]);
     });
 
+    Route::post('/upload', [UploadController::class, 'store'])->name('upload');
 
     Route::post('/catalogos/roles/{role}/permisos', [RoleModulePermissionController::class, 'update'])->name('roles.permisos.update');
 

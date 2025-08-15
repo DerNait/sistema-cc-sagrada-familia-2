@@ -48,12 +48,13 @@ class CursosController extends CrudControllerBase
             ->type('file')
             ->options([
                 'accept'     => 'image/*',
-                'uploadUrl'  => '/admin/uploads', // opcional; usa el props.uploadUrl si no lo pones
-                'folder'     => 'images/cursos',  // opcional; el backend puede guardarlo allí
+                'uploadUrl'  => '/upload', // opcional; usa el props.uploadUrl si no lo pones
+                'path'       => 'images/cursos',  // opcional; el backend puede guardarlo allí
                 'buttonText' => 'Subir imagen',
                 'placeholder'=> 'URL del archivo (se llena al subir)',
             ])
-            ->rules(['nullable','string','max:255']); // guardas la URL (string)
+            ->rules(['nullable','string','max:255'])
+            ->hide();
 
         // Color (hex)
         $this->column('color')
@@ -65,7 +66,8 @@ class CursosController extends CrudControllerBase
             ->rules([
                 'nullable',
                 'regex:/^#([0-9A-Fa-f]{6})$/',
-            ]);
+            ])
+            ->hide();
 
         $this->column('created_at')
             ->label('Creado en')
