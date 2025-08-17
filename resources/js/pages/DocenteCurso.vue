@@ -83,6 +83,7 @@
 
     <SortableTable
       v-else
+      :key="columnsKey"
       :columns="columns"
       :rows="rowsLocal"
       :page-lengths="[10, 25, 50, 100, -1]"
@@ -94,7 +95,7 @@
 
       <!-- Columnas dinámicas por actividad -->
       <template
-        v-for="act in actividadesLocal"
+        v-for="act in actsFuente"
         :key="`slot-${act.id}`"
         v-slot:[`cell-act_${act.id}`]="{ row, value }"
       >
@@ -248,6 +249,12 @@ const gradosLocal = ref(props.grados || []);
 const filtroEstudianteId = ref(null);
 const filtroActividadId = ref(null);
 
+const actsFuente = computed(() =>
+  filtroActividadId.value
+    ? actividadesLocal.value.filter(a => a.id === filtroActividadId.value)
+    : actividadesLocal.value
+);
+
 watch(gradoId, async (nuevo, viejo) => {
   if (syncing.value) return;
   if (nuevo === viejo || !nuevo) return;
@@ -263,11 +270,14 @@ watch(seccionId, async (nuevo, viejo) => {
 /* =========================
  * 1) Columnas
  * ========================= */
+
+const columnsKey = computed(() => 'cols-' + actsFuente.value.map(a => a.id).join('-'));
+
 const columns = computed(() => {
   const base = {
     estudiante: { label: 'Estudiante', field: 'estudiante', visible: true },
   };
-  actividadesLocal.value.forEach((a) => {
+  actsFuente.value.forEach((a) => {
     base[`act_${a.id}`] = {
       label: a.nombre,
       field: `act_${a.id}`,
@@ -304,13 +314,11 @@ const builtRows = computed(() => {
     : estudiantesLocal.value;
 
   // filtro ligero por actividad (reduce columnas y datos)
-  const actsFuente = filtroActividadId.value
-    ? actividadesLocal.value.filter(a => a.id === filtroActividadId.value)
-    : actividadesLocal.value;
+  const acts = actsFuente.value;
 
   return (estuFuente || []).map((estu) => {
     const r = { id: estu.id, estudiante: estu.nombre };
-    for (const act of actsFuente) {
+    for (const act of acts) {
       r[`act_${act.id}`] = notasIndex[act.id]?.[estu.id] ?? {
         nota_id: null,
         nota: null,
