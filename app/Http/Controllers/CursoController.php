@@ -66,6 +66,139 @@ class CursoController extends Controller
         return $this->showEstudiante($request, $cursoId);
     }
 
+    public function data(Request $request, int $cursoId)
+    {
+        $user  = auth()->user();
+        $rolId = (int) $user->rol_id;
+
+        // --- params de filtro ---
+        $gradoId     = (int) $request->input('grado_id');
+        $seccionId   = (int) $request->input('seccion_id');
+        $estIdsParam = (array) $request->input('estudiante_ids', []);
+
+        // Nombre real tabla grado (por si no es 'grados')
+        $gradoTable = (new Grado)->getTable();
+
+        // --- grados accesibles (igual que showDocenteAdmin, pero solo para validar/limitar) ---
+        $gradosQuery = Grado::query()
+            ->select("$gradoTable.id", "$gradoTable.nombre")
+            ->join('grado_cursos', 'grado_cursos.grado_id', '=', "$gradoTable.id")
+            ->where('grado_cursos.curso_id', $cursoId);
+
+        if ($rolId === 4) { // docente: sus grados
+            $empleadoId = $user->empleado ?? null;
+            $gradosQuery->whereExists(function ($q) use ($empleadoId, $gradoTable) {
+                $q->selectRaw(1)
+                ->from('secciones')
+                ->whereColumn('secciones.grado_id', "$gradoTable.id")
+                ->where('secciones.maestro_guia_id', $empleadoId);
+            });
+        }
+
+        $grados = $gradosQuery->orderBy("$gradoTable.nombre")->get();
+        abort_if($grados->isEmpty(), 404, 'No hay grados disponibles.');
+
+        // resolver grado_id por defecto
+        if (!$gradoId) $gradoId = (int) $grados->first()->id;
+
+        // --- secciones del grado ---
+        $seccionesQuery = Seccion::query()
+            ->select('id','seccion','maestro_guia_id','grado_id')
+            ->where('grado_id', $gradoId);
+
+        if ($rolId === 4) { // docente: sus secciones
+            $empleadoId = $user->empleado ?? null;
+            $seccionesQuery->where('maestro_guia_id', $empleadoId);
+        }
+
+        $secciones = $seccionesQuery->orderBy('seccion')->get();
+        abort_if($secciones->isEmpty(), 404, 'No hay secciones para el grado.');
+
+        // resolver seccion_id por defecto
+        if (!$seccionId) $seccionId = (int) $secciones->first()->id;
+
+        // --- estudiantes de la sección ---
+        $seccion = Seccion::with(['estudiantes.usuario:id,name,apellido'])
+            ->select('id')
+            ->findOrFail($seccionId);
+
+        $estudiantes = $seccion->estudiantes->map(fn($e) => [
+            'id'     => $e->id,
+            'nombre' => trim(($e->usuario->name ?? '') . ' ' . ($e->usuario->apellido ?? '')),
+        ])->values();
+
+        // estudiante_ids seleccionados (si vienen), default = todos
+        $selectedEstudianteIds = collect($estIdsParam)->map(fn($x)=>(int)$x)->filter();
+        if ($selectedEstudianteIds->isEmpty()) {
+            $selectedEstudianteIds = $estudiantes->pluck('id');
+        }
+
+        // map seccion_estudiante_id por estudiante
+        $mapSeccionEst = SeccionEstudiante::where('seccion_id', $seccionId)
+            ->whereIn('estudiante_id', $selectedEstudianteIds)
+            ->pluck('id', 'estudiante_id'); // [estudiante_id => seccion_estudiante_id]
+
+        // --- actividades del grado-curso ---
+        $actividades = Actividad::query()
+            ->whereHas('gradoCurso', function ($q) use ($cursoId, $gradoId) {
+                $q->where('curso_id', $cursoId)->where('grado_id', $gradoId);
+            })
+            ->select('id','nombre','total','fecha_inicio','fecha_fin','grado_curso_id')
+            ->orderBy('nombre')
+            ->get();
+
+        $actividadIds = $actividades->pluck('id');
+
+        // --- notas ---
+        $notas = EstudianteNota::query()
+            ->whereIn('actividad_id', $actividadIds)
+            ->whereIn('seccion_estudiante_id', $mapSeccionEst->values())
+            ->select('id','actividad_id','seccion_estudiante_id','nota','comentario','created_at','updated_at')
+            ->get()
+            ->groupBy('actividad_id');
+
+        $nombresPorEst = $estudiantes->keyBy('id');
+
+        $actividadesPayload = $actividades->map(function ($act) use ($notas,$mapSeccionEst,$nombresPorEst) {
+            $porActividad = $notas->get($act->id, collect())->keyBy('seccion_estudiante_id');
+
+            $rowsNotas = $nombresPorEst->map(function ($info, $estId) use ($porActividad,$mapSeccionEst) {
+                $seId = $mapSeccionEst->get($estId);
+                $n = $seId ? $porActividad->get($seId) : null;
+
+                return [
+                    'estudiante_id'         => (int) $estId,
+                    'estudiante_nombre'     => $info['nombre'] ?? '',
+                    'seccion_estudiante_id' => $seId,
+                    'id'                    => $n->id ?? null,
+                    'nota'                  => $n->nota ?? null,
+                    'comentario'            => $n->comentario ?? null,
+                    'has_comentario'        => filled($n?->comentario),
+                ];
+            })->values();
+
+            return [
+                'id'           => $act->id,
+                'nombre'       => $act->nombre,
+                'total'        => $act->total ?? 100,
+                'fecha_inicio' => $act->fecha_inicio,
+                'fecha_fin'    => $act->fecha_fin,
+                'notas'        => $rowsNotas,
+            ];
+        })->values();
+
+        return response()->json([
+            'grados'                  => $grados,
+            'selected_grado_id'       => $gradoId,
+            'secciones'               => $secciones,
+            'selected_seccion_id'     => $seccionId,
+            'estudiantes'             => $estudiantes,
+            'selected_estudiante_ids' => $selectedEstudianteIds->values(),
+            'actividades'             => $actividadesPayload,
+        ]);
+    }
+
+
     protected function showDocenteAdmin(Request $request, int $cursoId, int $rolId)
     {
         $user  = auth()->user();

@@ -1,15 +1,15 @@
 <template>
   <div class="filtro" ref="root">
     <div class="input-group filtro-input">
-      <span class="input-group-text bg-white border-0" style="color: #d2d2d2;">
+      <span class="input-group-text little-padding ps-2 bg-white border-0" style="color: #d2d2d2; padding-left: 0.75rem !important;">
         <i class="fa-solid fa-magnifying-glass"></i>
       </span>
       <input
         type="text"
-        class="form-control bg-white border-0"
-        v-model="q"
-        :placeholder="placeholder"
-        @focus="open = true"
+        class="form-control little-padding bg-white border-0 input-no-effects"
+        v-model="displayText"
+        :placeholder="placeholderText"
+        @focus="onFocus"
       />
       <button class="btn btn-outline-filters" type="button" @click="open = !open">
         <i class="fa-solid" :class="open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
@@ -56,12 +56,40 @@ const filtered = computed(() => {
   return props.options.filter(o => String(o[props.labelKey] ?? '').toLowerCase().includes(term));
 });
 
+// opción actualmente seleccionada
+const selectedOption = computed(() =>
+  props.options.find(o => o[props.valueKey] === props.modelValue)
+);
+
+// label de la opción seleccionada (o cadena vacía)
+const selectedLabel = computed(() =>
+  selectedOption.value ? String(selectedOption.value[props.labelKey] ?? '') : ''
+);
+
+const placeholderText = computed(() =>
+  (!q.value && !selectedLabel.value) ? props.placeholder : ''
+);
+
+const displayText = computed({
+  get() {
+    return q.value !== '' ? q.value : selectedLabel.value;
+  },
+  set(v) {
+    q.value = v ?? '';
+  }
+});
+
 function select(val) {
   emit('update:modelValue', val);
   open.value = false;
 }
 
-const root = ref(null)
+const root = ref(null);
+
+function onFocus() {
+  open.value = true;
+  //q.value = '';
+}
 
 function handleDocClick(e) {
   if (!root.value) return
@@ -79,11 +107,19 @@ onBeforeUnmount(() => document.removeEventListener('click', handleDocClick))
   min-width: 280px;
 }
 
+.little-padding {
+  padding: 0.375rem 0.1875rem !important;
+}
+
 /* INPUT WRAPPER */
 .filtro-input { 
   border-radius: 999px; 
   overflow: hidden;
   border: 1px solid #B5B5B5;
+}
+
+.input-no-effects:focus {
+  box-shadow: none !important;
 }
 
 /* Placeholder: ojo, va sobre el input, no sobre .filtro-input */

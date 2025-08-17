@@ -44,10 +44,45 @@
     </div>
 
     <div class="filters-container d-flex px-3 py-4 d-flex justify-content-between align-items-center">
-      
+      <!-- Grado (cambia grado -> refresca secciones, actividades, estudiantes/notas) -->
+      <Filtros
+        v-model="gradoId"
+        :options="gradosLocal"
+        label-key="nombre"
+        placeholder="Selecciona un grado"
+      />
+
+      <!-- Sección (cambia seccion -> refresca estudiantes/notas) -->
+      <Filtros
+        v-model="seccionId"
+        :options="seccionesLocal"
+        label-key="seccion"
+        placeholder="Selecciona una sección"
+      />
+
+      <!-- Estudiante (local) -->
+      <Filtros
+        v-model="filtroEstudianteId"
+        :options="estudiantesLocal"
+        label-key="nombre"
+        placeholder="Filtrar por estudiante"
+      />
+
+      <!-- Actividad (local) -->
+      <Filtros
+        v-model="filtroActividadId"
+        :options="actividadesLocal"
+        label-key="nombre"
+        placeholder="Filtrar por actividad"
+      />
+    </div>
+
+    <div v-if="busyData" class="p-5 text-center text-muted">
+      <i class="fa-solid fa-spinner fa-spin me-2"></i> Cargando…
     </div>
 
     <SortableTable
+      v-else
       :columns="columns"
       :rows="rowsLocal"
       :page-lengths="[10, 25, 50, 100, -1]"
@@ -59,7 +94,7 @@
 
       <!-- Columnas dinámicas por actividad -->
       <template
-        v-for="act in actividades"
+        v-for="act in actividadesLocal"
         :key="`slot-${act.id}`"
         v-slot:[`cell-act_${act.id}`]="{ row, value }"
       >
@@ -187,6 +222,7 @@
 import { computed, reactive, ref, watch } from 'vue';
 import axios from 'axios';
 import SortableTable from '../components/SortableTable.vue';
+import Filtros from '../components/Filtros.vue';
 
 const props = defineProps({
   curso: { type: Object, required: true },
@@ -199,6 +235,31 @@ const props = defineProps({
   actividades: { type: Array, default: () => [] },
 });
 
+const busyData = ref(false);
+const syncing  = ref(false);
+
+const gradoId = ref(props.selected_grado_id);
+const seccionId = ref(props.selected_seccion_id);
+const estudiantesLocal = ref(props.estudiantes || []);
+const actividadesLocal = ref(props.actividades || []);
+const seccionesLocal = ref(props.secciones || []);
+const gradosLocal = ref(props.grados || []);
+
+const filtroEstudianteId = ref(null);
+const filtroActividadId = ref(null);
+
+watch(gradoId, async (nuevo, viejo) => {
+  if (syncing.value) return;
+  if (nuevo === viejo || !nuevo) return;
+  await fetchData({ grado_id: nuevo, seccion_id: null });
+});
+
+watch(seccionId, async (nuevo, viejo) => {
+  if (syncing.value) return;
+  if (nuevo === viejo || !nuevo) return;
+  await fetchData({ grado_id: gradoId.value, seccion_id: nuevo });
+});
+
 /* =========================
  * 1) Columnas
  * ========================= */
@@ -206,7 +267,7 @@ const columns = computed(() => {
   const base = {
     estudiante: { label: 'Estudiante', field: 'estudiante', visible: true },
   };
-  props.actividades.forEach((a) => {
+  actividadesLocal.value.forEach((a) => {
     base[`act_${a.id}`] = {
       label: a.nombre,
       field: `act_${a.id}`,
@@ -223,7 +284,7 @@ const columns = computed(() => {
 const builtRows = computed(() => {
   // index: actId -> estudiante_id -> {nota, comentario, has_comentario, seccion_estudiante_id}
   const notasIndex = {};
-  for (const act of props.actividades) {
+  for (const act of actividadesLocal.value) {
     const byStudent = {};
     for (const n of act.notas || []) {
       byStudent[n.estudiante_id] = {
@@ -237,9 +298,19 @@ const builtRows = computed(() => {
     notasIndex[act.id] = byStudent;
   }
 
-  return (props.estudiantes || []).map((estu) => {
+  // filtro ligero por estudiante
+  const estuFuente = filtroEstudianteId.value
+    ? estudiantesLocal.value.filter(e => e.id === filtroEstudianteId.value)
+    : estudiantesLocal.value;
+
+  // filtro ligero por actividad (reduce columnas y datos)
+  const actsFuente = filtroActividadId.value
+    ? actividadesLocal.value.filter(a => a.id === filtroActividadId.value)
+    : actividadesLocal.value;
+
+  return (estuFuente || []).map((estu) => {
     const r = { id: estu.id, estudiante: estu.nombre };
-    for (const act of props.actividades) {
+    for (const act of actsFuente) {
       r[`act_${act.id}`] = notasIndex[act.id]?.[estu.id] ?? {
         nota_id: null,
         nota: null,
@@ -290,7 +361,7 @@ function normalizeDraftToCompare(val) {
 function snapshotOriginalNotas() {
   const snap = {};
   for (const r of rowsLocal.value) {
-    for (const a of props.actividades) {
+    for (const a of actividadesLocal) {
       const key = cellKey(r.id, a.id);
       const cell = r[`act_${a.id}`] || {};
       snap[key] = normalizeDraftToCompare(cell.nota);
@@ -301,7 +372,7 @@ function snapshotOriginalNotas() {
 
 function preloadAllDrafts() {
   for (const r of rowsLocal.value) {
-    for (const a of props.actividades) {
+    for (const a of actividadesLocal) {
       const key = cellKey(r.id, a.id);
       const cell = r[`act_${a.id}`] || {};
       ui.noteDraft[key] = (cell.nota ?? '').toString();
@@ -323,7 +394,7 @@ function toggleBulkEdit(state) {
 function cancelBulkEdit() {
   // Revertir drafts a los valores del snapshot
   for (const r of rowsLocal.value) {
-    for (const a of props.actividades) {
+    for (const a of actividadesLocal) {
       const key = cellKey(r.id, a.id);
       const orig = originalNotas.value[key];
       ui.noteDraft[key] = (orig === 0 ? 0 : (orig ?? '')).toString();
@@ -335,7 +406,7 @@ function cancelBulkEdit() {
 function getChangedCells() {
   const changes = [];
   for (const r of rowsLocal.value) {
-    for (const a of props.actividades) {
+    for (const a of actividadesLocal) {
       const key = cellKey(r.id, a.id);
       const rowCell = r[`act_${a.id}`] || {};
       const before = originalNotas.value[key]; // normalizado
@@ -518,6 +589,47 @@ function saveComentario(estId, actId) {
       ui.busy[key] = false;
     });
 }
+
+async function fetchData(params = {}) {
+  try {
+    busyData.value = true;
+    const { data } = await axios.get(`/cursos/${props.curso.id}/data`, { params });
+
+    syncing.value = true;
+
+    // refrescar combos
+    gradosLocal.value    = data.grados || [];
+    seccionesLocal.value = data.secciones || [];
+
+    // Solo pisa la selección si NO la enviaste explícita
+    if (params.grado_id == null)   gradoId.value   = data.selected_grado_id;
+    if (params.seccion_id == null) seccionId.value = data.selected_seccion_id;
+
+    // datasets
+    estudiantesLocal.value = data.estudiantes || [];
+    actividadesLocal.value = data.actividades || [];
+
+    // limpiar filtros si ya no aplican
+    if (filtroEstudianteId.value && !estudiantesLocal.value.some(e => e.id === filtroEstudianteId.value)) {
+      filtroEstudianteId.value = null;
+    }
+    if (filtroActividadId.value && !actividadesLocal.value.some(a => a.id === filtroActividadId.value)) {
+      filtroActividadId.value = null;
+    }
+
+    // si estabas en edición masiva, rearmar drafts
+    if (bulkEdit.value) {
+      preloadAllDrafts();
+      snapshotOriginalNotas();
+    }
+  } catch (e) {
+    console.error('Error cargando data:', e);
+  } finally {
+    syncing.value = false;
+    busyData.value = false;
+  }
+}
+
 </script>
 
 <style scoped>

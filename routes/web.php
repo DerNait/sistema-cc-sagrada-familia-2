@@ -29,8 +29,9 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
     Route::prefix('cursos')->name('cursos.')->group(function () {
-        Route::get('/',        [CursoController::class, 'index'])->name('index');
-        Route::get('/{curso}', [CursoController::class, 'show'])->name('show');
+        Route::get('/',            [CursoController::class, 'index'])->name('index');
+        Route::get('/{curso}',     [CursoController::class, 'show'])->name('show');
+        Route::get('{curso}/data', [CursoController::class, 'data'])->name('data');
 
         Route::resource('{curso}/notas', NotasController::class)->only(['store', 'update'])
         ->names([
