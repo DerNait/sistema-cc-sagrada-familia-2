@@ -213,25 +213,41 @@ function applyFilters () {
   const term = globalSearch.value.trim().toLowerCase();
 
   rows.value = originalRows.value.filter(row => {
-    /* 1 ) búsqueda global */
+    /* 1 ) BÚSQUEDA GLOBAL sobre el TEXTO VISIBLE */
     const matchesGlobal = !term || Object.values(props.columns).some(col => {
-      const cell = getValue(row, col.field);
-      return String(cell ?? '').toLowerCase().includes(term);
+      const cellText = getDisplayValue(row, col).toLowerCase();
+      return cellText.includes(term);
     });
 
     /* 2 ) filtros por columna */
-    const matchesColumnFilters = Object.entries(localFilters).every(([field,val]) => {
+    const matchesColumnFilters = Object.entries(localFilters).every(([field, val]) => {
       if (!val) return true;
 
-      const col  = props.columns[field];
-      const cell = getValue(row, field);
+      const col = props.columns[field];
 
-      switch (col.filterType) {
-        case 'numeric': return Number(cell) === Number(val);
-        case 'date':    return (cell ?? '').slice(0,10) === val;
-        case 'select':  return String(cell) === String(val);
-        default:        return String(cell ?? '').toLowerCase().includes(String(val).toLowerCase());
+      // Para filtros 'text' queremos comparar contra lo que se ve (label)
+      if (col.filterType === 'text') {
+        const display = getDisplayValue(row, col).toLowerCase();
+        return display.includes(String(val).toLowerCase());
       }
+
+      // Para 'select' y 'numeric' mantenemos igualdad exacta
+      if (col.filterType === 'select') {
+        const raw = getValue(row, field);
+        return String(raw) === String(val);
+      }
+      if (col.filterType === 'numeric') {
+        const raw = getValue(row, field);
+        return Number(raw) === Number(val);
+      }
+      if (col.filterType === 'date') {
+        const raw = getValue(row, field);
+        return String(raw ?? '').slice(0, 10) === val;
+      }
+
+      // fallback
+      const display = getDisplayValue(row, col).toLowerCase();
+      return display.includes(String(val).toLowerCase());
     });
 
     return matchesGlobal && matchesColumnFilters;
@@ -329,6 +345,36 @@ function canShow(action) {
   if (!action.ability) return true;
   return abilities.value[action.ability] ?? true;
 } */
+
+function getDisplayValue(row, col) {
+  const raw = getValue(row, col.field);
+
+  // 1) Si la columna tiene opciones (select / relation con map de labels)
+  if (col.options && raw != null && Object.prototype.hasOwnProperty.call(col.options, raw)) {
+    return String(col.options[raw] ?? '');
+  }
+
+  // 2) Si es relación por dot notation (user.role.nombre)
+  if (col.field.includes('.')) {
+    // normalmente ya viene como string (nombre)
+    return String(raw ?? '');
+  }
+
+  // 3) Tipos comunes
+  if (col.type === 'date') {
+    // yyyy-mm-dd...
+    return String(raw ?? '').slice(0, 10);
+  }
+  if (col.type === 'datetime') {
+    // yyyy-mm-dd hh:mm:ss...
+    return String(raw ?? '').slice(0, 19).replace('T', ' ');
+  }
+  if (col.type === 'boolean') {
+    return raw ? 'Sí' : 'No';
+  }
+
+  return String(raw ?? '');
+}
 
 function onCustomClick(action, row) {
   window.location.href = resolveUrl(action, row);
