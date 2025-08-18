@@ -33,6 +33,7 @@
 
 <script setup>
 import { reactive, computed, ref } from 'vue'
+import Swal from 'sweetalert2'
 import RoleModuleCard from '../components/RoleModuleCard.vue'
 import SearchBar from '../components/SearchBar.vue'
 
@@ -59,10 +60,26 @@ async function save () {
     .filter(([_, v]) => v)
     .map(([k]) => Number(k))
 
-  await axios.post(`/catalogos/roles/${props.rol.id}/permisos`, {
-    modulo_permiso_ids: elegidos
-  })
+  try {
+    await axios.post(`/catalogos/roles/${props.rol.id}/permisos`, {
+      modulo_permiso_ids: elegidos
+    })
 
-  alert('Permisos actualizados') // placeholder
+    Swal.fire({
+      icon: 'success',
+      title: 'Permisos actualizados',
+      text: 'Los permisos se han guardado correctamente.',
+      timer: 2500,
+      timerProgressBar: true,
+      showConfirmButton: false
+    })
+  } catch (error) {
+    console.error(error)
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No se pudieron actualizar los permisos.'
+    })
+  }
 }
 </script>
