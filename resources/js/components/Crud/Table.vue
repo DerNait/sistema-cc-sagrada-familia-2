@@ -130,12 +130,13 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
+import Swal from 'sweetalert2';
 import SortableTable from '../SortableTable.vue';
 import SearchBar from '../SearchBar.vue';
 import Form from './Form.vue';
 
 const showForm   = ref(false);
-const editingRow = ref(null);       // null = create
+const editingRow = ref(null);
 const formAction = ref('');
 const formMode = ref('create');
 
@@ -157,7 +158,7 @@ const localFilters = reactive(
 function openCreate() {
   formMode.value  = 'create';
   editingRow.value = null;
-  formAction.value = baseUrl;      // POST /entidad
+  formAction.value = baseUrl;
   open();
 }
 
@@ -180,29 +181,124 @@ async function loadLatest(id) {
   }
 }
 
-function openEdit(row) {
-  formMode.value  = 'edit';
-  editingRow.value = { ...row };
-  formAction.value = `${baseUrl}/${row.id}`; // PUT /entidad/{id}
-  open();
-}
+async function openEdit(row) {
+    formMode.value = 'edit';
+    editingRow.value = { ...row };
+    formAction.value = `${baseUrl}/${row.id}`;
+    open();
+  }
+
 function open()  { showForm.value = true; document.body.style.overflow = 'hidden'; }
 function close() { showForm.value = false; document.body.style.overflow = '';      }
 
-function onSaved (record) {
-  const idx = rows.value.findIndex(r => r.id === record.id);
-
-  if (idx > -1) {
-    // UPDATE
-    rows.value[idx]         = record;
-    originalRows.value[idx] = record;
-  } else {
-    // CREATE
-    rows.value.unshift(record);
-    originalRows.value.unshift(record);
-  }
-  close();
+// ✅ SweetAlert: Confirmación
+async function showConfirmation(title, text, confirmText = 'Confirmar') {
+  return await Swal.fire({
+    title: title,
+    text: text,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: confirmText,
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  });
 }
+
+// ✅ SweetAlert: Éxito
+function showSuccess(title, text, timer = 3000) {
+  Swal.fire({
+    icon: 'success',
+    title: title,
+    text: text,
+    timer: timer,
+    timerProgressBar: true,
+    showConfirmButton: timer === false
+  });
+}
+
+// ✅ SweetAlert: Error
+function showError(title, text) {
+  Swal.fire({
+    icon: 'error',
+    title: title,
+    text: text
+  });
+}
+
+// ✅ Eliminar con SweetAlert
+async function deleteRow(row) {
+  const result = await showConfirmation(
+    '¿Eliminar registro?',
+    'Esta acción no se puede deshacer',
+    'Sí, eliminar'
+  );
+
+  if (!result.isConfirmed) return;
+
+  try {
+    await axios.delete(`${baseUrl}/${row.id}`);
+    const idx = rows.value.findIndex(r => r.id === row.id);
+    if (idx > -1) {
+      rows.value.splice(idx, 1);
+      originalRows.value.splice(idx, 1);
+    }
+    showSuccess('Eliminado', 'El registro ha sido eliminado correctamente');
+  } catch (error) {
+    console.error(error);
+    showError('Error', 'No se pudo eliminar el registro');
+  }
+}
+
+// ✅ Guardar con SweetAlert
+async function saveItem(formData) {
+  try {
+    const { data } = await axios.post(baseUrl, formData);
+    rows.value.unshift(data);
+    originalRows.value.unshift(data);
+    showSuccess('Guardado', 'Registro creado correctamente');
+    close();
+    return data;
+  } catch (error) {
+    console.error(error);
+    showError('Error', 'No se pudo guardar el registro');
+    throw error;
+  }
+}
+
+// ✅ Actualizar con SweetAlert
+async function updateItem(id, formData) {
+  try {
+    const { data } = await axios.put(`${baseUrl}/${id}`, formData);
+    const idx = rows.value.findIndex(r => r.id === id);
+    if (idx > -1) {
+      rows.value[idx] = data;
+      originalRows.value[idx] = data;
+    }
+    showSuccess('Actualizado', 'Registro modificado correctamente');
+    close();
+    return data;
+  } catch (error) {
+    console.error(error);
+    showError('Error', 'No se pudo actualizar el registro');
+    throw error;
+  }
+}
+
+// ✅ onSaved redirige según modo
+async function onSaved(record) {
+  try {
+    if (formMode.value === 'create') {
+      await saveItem(record);
+    } else {
+      await updateItem(record.id, record);
+    }
+  } catch (error) {
+    // Ya manejado en saveItem/updateItem
+  }
+}
+
 onMounted(async () => {
   await nextTick();
 });
@@ -213,25 +309,19 @@ function applyFilters () {
   const term = globalSearch.value.trim().toLowerCase();
 
   rows.value = originalRows.value.filter(row => {
-    /* 1 ) BÚSQUEDA GLOBAL sobre el TEXTO VISIBLE */
     const matchesGlobal = !term || Object.values(props.columns).some(col => {
       const cellText = getDisplayValue(row, col).toLowerCase();
       return cellText.includes(term);
     });
 
-    /* 2 ) filtros por columna */
     const matchesColumnFilters = Object.entries(localFilters).every(([field, val]) => {
       if (!val) return true;
-
       const col = props.columns[field];
 
-      // Para filtros 'text' queremos comparar contra lo que se ve (label)
       if (col.filterType === 'text') {
         const display = getDisplayValue(row, col).toLowerCase();
         return display.includes(String(val).toLowerCase());
       }
-
-      // Para 'select' y 'numeric' mantenemos igualdad exacta
       if (col.filterType === 'select') {
         const raw = getValue(row, field);
         return String(raw) === String(val);
@@ -245,7 +335,6 @@ function applyFilters () {
         return String(raw ?? '').slice(0, 10) === val;
       }
 
-      // fallback
       const display = getDisplayValue(row, col).toLowerCase();
       return display.includes(String(val).toLowerCase());
     });
@@ -272,24 +361,8 @@ function getValue (obj, path) {
 }
 
 const baseUrl = window.location.pathname.split('?')[0];
-
 const segments = baseUrl.split('/');
-const segment = segments.filter(Boolean).pop(); 
-
-function deleteRow (row) {
-  if (!confirm('¿Eliminar?')) return;
-
-  axios
-    .delete(`${baseUrl}/${row.id}`)
-    .then(() => {
-      const idx = rows.value.findIndex(r => r.id === row.id);
-      if (idx > -1) {
-        rows.value.splice(idx, 1);
-        originalRows.value.splice(idx, 1);
-      }
-    })
-    .catch(err => console.log(err.message));
-}
+const segment = segments.filter(Boolean).pop();
 
 const entityTitle = computed(() => {
   return segment.charAt(0).toUpperCase() + segment.slice(1);
@@ -303,16 +376,12 @@ const hasActiveFilters = computed(() =>
   Object.values(localFilters).some(v => v !== '')
 );
 
-//Funcion para poder exportar la data
 function exportData() {
   axios.get(`${baseUrl}/export`, { responseType: 'blob' })
     .then(response => {
-      // Crear un enlace temporal para descargar el archivo
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      
-      // Obtener el nombre del archivo del header o generarlo
       const contentDisposition = response.headers['content-disposition'];
       let fileName = 'export.csv';
       if (contentDisposition) {
@@ -321,58 +390,39 @@ function exportData() {
           fileName = fileNameMatch[1];
         }
       }
-      
       link.setAttribute('download', fileName);
       document.body.appendChild(link);
       link.click();
-      
-      // Limpiar
       link.remove();
       window.URL.revokeObjectURL(url);
     })
     .catch(error => {
       console.error('Error al exportar:', error);
-      alert('Error al exportar los datos');
+      showError('Error', 'No se pudo exportar los datos');
     });
 }
 
-// Accion custom
 function resolveUrl(action, row) {
   return action.url.replace('__ID__', row.id);
 }
-/* 
-function canShow(action) {
-  if (!action.ability) return true;
-  return abilities.value[action.ability] ?? true;
-} */
 
 function getDisplayValue(row, col) {
   const raw = getValue(row, col.field);
-
-  // 1) Si la columna tiene opciones (select / relation con map de labels)
   if (col.options && raw != null && Object.prototype.hasOwnProperty.call(col.options, raw)) {
     return String(col.options[raw] ?? '');
   }
-
-  // 2) Si es relación por dot notation (user.role.nombre)
   if (col.field.includes('.')) {
-    // normalmente ya viene como string (nombre)
     return String(raw ?? '');
   }
-
-  // 3) Tipos comunes
   if (col.type === 'date') {
-    // yyyy-mm-dd...
     return String(raw ?? '').slice(0, 10);
   }
   if (col.type === 'datetime') {
-    // yyyy-mm-dd hh:mm:ss...
     return String(raw ?? '').slice(0, 19).replace('T', ' ');
   }
   if (col.type === 'boolean') {
     return raw ? 'Sí' : 'No';
   }
-
   return String(raw ?? '');
 }
 
