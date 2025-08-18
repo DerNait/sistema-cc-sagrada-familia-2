@@ -344,11 +344,16 @@ function applyFilters () {
 }
 
 function modelSingularName(pluralName) {
-  if (pluralName.endsWith('s')) {
-    return pluralName.slice(0, -1);
+  const word = pluralName.trim();
+
+  if (word.endsWith('es')) {
+    return word.slice(0, -2);
+  } else if (word.endsWith('s')) {
+    return word.slice(0, -1);
   }
-  return pluralName;
+  return word;
 }
+
 
 function inputType (t) {
   if (t === 'numeric') return 'number';
