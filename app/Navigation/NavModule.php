@@ -3,11 +3,12 @@ namespace App\Navigation;
 
 class NavModule
 {
-    public const CRUD  = ['create', 'read', 'update', 'delete', 'pay'];
+    public const CRUD  = ['create', 'read', 'update', 'delete'];
     public const READ  = ['read'];
     public const EXPORT  = ['read', 'export'];
     public const RANDOMIZE  = ['randomize'];
     public const NONE  = [];
+    public const PAYMENTS = ['read', 'create', 'edit', 'update', 'delete', 'pay'];
 
     public string  $label;
     public string  $key;
