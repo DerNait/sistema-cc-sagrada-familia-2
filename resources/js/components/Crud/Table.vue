@@ -23,19 +23,15 @@
     </div>
 
     <div class="filters-container d-flex px-3 py-4 d-flex justify-content-between align-items-center">
-      <div id="filters" class="d-flex flex-wrap g-2">
+      <div id="filters" class="d-flex flex-wrap gap-2">
         <template v-for="c in columns" :key="c.field">
           <div v-if="c.filterable" class="col-auto">
-            <select
+            <Filtros
               v-if="c.filterType==='select' && c.filterOptions"
               v-model="localFilters[c.field]"
-              class="form-select"
-            >
-              <option value="">{{ c.label }}</option>
-              <option v-for="(label,val) in c.filterOptions" :key="val" :value="val">
-                {{ label }}
-              </option>
-            </select>
+              :options="Object.entries(c.filterOptions).map(([val,label]) => ({ id: val, nombre: label }))"
+              :placeholder="c.label"
+            />
   
             <input
               v-else
@@ -47,7 +43,7 @@
           </div>
         </template>
   
-        <div v-if="hasActiveFilters" class="align-self-end ms-2">
+        <div v-if="hasActiveFilters" class="align-self-end">
           <button class="btn btn-outline-secondary" @click="clearFilters">
             Limpiar
           </button>
@@ -133,6 +129,7 @@ import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
 import Swal from 'sweetalert2';
 import SortableTable from '../SortableTable.vue';
 import SearchBar from '../SearchBar.vue';
+import Filtros from '../Filtros.vue'
 import Form from './Form.vue';
 
 const showForm   = ref(false);
