@@ -3,6 +3,33 @@
     <h3 class="p-3 fw-bold m-0">{{ curso_name }}</h3>
 
     <!-- Filtros -->
+    <div class="filters-container px-3 py-4 d-flex justify-content-evenly align-items-end gap-2">
+      <!-- Buscar/seleccionar actividad por nombre -->
+       <div>
+          <p class="fw-bold mb-1 fs-5 ms-1">Tarea</p>
+          <Filtros
+            v-model="filtros.actividad_id"
+            :options="actividadOptions"
+            value-key="id"
+            label-key="nombre"
+            placeholder="Buscar actividad…"
+          />
+       </div>
+
+      <div>
+        <p class="fw-bold mb-1 fs-5 ms-1">Desde</p>
+        <DateFiltro v-model="filtros.fecha_inicio" placeholder="Fecha inicio…" />
+      </div>
+
+      <div>
+        <p class="fw-bold mb-1 fs-5 ms-1">Hasta</p>
+        <DateFiltro v-model="filtros.fecha_fin" placeholder="Fecha fin…" />
+      </div>
+
+      <button class="btn btn-outline-secondary ms-2" @click="limpiarFiltros">
+        Limpiar
+      </button>
+    </div>
      
     <SortableTable 
       :columns="columns"
@@ -54,34 +81,51 @@
 <script setup>
 import { ref, computed } from 'vue';
 import SortableTable from '../components/SortableTable.vue';
-import Filters from '../components/Filters.vue';
+import Filtros from '../components/Filtros.vue';
+import DateFiltro from '../components/DateFiltro.vue';
 import { Chart } from 'highcharts-vue';
 
 const props = defineProps(['curso_name', 'actividades', 'cursos', 
   'total_calificado', 'total_del_curso', 'center_labels']);
 
 const filtros = ref({
-  nombre: '',
+  actividad_id: null,
   fecha_inicio: '',
   fecha_fin: ''
 });
 
+const actividadOptions = computed(() => {
+  return (props.actividades || []).map(a => ({
+    id: a.id,
+    nombre: a.asignacion?.nombre ?? a.nombre ?? `Actividad #${a.id}`
+  }));
+});
+
 const actividadesFiltradas = computed(() => {
-  return props.actividades.filter((a) => {
-    const nombre = a.asignacion?.nombre?.toLowerCase() || '';
-    const filtroNombre = filtros.value.nombre.toLowerCase();
+  const selId  = filtros.value.actividad_id;
+  const desde  = filtros.value.fecha_inicio;
+  const hasta  = filtros.value.fecha_fin;
 
-    const nombreCoincide = nombre.includes(filtroNombre);
-    const desde = filtros.value.fecha_inicio;
-    const hasta = filtros.value.fecha_fin;
+  return (props.actividades || []).filter(a => {
+    // 1) por actividad seleccionada (si hay)
+    const byActividad = !selId || a.id === selId;
 
-    const enRango =
-      (!desde || a.fecha_inicio >= desde) &&
-      (!hasta || a.fecha_fin <= hasta);
+    // 2) por rango de fechas (inclusivo)
+    const fi = a.fecha_inicio ? String(a.fecha_inicio).slice(0,10) : null;
+    const ff = a.fecha_fin    ? String(a.fecha_fin).slice(0,10)   : null;
 
-    return nombreCoincide && enRango;
+    const inDesde = !desde || (fi && fi >= desde);
+    const inHasta = !hasta || (ff && ff <= hasta);
+
+    return byActividad && inDesde && inHasta;
   });
 });
+
+function limpiarFiltros () {
+  filtros.value.actividad_id = null;
+  filtros.value.fecha_inicio = '';
+  filtros.value.fecha_fin    = '';
+}
 
 const columns = {
   nombre: {

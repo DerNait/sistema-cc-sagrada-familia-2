@@ -71,22 +71,47 @@ class CursoController extends Controller
         $user  = auth()->user();
         $rolId = (int) $user->rol_id;
 
-        // --- params de filtro ---
+        if ($rolId === 1 || $rolId === 4) {
+            // Admin / Docente
+            return $this->dataDocenteAdmin($request, $cursoId, $rolId);
+        }
+
+        // Estudiante
+        return $this->dataEstudiante($request, $cursoId);
+    }
+
+    /* ==========================================================
+    *  ADMIN / DOCENTE
+    *  - Mantiene tu lógica actual.
+    *  - Acepta filtros: grado_id, seccion_id, estudiante_ids[].
+    *  - Acepta filtros livianos: nombre, fecha_inicio, fecha_fin.
+    *  - Devuelve shape homogéneo con el de Estudiante.
+    * ========================================================== */
+    protected function dataDocenteAdmin(Request $request, int $cursoId, int $rolId)
+    {
+        $user  = auth()->user();
+
+        // Filtros “de selección”
         $gradoId     = (int) $request->input('grado_id');
         $seccionId   = (int) $request->input('seccion_id');
         $estIdsParam = (array) $request->input('estudiante_ids', []);
 
-        // Nombre real tabla grado (por si no es 'grados')
+        // Filtros “livianos” de actividad
+        $fNombre     = trim((string) $request->input('nombre', ''));
+        $fDesde      = $request->input('fecha_inicio'); // yyyy-mm-dd
+        $fHasta      = $request->input('fecha_fin');    // yyyy-mm-dd
+
         $gradoTable = (new Grado)->getTable();
 
-        // --- grados accesibles (igual que showDocenteAdmin, pero solo para validar/limitar) ---
+        // Grados accesibles
         $gradosQuery = Grado::query()
             ->select("$gradoTable.id", "$gradoTable.nombre")
             ->join('grado_cursos', 'grado_cursos.grado_id', '=', "$gradoTable.id")
             ->where('grado_cursos.curso_id', $cursoId);
 
-        if ($rolId === 4) { // docente: sus grados
-            $empleadoId = $user->empleado ?? null;
+        if ($rolId === 4) {
+            // Ojo: si $user->empleado es relación, usa ->id
+            $empleadoId = optional($user->empleado)->id ?? null;
             $gradosQuery->whereExists(function ($q) use ($empleadoId, $gradoTable) {
                 $q->selectRaw(1)
                 ->from('secciones')
@@ -98,26 +123,24 @@ class CursoController extends Controller
         $grados = $gradosQuery->orderBy("$gradoTable.nombre")->get();
         abort_if($grados->isEmpty(), 404, 'No hay grados disponibles.');
 
-        // resolver grado_id por defecto
         if (!$gradoId) $gradoId = (int) $grados->first()->id;
 
-        // --- secciones del grado ---
+        // Secciones del grado
         $seccionesQuery = Seccion::query()
             ->select('id','seccion','maestro_guia_id','grado_id')
             ->where('grado_id', $gradoId);
 
-        if ($rolId === 4) { // docente: sus secciones
-            $empleadoId = $user->empleado ?? null;
+        if ($rolId === 4) {
+            $empleadoId = optional($user->empleado)->id ?? null;
             $seccionesQuery->where('maestro_guia_id', $empleadoId);
         }
 
         $secciones = $seccionesQuery->orderBy('seccion')->get();
         abort_if($secciones->isEmpty(), 404, 'No hay secciones para el grado.');
 
-        // resolver seccion_id por defecto
         if (!$seccionId) $seccionId = (int) $secciones->first()->id;
 
-        // --- estudiantes de la sección ---
+        // Estudiantes de la sección
         $seccion = Seccion::with(['estudiantes.usuario:id,name,apellido'])
             ->select('id')
             ->findOrFail($seccionId);
@@ -133,23 +156,29 @@ class CursoController extends Controller
             $selectedEstudianteIds = $estudiantes->pluck('id');
         }
 
-        // map seccion_estudiante_id por estudiante
+        // Map seccion_estudiante_id por estudiante
         $mapSeccionEst = SeccionEstudiante::where('seccion_id', $seccionId)
             ->whereIn('estudiante_id', $selectedEstudianteIds)
             ->pluck('id', 'estudiante_id'); // [estudiante_id => seccion_estudiante_id]
 
-        // --- actividades del grado-curso ---
-        $actividades = Actividad::query()
+        // Actividades del grado-curso (con filtros livianos)
+        $actividadesQuery = Actividad::query()
             ->whereHas('gradoCurso', function ($q) use ($cursoId, $gradoId) {
                 $q->where('curso_id', $cursoId)->where('grado_id', $gradoId);
             })
-            ->select('id','nombre','total','fecha_inicio','fecha_fin','grado_curso_id')
-            ->orderBy('nombre')
-            ->get();
+            ->select('id','nombre','total','fecha_inicio','fecha_fin','grado_curso_id');
+
+        if ($fNombre !== '') {
+            $actividadesQuery->where('nombre', 'ILIKE', "%{$fNombre}%");
+        }
+        if ($fDesde) { $actividadesQuery->whereDate('fecha_inicio', '>=', $fDesde); }
+        if ($fHasta) { $actividadesQuery->whereDate('fecha_fin', '<=', $fHasta); }
+
+        $actividades = $actividadesQuery->orderBy('nombre')->get();
 
         $actividadIds = $actividades->pluck('id');
 
-        // --- notas ---
+        // Notas
         $notas = EstudianteNota::query()
             ->whereIn('actividad_id', $actividadIds)
             ->whereIn('seccion_estudiante_id', $mapSeccionEst->values())
@@ -157,6 +186,7 @@ class CursoController extends Controller
             ->get()
             ->groupBy('actividad_id');
 
+        // Payload (mismo shape que estudiante)
         $nombresPorEst = $estudiantes->keyBy('id');
 
         $actividadesPayload = $actividades->map(function ($act) use ($notas,$mapSeccionEst,$nombresPorEst) {
@@ -164,7 +194,7 @@ class CursoController extends Controller
 
             $rowsNotas = $nombresPorEst->map(function ($info, $estId) use ($porActividad,$mapSeccionEst) {
                 $seId = $mapSeccionEst->get($estId);
-                $n = $seId ? $porActividad->get($seId) : null;
+                $n    = $seId ? $porActividad->get($seId) : null;
 
                 return [
                     'estudiante_id'         => (int) $estId,
@@ -188,6 +218,7 @@ class CursoController extends Controller
         })->values();
 
         return response()->json([
+            'modo'                    => $rolId === 1 ? 'admin' : 'docente',
             'grados'                  => $grados,
             'selected_grado_id'       => $gradoId,
             'secciones'               => $secciones,
@@ -198,6 +229,74 @@ class CursoController extends Controller
         ]);
     }
 
+    /* ==========================================================
+    *  ESTUDIANTE
+    *  - Reusa la lógica de showEstudiante pero devuelve JSON.
+    *  - Acepta filtros livianos: nombre, fecha_inicio, fecha_fin.
+    *  - Mantiene el mismo shape de actividad usado en tu vista.
+    * ========================================================== */
+    protected function dataEstudiante(Request $request, int $cursoId)
+    {
+        $user = auth()->user();
+
+        // Filtros livianos
+        $fNombre = trim((string) $request->input('nombre', ''));
+        $fDesde  = $request->input('fecha_inicio'); // yyyy-mm-dd
+        $fHasta  = $request->input('fecha_fin');    // yyyy-mm-dd
+
+        $estudiante = Estudiante::where('usuario_id', $user->id)->firstOrFail();
+        $seccionEst = SeccionEstudiante::with('seccion.grado')
+            ->where('estudiante_id', $estudiante->id)
+            ->firstOrFail();
+
+        $gradoId      = $seccionEst->seccion->grado_id;
+        $seccionEstId = $seccionEst->id;
+
+        $actividadesQuery = Actividad::whereHas('gradoCurso', function ($q) use ($cursoId, $gradoId) {
+                $q->where('curso_id', $cursoId)
+                ->where('grado_id', $gradoId);
+            })
+            ->with(['notas' => fn ($q) => $q->where('seccion_estudiante_id', $seccionEstId)])
+            ->select('id', 'nombre', 'total', 'fecha_inicio', 'fecha_fin');
+
+        if ($fNombre !== '') {
+            $actividadesQuery->where('nombre', 'ILIKE', "%{$fNombre}%");
+        }
+        if ($fDesde) { $actividadesQuery->whereDate('fecha_inicio', '>=', $fDesde); }
+        if ($fHasta) { $actividadesQuery->whereDate('fecha_fin', '<=', $fHasta); }
+
+        $actividades = $actividadesQuery
+            ->orderBy('nombre')
+            ->get()
+            ->map(function ($act) {
+                $nota = $act->notas->first(); // puede ser null
+
+                return [
+                    'id'            => $act->id,
+                    'nombre'        => $act->nombre,
+                    'comentario'    => optional($nota)->comentario,
+                    'nota'          => optional($nota)->nota,
+                    'fecha_inicio'  => $act->fecha_inicio,
+                    'fecha_fin'     => $act->fecha_fin,
+                    'asignacion'    => [
+                        'nombre' => $act->nombre,
+                        'total'  => $act->total ?? 100,
+                    ],
+                ];
+            })->values();
+
+        // Para mantener shape homogéneo con el de docente/admin:
+        return response()->json([
+            'modo'                    => 'estudiante',
+            'grados'                  => [],               // no aplica
+            'selected_grado_id'       => null,             // no aplica
+            'secciones'               => [],               // no aplica
+            'selected_seccion_id'     => null,             // no aplica
+            'estudiantes'             => [],               // no aplica
+            'selected_estudiante_ids' => [],               // no aplica
+            'actividades'             => $actividades,
+        ]);
+    }
 
     protected function showDocenteAdmin(Request $request, int $cursoId, int $rolId)
     {
