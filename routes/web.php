@@ -18,11 +18,17 @@ use App\Http\Controllers\RoleModulePermissionController;
 use App\Http\Controllers\PagosController;
 use App\Http\Controllers\CSVController;
 use App\Http\Controllers\UploadController;
+use App\Http\Controllers\PagosEstudianteController;
 
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
 
 Auth::routes();
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/mis-pagos', [PagosEstudianteController::class, 'index'])->name('mis-pagos');
+});
+
 
 Route::group(['middleware' => ['auth', 'forerunner']], function () {
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
