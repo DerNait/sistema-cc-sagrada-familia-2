@@ -21,12 +21,6 @@ class EstudiantePago extends Model
         'tipo_estado_id'
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Relaciones
-    |--------------------------------------------------------------------------
-    */
-
     public function estudiante()
     {
         return $this->belongsTo(Estudiante::class);
