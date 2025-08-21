@@ -14,43 +14,62 @@ class PagosEstudianteController extends Controller
     {
         $usuario = Auth::user();
 
-        // Solo estudiantes pueden entrar aquí
-        if ($usuario->rol_id != 5) {
+        if ($usuario->rol_id == 1) {
+            $pagos = EstudiantePago::with(['estudiante.usuario'])
+                ->get()
+                ->map(function ($pago) {
+                    return [
+                        'id' => $pago->estudiante->id,
+                        'nombre' => $pago->estudiante->usuario->name,
+                        'apellido' => $pago->estudiante->usuario->apellido,
+                        'correo' => $pago->estudiante->usuario->email,
+                        'meses_pagados' => $pago->meses_pagados,
+                        'fecha_registro' => $pago->estudiante->usuario->fecha_registro,
+                        'fecha_nacimiento' => $pago->estudiante->usuario->fecha_nacimiento,
+                    ];
+                });
+
             return response()->json([
-                'success' => false,
-                'message' => 'Acceso denegado. Solo estudiantes pueden consultar sus pagos.'
-            ], 403);
+                'success' => true,
+                'rol' => 'admin',
+                'pagos' => $pagos
+            ]);
         }
 
-        // Buscar al estudiante
-        $estudiante = Estudiante::where('usuario_id', $usuario->id)->firstOrFail();
+        if ($usuario->rol_id == 5) {
+            $estudiante = Estudiante::where('usuario_id', $usuario->id)->firstOrFail();
 
-        // Traer pagos con relaciones
-        $pagos = EstudiantePago::with(['gradoPrecio', 'tipoPago', 'tipoEstado'])
-            ->where('estudiante_id', $estudiante->id)
-            ->latest()
-            ->get()
-            ->map(function ($pago) {
-                $inicio = Carbon::parse($pago->periodo_inicio);
-                $fin = Carbon::parse($pago->periodo_fin);
-                $hoy = Carbon::today();
+            $pagos = EstudiantePago::with(['gradoPrecio', 'tipoPago', 'tipoEstado'])
+                ->where('estudiante_id', $estudiante->id)
+                ->latest()
+                ->get()
+                ->map(function ($pago) {
+                    $inicio = Carbon::parse($pago->periodo_inicio);
+                    $fin = Carbon::parse($pago->periodo_fin);
+                    $hoy = Carbon::today();
 
-                if ($hoy->between($inicio, $fin)) {
-                    $pago->estado_vigencia = 'vigente';
-                } elseif ($hoy->greaterThan($fin)) {
-                    $pago->estado_vigencia = 'vencido';
-                } else {
-                    $pago->estado_vigencia = 'pendiente';
-                }
+                    if ($hoy->between($inicio, $fin)) {
+                        $pago->estado_vigencia = 'vigente';
+                    } elseif ($hoy->greaterThan($fin)) {
+                        $pago->estado_vigencia = 'vencido';
+                    } else {
+                        $pago->estado_vigencia = 'pendiente';
+                    }
 
-                return $pago;
-            });
+                    return $pago;
+                });
+
+            return response()->json([
+                'success' => true,
+                'rol' => 'estudiante',
+                'estudiante_id' => $estudiante->id,
+                'pagos' => $pagos
+            ]);
+        }
 
         return response()->json([
-            'success' => true,
-            'rol' => 'estudiante',
-            'estudiante_id' => $estudiante->id,
-            'pagos' => $pagos
-        ]);
+            'success' => false,
+            'message' => 'Acceso denegado. Solo estudiantes y administradores pueden consultar pagos.'
+        ], 403);
     }
 }
