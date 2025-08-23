@@ -32,6 +32,8 @@ import Form from './components/Crud/Form.vue';
 // Roles
 import RolesPermisos from './pages/RolesPermisos.vue';
 
+import CargarSeccion from './Pages/CargarSeccion.vue';
+
 const app = createApp({});
 
 app.component('hello-world', HelloWorld);
@@ -54,6 +56,7 @@ app.component('estudiante-cursos-detalle', estudianteCursosDetalle);
 app.component('curso-edicion', CursoEdicion);
 app.component('estudiante-curso', EstudianteCurso);
 app.component('docente-curso', DocenteCurso);
+app.component('cargar-seccion', CargarSeccion);
 app.component('home', Home);
 
 // CRUD

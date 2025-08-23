@@ -76,23 +76,21 @@ class SeccionesController extends CrudControllerBase
             ->multiRelation()
             ->hide();
 
-        $this->globalAction('randomize')
-            ->label('Randomizar')
+        $this->globalAction('upload')
+            ->label('Cargar')
             ->icon('fa-shuffle')
             ->btn('btn-outline-danger')
             ->ability('randomize')
-            ->url('/catalogos/secciones/randomizar')
-            ->method('POST')
-            ->confirm('confirm', 'Esto eliminara TODAS las secciones existentes y creara nuevas completamente diferente.
-            ¿Seguro que deseas continuar?');
+            ->url('/catalogos/secciones/upload')
+            ->method('GET');
 
         $this->syncAbilities('catalogos.secciones');
     }
 
-    public function randomize() {
-        return response()->json([
-            'status'  => 'ok',
-            'message' => 'Se randomizaron 128 registros.',
+    public function createUpload () {
+
+        return view('component', [
+            'component' => 'cargar-seccion',
         ]);
     }
 }

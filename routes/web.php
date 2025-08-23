@@ -148,15 +148,17 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
         });
     
         Route::prefix('secciones')->name('secciones.')->group(function () {
-            Route::get('/',            [SeccionesController::class, 'index'])->name('index');
-            Route::get('/export',      [SeccionesController::class, 'export'])->name('export');
-            Route::get('{id}',         [SeccionesController::class, 'show'])->name('show');
-            Route::get('/crear',       [SeccionesController::class, 'create'])->name('create');
-            Route::post('/',           [SeccionesController::class, 'store'])->name('store');
-            Route::get('{id}/editar',  [SeccionesController::class, 'edit'])->name('edit');
-            Route::put('{id}',         [SeccionesController::class, 'update'])->name('update');
-            Route::delete('{id}',      [SeccionesController::class, 'destroy'])->name('destroy');
-            Route::post('/randomizar', [SeccionesController::class, 'randomize'])->name('randomize');
+            Route::get('/',                 [SeccionesController::class, 'index'])->name('index');
+            Route::get('/export',           [SeccionesController::class, 'export'])->name('export');
+            Route::get('{id}',              [SeccionesController::class, 'show'])->name('show');
+            Route::get('/crear',            [SeccionesController::class, 'create'])->name('create');
+            Route::post('/',                [SeccionesController::class, 'store'])->name('store');
+            Route::get('{id}/editar',       [SeccionesController::class, 'edit'])->name('edit');
+            Route::put('{id}',              [SeccionesController::class, 'update'])->name('update');
+            Route::delete('{id}',           [SeccionesController::class, 'destroy'])->name('destroy');
+            Route::get('/upload',           [SeccionesController::class, 'createUpload'])->name('upload.create');
+            Route::post('/upload',          [SeccionesController::class, 'storeUpload'])->name('upload.store');
+            Route::get('/upload/template',  [SeccionesController::class, 'downloadTemplate'])->name('upload.template');
         });
     });
 });
