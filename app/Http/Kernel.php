@@ -41,5 +41,6 @@ class Kernel extends HttpKernel
     protected array $middlewareAliases = [
         'auth'       => \App\Http\Middleware\Authenticate::class,
         'forerunner' => \App\Http\Middleware\ForerunnerAbility::class,// ← Aquí registras tu middleware personalizado
+        'check.payment' => \App\Http\Middleware\CheckPaymentStatus::class,
     ];
 }
