@@ -26,7 +26,13 @@
           </button>
         </div>
       </div>
-
+    <div>
+      <!-- Botón de exportar -->
+      <div class="d-flex justify-content-end mb-3">
+        <a :href="`/calificaciones/export/${cursoId}`" class="btn btn-success">
+          📄 Exportar Calificaciones
+        </a>
+      </div>
       <!-- Tabla de calificaciones -->
       <div class="table-responsive">
         <table class="table table-bordered align-middle text-center">
@@ -54,34 +60,18 @@
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script>
 export default {
-  data() {
-    return {
-      grado: "8",
-      seccion: "A",
-      curso: "Matemáticas",
-      estudiantes: [
-        { nombre: "Emilio Lopez", parcial: 85, proyecto: 92, final: 78 },
-        { nombre: "Isaac Ortiz", parcial: 60, proyecto: 55, final: 70 },
-      ],
-    };
-  },
-  methods: {
-    calcularPromedio(est) {
-      const promedio = (est.parcial + est.proyecto + est.final) / 3;
-      return promedio.toFixed(1);
-    },
-    guardarNotas() {
-      alert("Notas guardadas correctamente ✅");
-    },
-    generarActa() {
-      alert("Acta generada con éxito 📄");
-    },
-  },
-};
+  props: {
+    cursoId: {
+      type: Number,
+      required: true
+    }
+  }
+}
 </script>
 
 <style scoped>

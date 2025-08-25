@@ -10,7 +10,7 @@
 </head>
 <body>
     <div id="app">
-        <calificaciones></calificaciones>
+        <calificaciones :curso-id="{{ $curso->id }}"></calificaciones>
     </div>
 </body>
 </html>
