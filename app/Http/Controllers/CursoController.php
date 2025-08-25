@@ -530,5 +530,32 @@ class CursoController extends Controller
         ]);
     }
 
-    //metodo export
+public function exportCalificaciones(int $cursoId)
+{
+    $calificaciones = EstudianteNota::with([
+            'actividad:id,nombre',
+            'seccionEstudiante.estudiante.usuario:id,name,apellido'
+        ])
+        ->whereHas('actividad.gradoCurso', function ($q) use ($cursoId) {
+            $q->where('curso_id', $cursoId);
+        })
+        ->get()
+        ->map(function ($nota) {
+            return [
+                'Estudiante' => $nota->seccionEstudiante->estudiante->usuario->name
+                    . ' ' . $nota->seccionEstudiante->estudiante->usuario->apellido,
+                'Actividad'  => $nota->actividad->nombre,
+                'Nota'       => $nota->nota,
+                'Comentario' => $nota->comentario,
+            ];
+        });
+
+    return Excel::download(
+        new \Maatwebsite\Excel\Collections\SheetCollection([
+            'Calificaciones' => collect($calificaciones)
+        ]),
+        'calificaciones.csv',
+        \Maatwebsite\Excel\Excel::CSV 
+    );
+}
 }
