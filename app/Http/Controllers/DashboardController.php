@@ -2,40 +2,56 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Firebase\JWT\JWT;
+use Illuminate\Http\JsonResponse;
+use App\Models\User;
+use App\Models\Estudiante;
 
 class DashboardController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
+        // Cambia a 'auth:sanctum' si lo consumirás vía /api con SPA
         $this->middleware('auth');
     }
 
     /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * Resumen para el dashboard (datos neutrales):
+     * - total de usuarios
+     * - total de estudiantes
+     * - estudiantes con beca vs sin beca
+     * - porcentajes con/sin beca
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $METABASE_SITE_URL = "http://localhost:3000"; // o el dominio donde corre Metabase
-        $METABASE_SECRET_KEY = "19c1faba8d589bb502fcab95b9f0d83f9bbccf03b708c4090d477e8a45eedf21";
+        $totalUsers = (int) User::count();
 
-        $payload = [
-            "resource" => ["dashboard" => 2], // Cambia el 2 por el ID real del dashboard
-            "params" => new \stdClass(),
-            "exp" => time() + (10 * 60)
-        ];
+        // LEFT JOIN para contar también estudiantes sin beca asociada
+        // Regla: "con beca" si existe beca y su descuento > 0; lo demás es "sin beca"
+        $agg = Estudiante::leftJoin('becas', 'estudiantes.beca_id', '=', 'becas.id')
+            ->selectRaw('COUNT(*) AS total')
+            ->selectRaw('SUM(CASE WHEN becas.id IS NOT NULL AND COALESCE(becas.descuento, 0) > 0 THEN 1 ELSE 0 END) AS con_beca')
+            ->first();
 
-        $token = JWT::encode($payload, $METABASE_SECRET_KEY, 'HS256');
-        $iframeUrl = $METABASE_SITE_URL . "/embed/dashboard/" . $token . "#bordered=true&titled=true";
+        $totalStudents  = (int) ($agg->total ?? 0);
+        $withScholar    = (int) ($agg->con_beca ?? 0);
+        $withoutScholar = max(0, $totalStudents - $withScholar);
 
-        return view('dashboard', compact('iframeUrl'));
+        $pctWith    = $totalStudents ? round(($withScholar * 100) / $totalStudents, 2) : 0.0;
+        $pctWithout = $totalStudents ? round(($withoutScholar * 100) / $totalStudents, 2) : 0.0;
+
+        return response()->json([
+            'totals' => [
+                'users'    => $totalUsers,
+                'students' => $totalStudents,
+            ],
+            'scholarships' => [
+                'with'      => $withScholar,
+                'without'   => $withoutScholar,
+                'percent'   => [
+                    'with'    => $pctWith,
+                    'without' => $pctWithout,
+                ],
+            ],
+        ]);
     }
 }
