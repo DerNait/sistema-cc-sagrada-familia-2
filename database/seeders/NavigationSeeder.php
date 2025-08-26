@@ -30,15 +30,6 @@ class NavigationSeeder extends Seeder
             new NavModule('Secciones','catalogos.secciones', 800,'fas fa-th-large','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT, NavModule::RANDOMIZE)),
             new NavModule('Actividades', 'catalogos.actividades', 900, 'fas fa-tasks', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
 
-            // Modulo para exportar calificaciones
-            new NavModule(
-                'Exportar Calificaciones',
-                'cursos.export-calificaciones',
-                1000,
-                'fas fa-file-excel',
-                'cursos', // lo colocamos dentro de "Cursos"
-                array_merge(NavModule::READ, NavModule::EXPORT)
-            ),
         ]);
 
         // 3) Inserta módulos y permisos

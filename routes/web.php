@@ -41,8 +41,7 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
 
         Route::get('{curso}/exportar-calificaciones', [CursoController::class, 'exportCalificaciones'])
             ->name('exportar.calificaciones');
-            ->middleware('can:cursos.export');
-
+            
         Route::resource('{curso}/notas', NotasController::class)->only(['store', 'update'])
         ->names([
             'store'  => 'notas.store',
