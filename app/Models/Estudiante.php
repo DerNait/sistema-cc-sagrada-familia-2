@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
 
 class Estudiante extends Model
 {
@@ -34,5 +35,18 @@ class Estudiante extends Model
             'estudiante_id',
             'seccion_id'
         );
+    }
+
+    public function haPagado(int $diasVigencia = 30): bool
+    {
+        $ultimoPago = $this->pagos()->orderByDesc('aprobado_en')->first();
+
+        if (!$ultimoPago) {
+            return false; // nunca ha pagado
+        }
+
+        $fechaVencimiento = Carbon::parse($ultimoPago->aprobado_en)->addDays($diasVigencia);
+
+        return $fechaVencimiento->isFuture(); // true si aún está vigente
     }
 }
