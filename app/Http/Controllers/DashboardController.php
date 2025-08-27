@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
+//use Illuminate\Http\JsonResponse;
+use Illuminate\View\View;
 use App\Models\User;
 use App\Models\Estudiante;
 
@@ -21,7 +22,7 @@ class DashboardController extends Controller
      * - estudiantes con beca vs sin beca
      * - porcentajes con/sin beca
      */
-    public function index(): JsonResponse
+    public function index(): View
     {
         $totalUsers = (int) User::count();
 
@@ -39,19 +40,12 @@ class DashboardController extends Controller
         $pctWith    = $totalStudents ? round(($withScholar * 100) / $totalStudents, 2) : 0.0;
         $pctWithout = $totalStudents ? round(($withoutScholar * 100) / $totalStudents, 2) : 0.0;
 
-        return response()->json([
-            'totals' => [
-                'users'    => $totalUsers,
-                'students' => $totalStudents,
-            ],
-            'scholarships' => [
-                'with'      => $withScholar,
-                'without'   => $withoutScholar,
-                'percent'   => [
-                    'with'    => $pctWith,
-                    'without' => $pctWithout,
-                ],
-            ],
+        $params = [
+        ];
+
+        return view('component', [
+            'component' => 'Dashboard',
+            'params'    => $params,
         ]);
     }
 }
