@@ -24,6 +24,7 @@ import EstudianteCurso from './pages/EstudianteCurso.vue';
 import DocenteCurso from './pages/DocenteCurso.vue';
 import CursoEdicion from './components/Curso-edicion.vue';
 import Home from './components/Home.vue';
+import Dashboard from './components/Dashboard.vue';
 
 // CRUD
 import Table from './components/Crud/Table.vue';
@@ -58,6 +59,7 @@ app.component('estudiante-curso', EstudianteCurso);
 app.component('docente-curso', DocenteCurso);
 app.component('cargar-seccion', CargarSeccion);
 app.component('home', Home);
+app.component('dashboard', Dashboard);
 
 // CRUD
 app.component('crud-table', Table);
