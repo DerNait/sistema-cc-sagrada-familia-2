@@ -11,7 +11,6 @@ class DashboardController extends Controller
 {
     public function __construct()
     {
-        // Cambia a 'auth:sanctum' si lo consumirás vía /api con SPA
         $this->middleware('auth');
     }
 
@@ -19,15 +18,13 @@ class DashboardController extends Controller
      * Resumen para el dashboard (JSON):
      * - total de usuarios
      * - total de estudiantes
-     * - estudiantes con beca vs sin beca (descuento > 0)
-     * - porcentajes con/sin beca
-     * - estudiantes pagados vs no pagados (año actual)
-     * - porcentajes pagados/no pagados
-     * - estructuras listas para progress bar y donut
+     * - estudiantes con beca vs sin beca (descuento > 0) + porcentajes
+     * - estudiantes pagados vs no pagados (año actual) + porcentajes
+     * - total de empleados
      */
     public function index(): JsonResponse
     {
-        // --- Año actual como filtro por defecto ---
+        // --- Año actual ---
         $year = now()->year;
         $yearStart = now()->setDate($year, 1, 1)->startOfDay();
         $yearEnd   = now()->setDate($year, 12, 31)->endOfDay();
@@ -35,7 +32,7 @@ class DashboardController extends Controller
         // --- Totales base ---
         $totalUsers = (int) User::count();
 
-        // Con/Sin beca (beca con descuento > 0)
+        // Con/Sin beca
         $agg = Estudiante::leftJoin('becas', 'estudiantes.beca_id', '=', 'becas.id')
             ->selectRaw('COUNT(*) AS total')
             ->selectRaw('SUM(CASE WHEN becas.id IS NOT NULL AND COALESCE(becas.descuento, 0) > 0 THEN 1 ELSE 0 END) AS con_beca')
@@ -48,19 +45,16 @@ class DashboardController extends Controller
         $pctWith    = $totalStudents ? round(($withScholar * 100) / $totalStudents, 2) : 0.0;
         $pctWithout = $totalStudents ? round(($withoutScholar * 100) / $totalStudents, 2) : 0.0;
 
-        // --- Pagados / No pagados ---
-        // Buscamos el id del estado "Pagado" en tipo_estados.tipo
+        // Pagados / No pagados
         $paidStateId = DB::table('tipo_estados')
             ->whereRaw('LOWER(tipo) = ?', ['pagado'])
             ->value('id');
 
-        // Estudiantes con al menos un registro "Pagado" que se solape con el año actual
         $paidStudents = 0;
         if ($paidStateId) {
             $paidStudents = DB::table('estudiante_pagos')
                 ->where('tipo_estado_id', $paidStateId)
                 ->where(function ($q) use ($yearStart, $yearEnd) {
-                    // overlap entre [periodo_inicio, periodo_fin] y [yearStart, yearEnd]
                     $q->whereDate('periodo_inicio', '<=', $yearEnd)
                       ->whereDate('periodo_fin', '>=', $yearStart);
                 })
@@ -72,7 +66,10 @@ class DashboardController extends Controller
         $pctPaid   = $totalStudents ? round(($paidStudents * 100) / $totalStudents, 2) : 0.0;
         $pctUnpaid = $totalStudents ? round(($unpaidStudents * 100) / $totalStudents, 2) : 0.0;
 
-        // --- JSON listo para frontend (progress + donut) ---
+        // --- Empleados ---
+        $totalEmployees = (int) DB::table('empleados')->count();
+
+        // --- JSON ---
         $payload = [
             'filters' => [
                 'year'  => $year,
@@ -82,8 +79,9 @@ class DashboardController extends Controller
                 ],
             ],
             'totals' => [
-                'users'    => $totalUsers,
-                'students' => $totalStudents,
+                'users'     => $totalUsers,
+                'students'  => $totalStudents,
+                'employees' => $totalEmployees,
             ],
             'scholarship' => [
                 'with'         => $withScholar,
@@ -98,13 +96,16 @@ class DashboardController extends Controller
                 'pct_unpaid'      => $pctUnpaid,
             ],
             'charts' => [
-                // Barra de progreso: 0..100
                 'progress_paid_percent' => $pctPaid,
-                // Donut
                 'donut_paid_unpaid' => [
                     ['label' => 'Pagados',    'value' => (int)$paidStudents],
                     ['label' => 'No pagados', 'value' => (int)$unpaidStudents],
                 ],
+            ],
+            'kpis' => [
+                ['label' => 'Empleados',   'value' => $totalEmployees],
+                ['label' => 'Estudiantes', 'value' => $totalStudents],
+                ['label' => 'Usuarios',    'value' => $totalUsers],
             ],
         ];
 
