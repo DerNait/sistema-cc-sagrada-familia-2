@@ -21,6 +21,7 @@ class DashboardController extends Controller
      * - estudiantes con beca vs sin beca (descuento > 0) + porcentajes
      * - estudiantes pagados vs no pagados (año actual) + porcentajes
      * - total de empleados
+     * - KPI: Estado de pagos de estudiantes
      */
     public function index(): JsonResponse
     {
@@ -102,10 +103,14 @@ class DashboardController extends Controller
                     ['label' => 'No pagados', 'value' => (int)$unpaidStudents],
                 ],
             ],
+            // KPIs grandes para tarjetas
             'kpis' => [
                 ['label' => 'Empleados',   'value' => $totalEmployees],
                 ['label' => 'Estudiantes', 'value' => $totalStudents],
                 ['label' => 'Usuarios',    'value' => $totalUsers],
+                // NUEVO: Estado de pagos
+                ['label' => 'Estudiantes Pagados',    'value' => $paidStudents],
+                ['label' => 'Estudiantes No Pagados', 'value' => $unpaidStudents],
             ],
         ];
 
