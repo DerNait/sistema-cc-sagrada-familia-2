@@ -163,7 +163,7 @@ class DashboardController extends Controller
         ];
 
         // === Retorna la vista ===
-        return view('component', [
+        return view('dashboard', [
             'component' => 'Dashboard',
             'params'    => $params,
         ]);

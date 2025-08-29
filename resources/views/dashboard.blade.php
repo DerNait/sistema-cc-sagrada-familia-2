@@ -1,17 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Edición</title>
-    @vite('resources/js/app.js')
-</head>
-<body>
-    <div id="app">
-        <dashboard></dashboard>
-    </div>
-</body>
-</html>
+<div id="app">
+    <dashboard :params='@json($params)'></dashboard>
+</div>
 @endsection
