@@ -38,9 +38,8 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
         Route::get('/',            [CursoController::class, 'index'])->name('index');
         Route::get('/{curso}',     [CursoController::class, 'show'])->name('show');
         Route::get('{curso}/data', [CursoController::class, 'data'])->name('data');
+        Route::get('/export-calificaciones', [CursosController::class, 'exportCalificaciones'])->name('export-calificaciones'); #Cambiar Controller, Ruta creada pues falta lógica.
 
-        Route::get('{curso}/exportar-calificaciones', [CursoController::class, 'exportCalificaciones'])
-            ->name('exportar.calificaciones');
             
         Route::resource('{curso}/notas', NotasController::class)->only(['store', 'update'])
         ->names([
