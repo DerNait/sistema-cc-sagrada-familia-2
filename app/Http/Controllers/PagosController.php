@@ -56,6 +56,7 @@ class PagosController extends Controller
         $data = $request->validate([
             'monto' => 'required|numeric',
             'descripcion' => 'nullable|string',
+            'estado' => 'required|in:pendiente,pagado,aprobado,rechazado',
         ]);
 
         $pago->update($data);
