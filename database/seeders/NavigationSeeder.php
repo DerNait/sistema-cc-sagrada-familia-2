@@ -21,6 +21,9 @@ class NavigationSeeder extends Seeder
             new NavModule('Cursos','cursos',300,'fas fa-graduation-cap', null, NavModule::READ),
             new NavModule('Catálogos','catalogos',400,'fas fa-book', null, NavModule::READ),
             
+            new NavModule('Pagos','pagos',500,'fas fa-credit-card', null, array_merge(NavModule::CRUD, NavModule::EXPORT)),
+
+
             new NavModule('Usuarios', 'catalogos.usuarios', 100, 'fas fa-user-shield', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
             new NavModule('Roles', 'catalogos.roles', 200, 'fas fa-user-tag', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
             new NavModule('Empleados','catalogos.empleados', 300,'fas fa-id-badge','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
@@ -29,6 +32,7 @@ class NavigationSeeder extends Seeder
             new NavModule('Cursos','catalogos.cursos', 700,'fas fa-chalkboard-teacher','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
             new NavModule('Secciones','catalogos.secciones', 800,'fas fa-th-large','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT, NavModule::RANDOMIZE)),
             new NavModule('Actividades', 'catalogos.actividades', 900, 'fas fa-tasks', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            
 
         ]);
 
