@@ -130,6 +130,8 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
             Route::get('{id}/editar', [PagosController::class, 'edit'])->name('edit');
             Route::put('{id}', [PagosController::class, 'update'])->name('update');
             Route::delete('{id}', [PagosController::class, 'destroy'])->name('destroy');
+            Route::get('cargar', [PagosController::class, 'createUpload'])->name('cargar');
+            Route::post('cargar', [PagosController::class, 'storeUpload'])->name('cargar.store');
         });
 
         Route::prefix('cargar_csv')->name('cargar_csv.')->group(function () {
