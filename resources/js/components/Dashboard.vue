@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container p-4">
-    <!-- Mostrar KPIs solo si ya tenemos params -->
+    
     <div
       v-if="params && params.totals"
       class="d-flex justify-content-end gap-5 mb-4"
@@ -25,13 +25,13 @@
       />
     </div>
 
-    <!-- Estado mientras carga o si no hay datos -->
+    
     <div v-else class="text-center my-5">
       <p class="text-muted">Cargando datos del dashboard...</p>
     </div>
 
     <!-- Gráficos -->
-    <div class="row g-4 mt-4 charts-row">
+    <div v-if="params && params.charts" class="row g-4 mt-4 charts-row">
       <!-- Gráfico circular de estudiantes -->
       <div class="col-md-4 d-flex">
         <Chart
@@ -73,8 +73,8 @@
     </div>
 
     <!-- Segunda fila de gráficos -->
-    <div class="row g-4 mt-1 charts-row">
-      <!-- Gráfico de promedio de grados (ocupa 8 columnas para ser igual al ancho de los dos primeros de arriba) -->
+    <div v-if="params && params.charts" class="row g-4 mt-1 charts-row">
+      <!-- Gráfico de promedio de grados -->
       <div class="col-md-8 d-flex">
         <Chart
           title="Promedio de grados"
@@ -118,47 +118,83 @@ export default {
       required: true
     }
   },
-  data() {
-    return {
-      // Datos para el gráfico de estudiantes (donut)
-      studentsData: {
-        series: [65, 35],
-        labels: ['Activos', 'Inactivos']
-      },
+  computed: {
+    // Datos para el gráfico de estudiantes (donut) - Con beca/Sin beca
+    studentsData() {
+      if (!this.params?.charts?.scholarship_donut) {
+        return { series: [], labels: [] }
+      }
+      
+      const data = this.params.charts.scholarship_donut
+      return {
+        series: data.map(item => item.value),
+        labels: data.map(item => item.label)
+      }
+    },
 
-      // Datos para pagos de estudiantes
-      paymentsData: {
+    // Datos para pagos de estudiantes (bar) - Pagados/No pagados
+    paymentsData() {
+      if (!this.params?.charts?.donut_paid_unpaid) {
+        return { series: [], categories: [] }
+      }
+      
+      const data = this.params.charts.donut_paid_unpaid
+      return {
         series: [{
           name: 'Estudiantes',
-          data: [85, 70, 55]
+          data: data.map(item => item.value)
         }],
-        categories: ['Pagados', 'En proceso', 'En mora']
-      },
+        categories: data.map(item => item.label)
+      }
+    },
 
-      // Datos para becas de estudiantes
-      scholarshipsData: {
+    // Datos para becas de estudiantes (bar horizontal) - Con beca/Sin beca
+    scholarshipsData() {
+      if (!this.params?.charts?.scholarship_donut) {
+        return { series: [] }
+      }
+      
+      const data = this.params.charts.scholarship_donut
+      const conBeca = data.find(item => item.label === 'Con beca')?.value || 0
+      const sinBeca = data.find(item => item.label === 'Sin beca')?.value || 0
+      
+      return {
         series: [{
           name: 'Con beca',
-          data: [30, 35, 25, 40, 35, 30]
+          data: [conBeca, conBeca, conBeca, conBeca, conBeca, conBeca]
         }, {
           name: 'Sin beca',
-          data: [70, 65, 75, 60, 65, 70]
+          data: [sinBeca, sinBeca, sinBeca, sinBeca, sinBeca, sinBeca]
         }]
-      },
+      }
+    },
 
-      // Datos para el nuevo gráfico de promedio de grados
-      gradesData: {
+    // Datos para promedio de grados (bar)
+    gradesData() {
+      if (!this.params?.charts?.grades_avg_bar) {
+        return { series: [], categories: [] }
+      }
+      
+      const data = this.params.charts.grades_avg_bar
+      return {
         series: [{
           name: 'Promedio',
-          data: [95, 82, 88, 92, 96, 85, 89, 93]
+          data: data.map(item => item.value)
         }],
-        categories: ['Grado 1', 'Grado 1', 'Grado 1', 'Grado 1', 'Grado 1', 'Grado 1', 'Grado 1', 'Grado 1']
-      },
+        categories: data.map(item => item.label)
+      }
+    },
 
-      // Datos para el gráfico de estado del personal (donut)
-      staffStatusData: {
-        series: [72, 28],
-        labels: ['Activo', 'Inactivo']
+    // Datos para estado del personal (donut) - Pagado/No pagado este mes
+    staffStatusData() {
+      if (!this.params?.staff_pay_status) {
+        return { series: [], labels: [] }
+      }
+      
+      const data = this.params.staff_pay_status
+      return {
+        series: [data.paid, data.unpaid],
+        labels: ['Pagado', 'No pagado']
       }
     }
   }
@@ -166,7 +202,6 @@ export default {
 </script>
 
 <style scoped>
-/* Hacer que las cards tengan la misma altura */
 .charts-row .col-md-4 {
   display: flex;
 }
