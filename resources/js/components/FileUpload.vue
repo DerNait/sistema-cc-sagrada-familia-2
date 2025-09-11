@@ -43,35 +43,52 @@
 
     <!-- Archivo cargado -->
     <div v-if="selectedFile" class="uploaded-file mt-2">
-      <div class="d-flex justify-content-between align-items-start">
-        <div class="d-flex gap-2 align-items-center">
-          <div class="file-icon d-flex justify-content-center align-items-center">
-            <i class="fa-solid fa-image fs-5"></i>
+      <template v-if="!fileBusy">
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="d-flex gap-2 align-items-center">
+            <div class="file-icon d-flex justify-content-center align-items-center">
+              <i class="fa-solid fa-image fs-5"></i>
+            </div>
+            <div>
+              <p class="m-0 p-0">{{ selectedFile.name }}</p>
+              <p class="m-0 p-0" style="color: #A9A9A9;">{{ prettySize(selectedFile.size) }}</p>
+            </div>
           </div>
-          <div>
-            <p class="m-0 p-0">{{ selectedFile.name }}</p>
-            <p class="m-0 p-0" style="color: #A9A9A9;">{{ prettySize(selectedFile.size) }}</p>
+          <Filtros
+            v-if="!uploadingTemp"
+            v-model="meses"
+            :options="mesesOptions"
+            placeholder="Meses a pagar"
+            direction="up"
+          />
+          <button class="x-button" @click.stop="clearFile">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+  
+        <!-- Progreso -->
+        <div v-if="progress > 0 && uploadingTemp" class="mt-3">
+          <div class="progress" role="progressbar" :aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar" :style="{ width: progress + '%' }">
+              {{ progress }}%
+            </div>
           </div>
         </div>
-        <button class="x-button" @click.stop="clearFile">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <!-- Progreso -->
-      <div v-if="progress > 0" class="mt-3">
-        <div class="progress" role="progressbar" :aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100">
-          <div class="progress-bar" :style="{ width: progress + '%' }">
-            {{ progress }}%
-          </div>
+      </template>
+      <template v-else>
+        <div class="d-flex justify-content-center align-items-center flex-grow-1">
+          <i class="fa-solid fa-spinner fa-spin-pulse"></i>
         </div>
-      </div>
+      </template>
     </div>
+
+    <!-- Mensajes -->
+    <p v-if="message" class="mt-2 text-center">{{ message }}</p>
 
     <!-- Botón enviar -->
     <div class="d-flex justify-content-center mt-3">
       <button
-        v-if="selectedFile"
+        v-if="selectedFile && !uploadingTemp && !fileBusy"
         class="btn btn-primary px-4"
         @click="uploadFile"
         :disabled="!selectedFile || uploading"
@@ -81,119 +98,189 @@
         <span class="ms-2" v-else>Enviando…</span>
       </button>
     </div>
-
-    <!-- Mensajes -->
-    <p v-if="message" class="mt-2 text-center">{{ message }}</p>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
 import axios from 'axios'
+import Filtros from './Filtros.vue';
 
-export default {
-  name: 'DragDropUploader',
-  props: {
-    accept: { type: String, default: '' }, // e.g. "image/*,.pdf"
-    hint:   { type: String, default: '' }  // e.g. "PDF o imágenes, máximo 10MB"
-  },
-  data() {
-    return {
-      selectedFile: null,
-      message: '',
-      progress: 0,
-      isDragOver: false,
-      dragCounter: 0,
-      uploading: false
-    }
-  },
-  methods: {
-    openFileDialog() {
-      this.$refs.fileInput?.click()
-    },
-    onFileChange(event) {
-      const file = event.target.files?.[0]
-      if (file) {
-        this.selectedFile = file
-        this.message = ''
-        this.progress = 0
-      }
-    },
-    onDragOver() {
-      this.isDragOver = true
-      this.dragCounter++
-    },
-    onDragLeave() {
-      this.dragCounter = Math.max(0, this.dragCounter - 1)
-      if (this.dragCounter === 0) this.isDragOver = false
-    },
-    onDrop(e) {
-      this.dragCounter = 0
-      this.isDragOver = false
-      const file = e.dataTransfer?.files?.[0]
-      if (file) {
-        // opcional: valida por tipo/tamaño aquí
-        this.selectedFile = file
-        this.message = ''
-        this.progress = 0
-      }
-    },
-    prettySize(bytes) {
-      if (!bytes && bytes !== 0) return ''
-      const units = ['B','KB','MB','GB','TB']
-      let i = 0
-      let size = bytes
-      while (size >= 1024 && i < units.length - 1) {
-        size /= 1024
-        i++
-      }
-      return `${size.toFixed(i ? 1 : 0)} ${units[i]}`
-    },
-    clearFile() {
-      this.selectedFile = null
-      this.progress = 0
-      this.message = ''
-      if (this.$refs.fileInput) this.$refs.fileInput.value = ''
-    },
-    async uploadFile() {
-      if (!this.selectedFile) return
-      try {
-        this.uploading = true
-        this.message = ''
-        const formData = new FormData()
-        formData.append('file', this.selectedFile)
+const meses = ref(null)
+const mesesOptions = Array.from({ length: 12 }, (_, i) => {
+  const n = i + 1
+  return { id: n, nombre: `${n} mes${n > 1 ? 'es' : ''}` }
+})
 
-        const csrfToken = document
-          .querySelector('meta[name="csrf-token"]')
-          ?.getAttribute('content')
+// === Validación dura (1MB, JPG/PNG) ===
+const MAX_SIZE_BYTES = 1 * 1024 * 1024;
+const ALLOWED_MIME = new Set(['image/jpeg', 'image/png']);
+const ALLOWED_EXT  = ['.jpg', '.jpeg', '.png'];
 
-        const res = await axios.post('/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
-          },
-          onUploadProgress: (evt) => {
-            // total puede venir undefined según el server; manejemos fallback
-            const total = evt.total || (evt.target && evt.target.getResponseHeader && Number(evt.target.getResponseHeader('Content-Length'))) || 0
-            if (total > 0) {
-              this.progress = Math.round((evt.loaded / total) * 100)
-            } else {
-              // fallback: si no hay total, simula progreso básico
-              const approx = Math.min(95, Math.floor((evt.loaded / (1024 * 1024)) * 10)) // arbitrario
-              this.progress = approx
-            }
-          }
-        })
+function isAllowedType(file) {
+  if (ALLOWED_MIME.has(file.type)) return true;
+  const name = (file.name || '').toLowerCase();
+  return ALLOWED_EXT.some(ext => name.endsWith(ext));
+}
 
-        this.progress = 100
-        this.message = res?.data?.message || 'Archivo subido correctamente'
-      } catch (error) {
-        console.error(error)
-        this.message = 'Error al subir el archivo'
-      } finally {
-        this.uploading = false
-      }
-    }
+function validateFile(file) {
+  if (!file) return false;
+  if (!isAllowedType(file)) {
+    message.value = 'Formato inválido. Solo se permiten JPG, JPEG o PNG.';
+    return false;
   }
+  if (file.size > MAX_SIZE_BYTES) {
+    message.value = 'El archivo supera el máximo de 1 MB.';
+    return false;
+  }
+  return true;
+}
+
+// Props
+const props = defineProps({
+  accept: { type: String, default: '' },
+  hint:   { type: String, default: '' }
+})
+
+// Estado
+const fileInput     = ref(null)
+const selectedFile  = ref(null)
+const uploadedPath  = ref(null) // <- ruta en storage para poder borrar
+const message       = ref('')
+const progress      = ref(0)
+const isDragOver    = ref(false)
+const dragCounter   = ref(0)
+const uploadingTemp = ref(false) // upload temporal (pre-enviar)
+const uploading     = ref(false)
+const fileBusy      = ref(false)
+
+// Helpers UI
+function prettySize(bytes) {
+  if (!bytes && bytes !== 0) return ''
+  const units = ['B','KB','MB','GB','TB']
+  let i = 0, size = bytes
+  while (size >= 1024 && i < units.length - 1) { size /= 1024; i++ }
+  return `${size.toFixed(i ? 1 : 0)} ${units[i]}`
+}
+
+const openFileDialog = () => fileInput.value?.click()
+
+// === Ciclo: borrar temp anterior -> subir nuevo temp ===
+async function deleteUploadedIfAny() {
+  if (!uploadedPath.value) return
+  fileBusy.value = true
+  message.value = ''
+
+  try {
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    await axios.delete('/upload', {
+      data: { path: uploadedPath.value },
+      headers: { ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {}) }
+    })
+  } catch (e) {
+    console.warn('No se pudo eliminar el archivo previo:', e)
+  } finally {
+    uploadedPath.value = null
+    fileBusy.value = false
+  }
+}
+
+async function beginTempUpload(file) {
+  // sube a /upload y guarda path para poder borrarlo
+  const formData = new FormData()
+  formData.append('file', file)
+  // opcional: carpeta custom -> formData.append('path', 'uploads/comprobantes/tmp')
+
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+
+  uploadingTemp.value = true
+  message.value = ''
+  progress.value = 0
+
+  try {
+    const res = await axios.post('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
+      },
+      onUploadProgress: (evt) => {
+        const total =
+          evt.total ||
+          (evt.target && evt.target.getResponseHeader && Number(evt.target.getResponseHeader('Content-Length'))) ||
+          0
+        if (total > 0) {
+          progress.value = Math.round((evt.loaded / total) * 100)
+        } else {
+          const approx = Math.min(95, Math.floor((evt.loaded / (1024 * 1024)) * 10))
+          progress.value = approx
+        }
+      }
+    })
+
+    progress.value = 100
+    uploadedPath.value = res?.data?.path || null
+    message.value = res?.data?.message || 'Archivo subido correctamente'
+  } catch (err) {
+    console.error(err)
+    message.value = 'Error al subir el archivo'
+    // si falló el upload, limpia selección
+    selectedFile.value = null
+    if (fileInput.value) fileInput.value.value = ''
+  } finally {
+    uploadingTemp.value = false
+  }
+}
+
+// Handlers
+const onFileChange = async (event) => {
+  const file = event.target.files?.[0]
+  if (!validateFile(file)) return
+  // Si hay uno previo ya subido, bórralo primero
+  await deleteUploadedIfAny()
+  selectedFile.value = file
+  await beginTempUpload(file)
+}
+
+const onDragOver = () => {
+  isDragOver.value = true
+  dragCounter.value++
+}
+
+const onDragLeave = () => {
+  dragCounter.value = Math.max(0, dragCounter.value - 1)
+  if (dragCounter.value === 0) isDragOver.value = false
+}
+
+const onDrop = async (e) => {
+  dragCounter.value = 0
+  isDragOver.value = false
+  const file = e.dataTransfer?.files?.[0]
+  if (!validateFile(file)) return
+  await deleteUploadedIfAny()
+  selectedFile.value = file
+  await beginTempUpload(file)
+}
+
+const clearFile = async () => {
+  // al presionar la X: borrar en servidor si ya estaba subido
+  await deleteUploadedIfAny()
+  selectedFile.value = null
+  progress.value = 0
+  message.value = ''
+  if (fileInput.value) fileInput.value.value = ''
+  meses.value = null
+}
+
+// Botón "Enviar" (a otra ruta). Aún no implementado en backend.
+const uploadFile = async () => {
+  // Aquí, cuando implementes, envía `uploadedPath.value` a tu endpoint final:
+  /*
+    await axios.post('/comprobantes/enviar', {
+      path: uploadedPath.value,
+      meses: meses.value
+    })
+  */
+  message.value = 'Envío pendiente de implementación'
 }
 </script>
 

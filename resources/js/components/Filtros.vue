@@ -1,5 +1,5 @@
 <template>
-  <div class="filtro" ref="root">
+  <div class="filtro" :class="{ dropup: direction === 'up' }" ref="root">
     <div class="input-group filtro-input">
       <span class="input-group-text little-padding ps-2 bg-white border-0" style="color: #d2d2d2; padding-left: 0.75rem !important;">
         <i class="fa-solid fa-magnifying-glass"></i>
@@ -12,7 +12,7 @@
         @focus="onFocus"
       />
       <button class="btn btn-outline-filters" type="button" @click="open = !open">
-        <i class="fa-solid" :class="open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        <i class="fa-solid" :class="caretIcon"></i>
       </button>
     </div>
 
@@ -43,6 +43,12 @@ const props = defineProps({
   valueKey: { type: String, default: 'id' },
   labelKey: { type: String, default: 'nombre' },
   placeholder: { type: String, default: 'Selecciona…' },
+  // NUEVO: dirección del dropdown
+  direction: {
+    type: String,
+    default: 'down',
+    validator: v => ['up', 'down'].includes(v)
+  }
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -79,6 +85,14 @@ const displayText = computed({
   }
 });
 
+// Ícono según dirección y estado
+const caretIcon = computed(() => {
+  if (props.direction === 'up') {
+    return open.value ? 'fa-chevron-down' : 'fa-chevron-up';
+  }
+  return open.value ? 'fa-chevron-up' : 'fa-chevron-down';
+});
+
 function select(val) {
   emit('update:modelValue', val);
   open.value = false;
@@ -88,7 +102,6 @@ const root = ref(null);
 
 function onFocus() {
   open.value = true;
-  //q.value = '';
 }
 
 function handleDocClick(e) {
@@ -122,14 +135,14 @@ onBeforeUnmount(() => document.removeEventListener('click', handleDocClick))
   box-shadow: none !important;
 }
 
-/* Placeholder: ojo, va sobre el input, no sobre .filtro-input */
+/* Placeholder */
 .form-control::placeholder {
   color: gray;
   font-style: italic;
   opacity: 1;
 }
 
-/* Botón (igual que ya tenías) */
+/* Botón */
 .btn-outline-filters {
   border-left: 1px solid #B5B5B5;
   color: #B5B5B5;
@@ -138,12 +151,12 @@ onBeforeUnmount(() => document.removeEventListener('click', handleDocClick))
 .btn-outline-filters:hover { background-color: #ebebeb; }
 .btn-outline-filters:active { border: 0px solid transparent; }
 
-/* ===== DROPDOWN (estilo “navbar”) ===== */
+/* ===== DROPDOWN ===== */
 .filtro-menu {
   width: 100%;
   max-height: 260px;
   overflow: auto;
-  margin-top: .25rem;
+  margin-top: .25rem; /* default hacia abajo */
 
   /* navbar-like */
   border: none;
@@ -156,15 +169,14 @@ onBeforeUnmount(() => document.removeEventListener('click', handleDocClick))
   -webkit-backdrop-filter: blur(1rem);
   box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,.15);
 
-  /* animación de aparición */
+  /* animación de aparición (down) */
   opacity: 0;
   transform: translateY(5px);
   pointer-events: none;
   transition: opacity .2s ease, transform .2s ease;
 }
 
-/* Cuando esté “open”, que se vea y sea clickeable.
-   Con v-if el elemento aparece ya con estas reglas aplicadas. */
+/* Cuando esté “open” */
 .filtro .dropdown-menu.show {
   opacity: 1;
   transform: translateY(0);
@@ -176,17 +188,28 @@ onBeforeUnmount(() => document.removeEventListener('click', handleDocClick))
   padding: 0.5rem 1rem;
   font-weight: 500;
 }
-
-/* Hover (equivalente a rgba(#002b55,0.8) en SCSS) */
 .filtro .dropdown-item:hover {
   background-color: rgba(0, 43, 85, 0.8);
   color: #fff !important;
 }
-
-/* Activo (por si lo manejas) */
 .filtro .dropdown-item.active {
-  background: #83aa6b; /* o tu primario de Bootstrap */
+  background: #83aa6b;
   color: #fff;
 }
 
+/* ===== MODO "UP" =====
+   Si el contenedor tiene .dropup, coloca el menú arriba.
+   Bootstrap ya hace .dropup .dropdown-menu { bottom:100%; top:auto; }
+   Ajustamos márgenes/animación para que se vea natural. */
+.filtro.dropup .filtro-menu {
+  top: auto;        /* clave */
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: .25rem;
+  /* animación inversa: que aparezca "desde arriba" */
+  transform: translateY(-5px);
+}
+.filtro.dropup .dropdown-menu.show {
+  transform: translateY(0);
+}
 </style>
