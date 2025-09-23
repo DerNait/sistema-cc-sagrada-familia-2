@@ -45,6 +45,10 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
     });
 
     Route::post('/upload', [UploadController::class, 'store'])->name('upload');
+    Route::delete('/upload', [UploadController::class, 'destroy'])->name('upload.delete');
+
+    Route::get('/pagos', [PagosController::class, 'index'])->name('pagos.index');
+    Route::post('/pagos', [PagosController::class, 'store'])->name('pagos.store');
 
     Route::post('/catalogos/roles/{role}/permisos', [RoleModulePermissionController::class, 'update'])->name('roles.permisos.update');
 
