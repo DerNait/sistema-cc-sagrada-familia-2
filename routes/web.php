@@ -163,6 +163,11 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
             Route::post('/upload',          [SeccionesController::class, 'storeUpload'])->name('upload.store');
             Route::get('/upload/template',  [SeccionesController::class, 'downloadTemplate'])->name('upload.template');
         });
+
+        Route::prefix('perfil')->name('perfil.')->group(function () {
+            Route::get('/editar', [PerfilController::class, 'edit'])->name('edit');
+            Route::post('/editar', [PerfilController::class, 'update'])->name('update');
+        });
     });
 });
 
