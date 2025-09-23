@@ -61,6 +61,25 @@
             placeholder="Meses a pagar"
             direction="up"
           />
+          <Filtros
+            v-if="!uploadingTemp"
+            v-model="tipoPagoId"
+            :options="tiposPagoOptions"
+            placeholder="Tipo de pago"
+            direction="up"
+          />
+          <div class="amount-wrapper" v-if="!uploadingTemp">
+            <input
+              class="amount-input"
+              type="number"
+              inputmode="decimal"
+              step="0.01"
+              min="0"
+              v-model="monto"
+              placeholder="Monto pagado"
+            />
+            <i class="fa-solid fa-coins amount-icon"></i>
+          </div>
           <button class="x-button" @click.stop="clearFile">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -102,9 +121,36 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
-import Filtros from './Filtros.vue';
+import Filtros from './Filtros.vue'
+
+// Props
+const props = defineProps({
+  accept: { type: String, default: '' },
+  hint:   { type: String, default: '' },
+  tiposPago: { type: Array, default: () => [] }
+})
+
+const tiposPagoOptions = computed(() =>
+  (props.tiposPago || []).map(t => ({ id: t.id, nombre: t.nombre }))
+)
+
+// Estado
+const fileInput     = ref(null)
+const selectedFile  = ref(null)
+const uploadedPath  = ref(null) // <- ruta en storage para poder borrar
+const message       = ref('')
+const progress      = ref(0)
+const isDragOver    = ref(false)
+const dragCounter   = ref(0)
+const uploadingTemp = ref(false) // upload temporal (pre-enviar)
+const uploading     = ref(false)
+const fileBusy      = ref(false)
+const cleanupDone = ref(false)
+
+const tipoPagoId = ref(null)
+const monto      = ref('')
 
 const meses = ref(null)
 const mesesOptions = Array.from({ length: 12 }, (_, i) => {
@@ -136,24 +182,6 @@ function validateFile(file) {
   return true;
 }
 
-// Props
-const props = defineProps({
-  accept: { type: String, default: '' },
-  hint:   { type: String, default: '' }
-})
-
-// Estado
-const fileInput     = ref(null)
-const selectedFile  = ref(null)
-const uploadedPath  = ref(null) // <- ruta en storage para poder borrar
-const message       = ref('')
-const progress      = ref(0)
-const isDragOver    = ref(false)
-const dragCounter   = ref(0)
-const uploadingTemp = ref(false) // upload temporal (pre-enviar)
-const uploading     = ref(false)
-const fileBusy      = ref(false)
-
 // Helpers UI
 function prettySize(bytes) {
   if (!bytes && bytes !== 0) return ''
@@ -184,6 +212,50 @@ async function deleteUploadedIfAny() {
     fileBusy.value = false
   }
 }
+
+function sendCleanupBeacon() {
+  if (!uploadedPath.value || cleanupDone.value) return
+  cleanupDone.value = true
+
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+
+  // Usamos sendBeacon (POST) -> requiere endpoint POST
+  const data = new FormData()
+  data.append('path', uploadedPath.value)
+  if (csrf) data.append('_token', csrf)
+
+  // Si no existe sendBeacon, hacemos fetch keepalive
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon('/upload/cleanup', data)
+  } else {
+    fetch('/upload/cleanup', { method: 'POST', body: data, keepalive: true })
+      .catch(() => {}) // no bloqueamos la salida
+  }
+}
+
+function handlePageHide() {
+  // pagehide/beforeunload: no hay tiempo para axios; usa beacon
+  sendCleanupBeacon()
+}
+
+onMounted(() => {
+  window.addEventListener('pagehide', handlePageHide)      // navegación SPA o cierre
+  window.addEventListener('beforeunload', handlePageHide)  // fallback adicional
+})
+
+onBeforeUnmount(() => {
+  // 1) Quita listeners
+  window.removeEventListener('pagehide', handlePageHide)
+  window.removeEventListener('beforeunload', handlePageHide)
+
+  // 2) Limpia en desmontaje normal de Vue (cambio de ruta dentro de tu SPA)
+  //    Aquí sí podemos intentar el DELETE normal porque aún estamos "vivos".
+  if (uploadedPath.value && !cleanupDone.value) {
+    cleanupDone.value = true
+    // Llama a tu método actual (no esperes la promesa)
+    deleteUploadedIfAny()
+  }
+})
 
 async function beginTempUpload(file) {
   // sube a /upload y guarda path para poder borrarlo
@@ -267,21 +339,62 @@ const clearFile = async () => {
   selectedFile.value = null
   progress.value = 0
   message.value = ''
+  tipoPagoId.value = null
+  monto.value = ''
+
   if (fileInput.value) fileInput.value.value = ''
   meses.value = null
 }
 
 // Botón "Enviar" (a otra ruta). Aún no implementado en backend.
 const uploadFile = async () => {
-  // Aquí, cuando implementes, envía `uploadedPath.value` a tu endpoint final:
-  /*
-    await axios.post('/comprobantes/enviar', {
+  if (!uploadedPath.value) {
+    message.value = 'Primero sube un archivo válido.'
+    return
+  }
+  if (!tipoPagoId.value) {
+    message.value = 'Selecciona el tipo de pago.'
+    return
+  }
+  const montoNum = Number(monto.value)
+  if (!monto.value || Number.isNaN(montoNum) || montoNum <= 0) {
+    message.value = 'Ingresa un monto válido mayor a 0.'
+    return
+  }
+
+  uploading.value = true
+  message.value = ''
+
+  try {
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+
+    const payload = {
       path: uploadedPath.value,
-      meses: meses.value
+      meses_pagados: meses.value?.id ?? meses.value ?? 1,
+      tipo_pago_id: tipoPagoId.value,
+      monto_pagado: montoNum,
+    }
+
+    const { data } = await axios.post('/pagos', payload, {
+      headers: { ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {}) },
     })
-  */
-  message.value = 'Envío pendiente de implementación'
+
+    message.value = data?.message ?? 'Pago registrado.'
+
+    // Limpieza visual
+    selectedFile.value = null
+    progress.value = 0
+    message.value = ''
+    tipoPagoId.value = null
+    monto.value = ''
+  } catch (err) {
+    console.error(err)
+    message.value = err?.response?.data?.message ?? 'No se pudo registrar el pago.'
+  } finally {
+    uploading.value = false
+  }
 }
+
 </script>
 
 <style scoped>
@@ -343,4 +456,40 @@ const uploadFile = async () => {
   cursor: pointer;
   display: inline;  
 }
+
+/* === Monto con estilo de search bar === */
+.amount-wrapper {
+  position: relative;
+  width: 280px;            /* puedes ajustar o usar 100% si prefieres */
+  margin-left: .5rem;      /* pequeño espacio del selector */
+}
+
+.amount-input {
+  width: 100%;
+  padding: .3rem 2.75rem .3rem 1rem; /* deja espacio al ícono */
+  border: 1px solid #B5B5B5;
+  border-radius: 0.8rem;
+  font-size: 1rem;
+  color: #777;
+  outline: none;
+  appearance: textfield;           /* quita flechas en algunos navegadores */
+}
+
+/* Quitar spinners en number (Chrome/Edge) */
+.amount-input::-webkit-outer-spin-button,
+.amount-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.amount-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #B5B5B5;
+  font-size: 1rem;
+}
+
 </style>
