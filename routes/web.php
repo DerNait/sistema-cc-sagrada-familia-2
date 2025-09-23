@@ -25,10 +25,6 @@ Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
 
 Auth::routes();
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/mis-pagos', [PagosEstudianteController::class, 'index'])->name('mis-pagos');
-});
-
 
 Route::group(['middleware' => ['auth', 'forerunner']], function () {
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
