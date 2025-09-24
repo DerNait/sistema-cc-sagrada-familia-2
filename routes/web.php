@@ -19,6 +19,7 @@ use App\Http\Controllers\PagosController;
 use App\Http\Controllers\CSVController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\PagosEstudianteController;
+use App\Http\Controllers\PerfilController;
 
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
