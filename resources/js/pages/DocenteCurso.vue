@@ -39,6 +39,13 @@
             <i class="fa-solid fa-xmark me-1"></i>
             Cancelar
           </button>
+          <button
+          v-if="abilities.export"
+          class="btn btn-info"
+          @click="exportData"
+        >
+          <i class="fa-solid fa-download"></i>
+        </button>
         </template>
       </div>
     </div>
@@ -595,6 +602,31 @@ function saveComentario(estId, actId) {
     .catch((err) => {
       console.error('Error guardando comentario:', err);
       ui.busy[key] = false;
+    });
+}
+function exportData() {
+  axios.get(`${baseUrl}/export`, { responseType: 'blob' })
+    .then(response => {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = 'export.csv';
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (fileNameMatch && fileNameMatch[1]) {
+          fileName = fileNameMatch[1];
+        }
+      }
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    })
+    .catch(error => {
+      console.error('Error al exportar:', error);
+      showError('Error', 'No se pudo exportar los datos');
     });
 }
 
