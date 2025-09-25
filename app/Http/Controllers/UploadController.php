@@ -31,4 +31,34 @@ class UploadController extends Controller
             'path'          => $storedPath,
         ]);
     }
+
+    public function destroy(Request $request)
+    {
+        $request->validate([
+            'path' => 'required|string',
+        ]);
+
+        $path = ltrim($request->input('path'), '/');
+
+        // Sanitiza y restringe a uploads/
+        if (str_contains($path, '..')) {
+            return response()->json(['message' => 'Ruta inválida'], 422);
+        }
+        if (!str_starts_with($path, 'uploads/')) {
+            return response()->json(['message' => 'Ruta no permitida'], 403);
+        }
+
+        $disk = Storage::disk('public');
+
+        if (!$disk->exists($path)) {
+            return response()->json(['message' => 'Archivo no encontrado'], 404);
+        }
+
+        $disk->delete($path);
+
+        return response()->json([
+            'message' => 'Archivo eliminado',
+            'path'    => $path,
+        ]);
+    }
 }

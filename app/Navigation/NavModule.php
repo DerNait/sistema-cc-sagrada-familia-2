@@ -8,7 +8,6 @@ class NavModule
     public const EXPORT  = ['read', 'export'];
     public const RANDOMIZE  = ['randomize'];
     public const NONE  = [];
-    public const PAYMENTS = ['read', 'create', 'edit', 'update', 'delete', 'pay'];
 
     public string  $label;
     public string  $key;
