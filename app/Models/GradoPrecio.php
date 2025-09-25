@@ -8,10 +8,8 @@ class GradoPrecio extends Model
 {
     protected $table = 'grado_precio'; 
 
-    protected $fillable = [
-        'grado_id',
-        'mensualidad',
-        'inscripcion',
+    protected $guarded = [
+        'id',
     ];
 
     public function pagos()

@@ -12,6 +12,18 @@ class Estudiante extends Model
 
     protected $guarded = ['id'];
 
+    protected $appends = [
+        'grado_id',
+    ];
+
+    public function getGradoIdAttribute()
+    {
+        return $this->secciones()
+            ->select('secciones.grado_id') // desambigua
+            ->orderByDesc('seccion_estudiantes.created_at')
+            ->value('secciones.grado_id');
+    }
+
     public function usuario()
     {
         return $this->belongsTo(User::class, 'usuario_id');
@@ -34,7 +46,7 @@ class Estudiante extends Model
             'seccion_estudiantes',   // ← plural
             'estudiante_id',
             'seccion_id'
-        );
+        )->withTimestamps();
     }
 
     public function haPagado(int $diasVigencia = 30): bool
