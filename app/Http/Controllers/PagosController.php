@@ -32,7 +32,8 @@ class PagosController extends Controller
                         'correo' => $usuario->email ?? 'N/A',
                         'meses_pagados' => $pago->meses_pagados,
                         'fecha_registro' => $usuario->fecha_registro ?? ($usuario ? $usuario->created_at->format('Y-m-d') : 'N/A'),
-                        'fecha_nacimiento' => $usuario->fecha_nacimiento ?? 'N/A'
+                        'fecha_nacimiento' => $usuario->fecha_nacimiento ?? 'N/A',
+                        'comprobante' => $pago->comprobante ?? null
                     ];
                 });
 
