@@ -229,6 +229,7 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import SortableTable from '../components/SortableTable.vue';
 import Filtros from '../components/Filtros.vue';
 
@@ -241,6 +242,7 @@ const props = defineProps({
   estudiantes: { type: Array, default: () => [] },
   selected_estudiante_ids: { type: Array, default: () => [] },
   actividades: { type: Array, default: () => [] },
+  abilities: { type: Object, default: () => ({}) },
 });
 
 const busyData = ref(false);
@@ -604,30 +606,49 @@ function saveComentario(estId, actId) {
       ui.busy[key] = false;
     });
 }
-function exportData() {
-  axios.get(`${baseUrl}/export`, { responseType: 'blob' })
-    .then(response => {
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      const contentDisposition = response.headers['content-disposition'];
-      let fileName = 'export.csv';
-      if (contentDisposition) {
-        const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
-        if (fileNameMatch && fileNameMatch[1]) {
-          fileName = fileNameMatch[1];
+async function exportData() {
+  try {
+    const resp = await axios.get(`/cursos/${props.curso.id}/export`, {
+      responseType: 'blob',
+    });
+
+    const blob = new Blob([resp.data]);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+
+    // Intentar sacar filename desde headers (varias variantes)
+    const cd = (resp.headers && (resp.headers['content-disposition'] || resp.headers['Content-Disposition'])) || '';
+    let fileName = 'calificaciones.csv';
+    if (cd) {
+      // filename*=UTF-8''nombre or filename="name"
+      const m = cd.match(/filename\*?=(?:UTF-8''|\")?([^;\"]+)/i);
+      if (m && m[1]) {
+        try {
+          fileName = decodeURIComponent(m[1].replace(/['\"]/g, ''));
+        } catch (e) {
+          fileName = m[1].replace(/['\"]/g, '');
         }
       }
-      link.setAttribute('download', fileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    })
-    .catch(error => {
-      console.error('Error al exportar:', error);
-      showError('Error', 'No se pudo exportar los datos');
-    });
+    }
+
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error al exportar:', error);
+    showError('Error', 'No se pudo exportar los datos');
+  }
+}
+
+function showError(title, text) {
+  Swal.fire({
+    icon: 'error',
+    title,
+    text,
+  });
 }
 
 async function fetchData(params = {}) {
