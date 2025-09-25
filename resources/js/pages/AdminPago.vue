@@ -49,10 +49,10 @@
             >
               <!-- Slot personalizado para las acciones -->
               <template #row-actions="{ row }">
-                <div class="d-flex gap-1">
+                <div class="d-flex gap-1 justify-content-center">
                   <!-- Botón Ver -->
                   <button 
-                    class="btn btn-outline-primary btn-sm rounded-circle"
+                    class="btn btn-outline-dark btn-sm rounded-circle"
                     @click="viewPayment(row)"
                     title="Ver detalles"
                   >
@@ -81,6 +81,66 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal para mostrar comprobante -->
+    <div 
+      v-if="showComprobanteModal" 
+      class="modal fade show d-block" 
+      tabindex="-1" 
+      style="background-color: rgba(0,0,0,0.5);"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <!-- Sin header/título -->
+          <button 
+            type="button" 
+            class="btn-close position-absolute top-0 end-0 m-3" 
+            style="z-index: 1050;"
+            @click="closeComprobanteModal"
+          ></button>
+          
+          <div class="modal-body p-0 text-center">
+            <div v-if="selectedPayment?.comprobante" class="comprobante-container">
+              <img 
+                :src="selectedPayment.comprobante" 
+                :alt="`Comprobante de ${selectedPayment.nombre} ${selectedPayment.apellido}`"
+                class="img-fluid w-100"
+                style="max-height: 70vh; object-fit: contain;"
+                @error="imageError = true"
+              />
+              <div v-if="imageError" class="alert alert-warning m-3">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Error al cargar la imagen del comprobante
+              </div>
+            </div>
+            <div v-else class="alert alert-info m-3">
+              <i class="fas fa-info-circle me-2"></i>
+              No hay comprobante disponible para este pago
+            </div>
+          </div>
+          
+          <!-- Botones centrados sin footer -->
+          <div class="d-flex justify-content-center gap-3 p-4" v-if="selectedPayment?.comprobante">
+            <button 
+              type="button"
+              class="btn btn-success btn-lg px-4 py-3 action-button-rect"
+              @click="approvePayment"
+            >
+              <i class="fas fa-clipboard-check me-2"></i>
+              Aprobar
+            </button>
+            <button 
+              type="button"
+              class="btn btn-danger btn-lg px-4 py-3 action-button-rect"
+              @click="rejectPayment"
+            >
+              <i class="fas fa-times me-2"></i>
+              Rechazar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -99,6 +159,11 @@ const props = defineProps({
 // Estado reactivo
 const selectedFilter = ref('estudiante')
 const searchQuery = ref('')
+
+// Variables para el modal del comprobante
+const showComprobanteModal = ref(false)
+const selectedPayment = ref(null)
+const imageError = ref(false)
 
 // Usar los datos que vienen del controller
 const paymentsData = ref(props.pagos)
@@ -166,8 +231,42 @@ const filteredRows = computed(() => {
   return filtered
 })
 
+// Métodos para las acciones de la tabla
 const viewPayment = (row) => {
-  console.log('Ver pago:', row)
+  selectedPayment.value = row
+  imageError.value = false
+  showComprobanteModal.value = true
+}
+
+const closeComprobanteModal = () => {
+  showComprobanteModal.value = false
+  selectedPayment.value = null
+  imageError.value = false
+}
+
+const approvePayment = () => {
+  if (!selectedPayment.value) return
+  
+  if (confirm(`¿Estás seguro de aprobar el pago de ${selectedPayment.value.nombre} ${selectedPayment.value.apellido}?`)) {
+    console.log('Aprobar pago:', selectedPayment.value)
+    
+    closeComprobanteModal()
+    
+    
+  }
+}
+
+const rejectPayment = () => {
+  if (!selectedPayment.value) return
+  
+  if (confirm(`¿Estás seguro de rechazar el pago de ${selectedPayment.value.nombre} ${selectedPayment.value.apellido}?`)) {
+    console.log('Rechazar pago:', selectedPayment.value)
+   
+    
+    // Cerrar modal después de rechazar
+    closeComprobanteModal()
+    
+  }
 }
 
 const editPayment = (row) => {
@@ -221,5 +320,41 @@ const deletePayment = (row) => {
   border-radius: 8px;
   border: 1px solid #dee2e6;
   padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+}
+
+
+.modal.show {
+  display: block !important;
+}
+
+.comprobante-container img {
+  border: none;
+  box-shadow: none;
+}
+
+/* Botones de acción del modal rectangulares */
+.action-button-rect {
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  min-width: 150px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.action-button-rect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.action-button-rect i {
+  font-size: 1.2rem;
+}
+
+/* Modal sin bordes redondeados en la imagen */
+.modal-content {
+  border-radius: 12px;
+  overflow: hidden;
 }
 </style>
