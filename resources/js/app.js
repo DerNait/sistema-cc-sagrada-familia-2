@@ -7,7 +7,7 @@ import HelloWorld from './components/HelloWorld.vue';
 import Homepadres from './components/Homepadres.vue';
 import Homeprofesores from './components/Homeprofesores.vue';
 import InicioSesion from './components/InicioSesion.vue';
-import Registro from './components/Registro.vue';
+import Registro from './pages/Registro.vue';
 import Estudiantes from './components/Estudiantes.vue';
 import Profesores from './components/Profesores.vue';
 import Cursos from './components/Cursos.vue';
