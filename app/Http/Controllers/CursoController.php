@@ -10,6 +10,7 @@ use App\Models\Seccion;
 use App\Models\SeccionEstudiante;
 use App\Models\EstudianteNota;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CursoController extends Controller
 {
@@ -530,8 +531,10 @@ class CursoController extends Controller
         ]);
     }
 
-public function exportCalificaciones(int $cursoId)
+public function export(Curso $curso)
 {
+    $cursoId = $curso->id;
+
     $calificaciones = EstudianteNota::with([
             'actividad:id,nombre',
             'seccionEstudiante.estudiante.usuario:id,name,apellido'
@@ -541,10 +544,11 @@ public function exportCalificaciones(int $cursoId)
         })
         ->get()
         ->map(function ($nota) {
+            $usuario = optional($nota->seccionEstudiante->estudiante->usuario);
+
             return [
-                'Estudiante' => $nota->seccionEstudiante->estudiante->usuario->name
-                    . ' ' . $nota->seccionEstudiante->estudiante->usuario->apellido,
-                'Actividad'  => $nota->actividad->nombre,
+                'Estudiante' => trim(($usuario->name ?? '') . ' ' . ($usuario->apellido ?? '')),
+                'Actividad'  => $nota->actividad->nombre ?? '',
                 'Nota'       => $nota->nota,
                 'Comentario' => $nota->comentario,
             ];
@@ -555,7 +559,14 @@ public function exportCalificaciones(int $cursoId)
             'Calificaciones' => collect($calificaciones)
         ]),
         'calificaciones.csv',
-        \Maatwebsite\Excel\Excel::CSV 
+        \Maatwebsite\Excel\Excel::CSV
     );
+}
+
+// compat wrapper for existing route that passes an int id
+public function exportCalificaciones(int $cursoId)
+{
+    $curso = Curso::findOrFail($cursoId);
+    return $this->export($curso);
 }
 }
