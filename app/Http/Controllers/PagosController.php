@@ -14,16 +14,56 @@ class PagosController extends Controller
 {
     public function index()
     {
-        $tiposPago = TipoPago::select('id','nombre')->orderBy('nombre')->get();
+        $user = Auth::user();
+        $rolId = $user->rol_id;
 
-        $params = [
-            'tipos_pago' => $tiposPago,
-        ];
+        // Si es admin (1) o secretaria (2), mostrar vista de administración
+        if ($rolId === 1 || $rolId === 2) {
+            // Obtener todos los pagos con las relaciones necesarias
+            $pagos = EstudiantePago::with(['estudiante.usuario'])
+                ->get()
+                ->map(function ($pago) {
+                    $usuario = $pago->estudiante->usuario ?? null;
+                    
+                    return [
+                        'id' => $pago->id,
+                        'nombre' => $usuario->name ?? 'N/A',
+                        'apellido' => $usuario->apellido ?? 'N/A',
+                        'correo' => $usuario->email ?? 'N/A',
+                        'meses_pagados' => $pago->meses_pagados,
+                        'fecha_registro' => $usuario->fecha_registro ?? ($usuario ? $usuario->created_at->format('Y-m-d') : 'N/A'),
+                        'fecha_nacimiento' => $usuario->fecha_nacimiento ?? 'N/A'
+                    ];
+                });
 
-        return view('component', [
-            'component' => 'estudiante-pago',
-            'params'    => $params,
-        ]);
+            $params = [
+                'pagos' => $pagos
+            ];
+
+            return view('component', [
+                'component' => 'admin-pago',
+                'params'    => $params,
+            ]);
+        }
+        
+        // Si es estudiante (5), mostrar vista de estudiante
+        elseif ($rolId === 5) {
+            $tiposPago = TipoPago::select('id','nombre')->orderBy('nombre')->get();
+
+            $params = [
+                'tipos_pago' => $tiposPago,
+            ];
+
+            return view('component', [
+                'component' => 'estudiante-pago',
+                'params'    => $params,
+            ]);
+        }
+        
+        // Si es cualquier otro rol (docente, inventario, etc.), denegar acceso
+        else {
+            abort(403, 'No tienes permisos para acceder a esta sección.');
+        }
     }
 
     public function store(Request $request)
