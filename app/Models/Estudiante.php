@@ -61,4 +61,9 @@ class Estudiante extends Model
 
         return $fechaVencimiento->isFuture(); // true si aún está vigente
     }
+
+    public function pagos()
+    {
+        return $this->hasMany(EstudiantePago::class);
+    }
 }
