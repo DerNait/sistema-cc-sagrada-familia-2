@@ -12,7 +12,7 @@ import Estudiantes from './components/Estudiantes.vue';
 import Profesores from './components/Profesores.vue';
 import Cursos from './components/Cursos.vue';
 import Pagos from './pages/Pagos.vue';
-import Inventario from './components/Inventario.vue';
+import Inventario from './pages/Inventario.vue';
 import Empleados from './components/Empleados.vue';
 import Planilla from './components/Planilla.vue';
 import EdicionUsuarios from './components/EdicionUsuarios.vue';
