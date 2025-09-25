@@ -88,9 +88,20 @@
 import { ref, computed } from 'vue'
 import SortableTable from '@/components/SortableTable.vue'
 
+// Recibir los datos del controller Laravel
+const props = defineProps({
+  pagos: {
+    type: Array,
+    default: () => []
+  }
+})
+
 // Estado reactivo
 const selectedFilter = ref('estudiante')
 const searchQuery = ref('')
+
+// Usar los datos que vienen del controller
+const paymentsData = ref(props.pagos)
 
 // Definición de columnas para la tabla
 const tableColumns = {
@@ -138,82 +149,6 @@ const tableColumns = {
   }
 }
 
-// Datos quemados (simulando los de la imagen)
-const paymentsData = ref([
-  {
-    id: 1,
-    nombre: 'Test',
-    apellido: 'Tester',
-    correo: 'test@test.com',
-    meses_pagados: 1,
-    fecha_registro: '2025-05-10',
-    fecha_nacimiento: '1985-04-16'
-  },
-  {
-    id: 2,
-    nombre: 'Test',
-    apellido: 'Tester',
-    correo: 'test2@test.com',
-    meses_pagados: 3,
-    fecha_registro: '2025-05-10',
-    fecha_nacimiento: '1985-04-16'
-  },
-  {
-    id: 3,
-    nombre: 'Test',
-    apellido: 'Tester',
-    correo: 'test3@test.com',
-    meses_pagados: 4,
-    fecha_registro: '2025-05-10',
-    fecha_nacimiento: '1985-04-16'
-  },
-  {
-    id: 4,
-    nombre: 'Test',
-    apellido: 'Tester',
-    correo: 'test4@test.com',
-    meses_pagados: 2,
-    fecha_registro: '2025-05-10',
-    fecha_nacimiento: '1985-04-16'
-  },
-  {
-    id: 5,
-    nombre: 'Ana',
-    apellido: 'García',
-    correo: 'ana.garcia@colegio.com',
-    meses_pagados: 6,
-    fecha_registro: '2025-03-15',
-    fecha_nacimiento: '1990-07-22'
-  },
-  {
-    id: 6,
-    nombre: 'Carlos',
-    apellido: 'Mendoza',
-    correo: 'carlos.mendoza@colegio.com',
-    meses_pagados: 2,
-    fecha_registro: '2025-04-08',
-    fecha_nacimiento: '1988-12-03'
-  },
-  {
-    id: 7,
-    nombre: 'María',
-    apellido: 'López',
-    correo: 'maria.lopez@colegio.com',
-    meses_pagados: 5,
-    fecha_registro: '2025-02-20',
-    fecha_nacimiento: '1992-09-11'
-  },
-  {
-    id: 8,
-    nombre: 'Juan',
-    apellido: 'Rodríguez',
-    correo: 'juan.rodriguez@colegio.com',
-    meses_pagados: 1,
-    fecha_registro: '2025-05-05',
-    fecha_nacimiento: '1987-03-28'
-  }
-])
-
 // Computed para filtrar los datos
 const filteredRows = computed(() => {
   let filtered = paymentsData.value
@@ -228,26 +163,19 @@ const filteredRows = computed(() => {
     )
   }
 
-  // Aquí puedes agregar más filtros basados en selectedFilter si es necesario
-  // Por ahora solo tenemos estudiantes
-
   return filtered
 })
 
-// Métodos para las acciones de la tabla
 const viewPayment = (row) => {
   console.log('Ver pago:', row)
-  // Aquí irá la lógica para ver detalles del pago
 }
 
 const editPayment = (row) => {
   console.log('Editar pago:', row)
-  // Aquí irá la lógica para editar el pago
 }
 
 const deletePayment = (row) => {
   console.log('Eliminar pago:', row)
-  // Aquí irá la lógica para eliminar el pago
   if (confirm(`¿Estás seguro de eliminar el pago de ${row.nombre} ${row.apellido}?`)) {
     const index = paymentsData.value.findIndex(item => item.id === row.id)
     if (index > -1) {
@@ -258,7 +186,7 @@ const deletePayment = (row) => {
 </script>
 
 <style scoped>
-/* Estilos personalizados para la vista de admin pagos */
+
 .btn-sm.rounded-circle {
   width: 32px;
   height: 32px;
@@ -268,7 +196,7 @@ const deletePayment = (row) => {
   padding: 0;
 }
 
-/* Mejorar la opacidad del contenedor blanco */
+
 .card {
   border-radius: 12px;
   background-color: rgba(248, 249, 250, 0.4) !important;
@@ -281,14 +209,14 @@ const deletePayment = (row) => {
   box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
-/* Mejorar el estilo del dropdown */
+
 .form-select {
   border-radius: 8px;
   border: 1px solid #dee2e6;
   padding: 0.5rem 2.5rem 0.5rem 0.75rem;
 }
 
-/* Mejorar el estilo del input de búsqueda */
+
 .form-control {
   border-radius: 8px;
   border: 1px solid #dee2e6;
