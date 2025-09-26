@@ -3,13 +3,54 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    ports:
-      - "8080:8000"  # Laravel
-      - "5173:5173"  # Vite
+    user: root
     volumes:
-      - .:/var/www/html
+      - ./:/var/www/html:cached
+      - vendor:/var/www/html/vendor
+      - storage:/var/www/html/storage
+      - cache:/var/www/html/bootstrap/cache
+    env_file:
+      - .env.dev       # cada dev crea su propio .env.dev a partir de .env.dev.example
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
     command: >
-      sh -c "cd /var/www/html &&
-            npm install --legacy-peer-deps &&
-            composer install &&
-            php artisan serve --host=0.0.0.0 --port=8000"
+      sh -lc '
+        mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache &&
+        chown -R www:www storage bootstrap/cache &&
+        exec php-fpm -F
+      '
+
+  web:
+    depends_on:
+      - app
+    ports:
+      - "8100:80"
+      - "8443:443"
+    volumes:
+      - ./ops/nginx/app.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./public:/var/www/html/public:ro
+
+  vite:
+    image: node:18-alpine
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace:cached
+      - node_modules:/workspace/node_modules
+    ports:
+      - "5173:5173"
+    command: sh -lc "npm ci --legacy-peer-deps && npm run dev -- --host"
+    depends_on:
+      - app
+
+  db:
+    ports:
+      - "5434:5432"    # mapeo alterno para conexiones locales
+    env_file:
+      - .env.dev
+
+volumes:
+  vendor:
+  node_modules:
+  storage:
+  cache:
