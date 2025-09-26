@@ -166,8 +166,10 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
         });
 
         Route::prefix('perfil')->name('perfil.')->group(function () {
+            Route::get('/', [PerfilController::class, 'show'])->name('show');
             Route::get('/editar', [PerfilController::class, 'edit'])->name('edit');
             Route::post('/editar', [PerfilController::class, 'update'])->name('update');
+            Route::post('/foto/eliminar', [PerfilController::class, 'destroyPhoto'])->name('foto.destroy');
         });
     });
 });
