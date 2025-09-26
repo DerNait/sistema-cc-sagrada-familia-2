@@ -23,7 +23,7 @@ import estudianteCursosDetalle from './components/estudiante-curso-detalle.vue';
 import EstudianteCurso from './pages/EstudianteCurso.vue';
 import DocenteCurso from './pages/DocenteCurso.vue';
 import CursoEdicion from './components/Curso-edicion.vue';
-import Home from './components/Home.vue';
+import Home from './pages/Home.vue';
 import Dashboard from './components/Dashboard.vue';
 
 // CRUD
