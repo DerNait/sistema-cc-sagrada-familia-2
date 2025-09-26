@@ -3,26 +3,18 @@ import 'bootstrap';
 
 import './bootstrap';
 import { createApp } from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
-import Homepadres from './components/Homepadres.vue';
-import Homeprofesores from './components/Homeprofesores.vue';
 import InicioSesion from './pages/InicioSesion.vue';
 import Registro from './pages/Registro.vue';
-import Estudiantes from './components/Estudiantes.vue';
-import Profesores from './components/Profesores.vue';
-import Cursos from './components/Cursos.vue';
 import Pagos from './pages/Pagos.vue';
 import Inventario from './pages/Inventario.vue';
 import Empleados from './components/Empleados.vue';
 import Planilla from './components/Planilla.vue';
-import EdicionUsuarios from './components/EdicionUsuarios.vue';
 import AgregacionInventario from './pages/AgregacionInventario.vue';
 import Calificaciones from './pages/Calificaciones.vue';
 import estudianteCursosIndex from './pages/estudiante-cursos-index.vue';
 import estudianteCursosDetalle from './pages/estudiante-curso-detalle.vue';
 import EstudianteCurso from './pages/EstudianteCurso.vue';
 import DocenteCurso from './pages/DocenteCurso.vue';
-import CursoEdicion from './components/Curso-edicion.vue';
 import Home from './pages/Home.vue';
 import Dashboard from './pages/Dashboard.vue';
 
@@ -39,24 +31,16 @@ import EstudiantePago from './pages/EstudiantePago.vue';
 import AdminPago from './pages/AdminPago.vue';
 const app = createApp({});
 
-app.component('hello-world', HelloWorld);
-app.component('home-padres', Homepadres);// El primero nombre donde lo llamaran, el celeste como tienen que llamar al archivo.vue
-app.component('home-profesores', Homeprofesores);
+// El primero nombre donde lo llamaran, el celeste como tienen que llamar al archivo.vue
 app.component('inicio-sesion',InicioSesion);
 app.component('registro',Registro);
-app.component('estudiantes',Estudiantes);
-app.component('profesores',Profesores);
-app.component('cursos',Cursos);
-app.component('pagos',Pagos);
 app.component('agregacion-inventario',AgregacionInventario);
 app.component('inventario',Inventario);
 app.component('planilla',Planilla);
 app.component('empleados',Empleados);
-app.component('edicion-usuarios',EdicionUsuarios);
 app.component('calificaciones',Calificaciones);
 app.component('estudiante-cursos-index', estudianteCursosIndex);
 app.component('estudiante-cursos-detalle', estudianteCursosDetalle);
-app.component('curso-edicion', CursoEdicion);
 app.component('estudiante-curso', EstudianteCurso);
 app.component('docente-curso', DocenteCurso);
 app.component('cargar-seccion', CargarSeccion);
@@ -73,7 +57,4 @@ app.component('roles-permisos', RolesPermisos);
 app.component('estudiante-pago', EstudiantePago);
 app.component('admin-pago', AdminPago);
 
-// app.component('students',Students);
-// app.component('profesores',Profesores);
-// app.component('courses',Courses);
 app.mount('#app');
