@@ -93,4 +93,14 @@ class SeccionesController extends CrudControllerBase
             'component' => 'cargar-seccion',
         ]);
     }
+
+    public function storeUpload () {
+        // TODO: implementar metodo para cargar csv y sobreescribir las secciones del año
+        return;
+    }
+
+    public function downloadTemplate() {
+        // TODO: implementar descargar plantilla.csv para la creacion de secciones
+        return;
+    }
 }
