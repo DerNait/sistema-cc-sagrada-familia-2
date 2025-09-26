@@ -25,8 +25,6 @@ import Form from './components/Crud/Form.vue';
 // Roles
 import RolesPermisos from './pages/RolesPermisos.vue';
 
-import CargarSeccion from './Pages/CargarSeccion.vue';
-
 import EstudiantePago from './pages/EstudiantePago.vue';
 import AdminPago from './pages/AdminPago.vue';
 const app = createApp({});
@@ -43,7 +41,6 @@ app.component('estudiante-cursos-index', estudianteCursosIndex);
 app.component('estudiante-cursos-detalle', estudianteCursosDetalle);
 app.component('estudiante-curso', EstudianteCurso);
 app.component('docente-curso', DocenteCurso);
-app.component('cargar-seccion', CargarSeccion);
 app.component('home', Home);
 app.component('dashboard', Dashboard);
 
