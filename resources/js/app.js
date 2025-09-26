@@ -19,7 +19,7 @@ import EdicionUsuarios from './components/EdicionUsuarios.vue';
 import AgregacionInventario from './components/AgregacionInventario.vue';
 import Calificaciones from './components/Calificaciones.vue';
 import estudianteCursosIndex from './pages/estudiante-cursos-index.vue';
-import estudianteCursosDetalle from './components/estudiante-curso-detalle.vue';
+import estudianteCursosDetalle from './pages/estudiante-curso-detalle.vue';
 import EstudianteCurso from './pages/EstudianteCurso.vue';
 import DocenteCurso from './pages/DocenteCurso.vue';
 import CursoEdicion from './components/Curso-edicion.vue';
