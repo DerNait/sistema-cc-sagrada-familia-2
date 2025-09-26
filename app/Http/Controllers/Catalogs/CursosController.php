@@ -69,6 +69,27 @@ class CursosController extends CrudControllerBase
             ])
             ->hide();
 
+        $this->column('icono')
+            ->label('Icono')
+            ->type('relation')
+            ->filterable('select')
+            ->filterOptions([
+                'fas fa-book' => 'Libro',
+                'fas fa-chalkboard-teacher' => 'Profesor',
+                'fas fa-graduation-cap' => 'Graduación',
+                'fas fa-users' => 'Usuarios',
+                // Agregar más íconos 
+            ])
+            ->options([
+                'fas fa-book' => 'Libro',
+                'fas fa-chalkboard-teacher' => 'Profesor',
+                'fas fa-graduation-cap' => 'Graduación',
+                'fas fa-users' => 'Usuarios',
+                // Agregar más íconos
+            ])
+            ->rules(['required', 'string'])
+            ->hide(false);
+
         $this->column('created_at')
             ->label('Creado en')
             ->type('datetime')
