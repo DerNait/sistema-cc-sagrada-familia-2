@@ -17,7 +17,7 @@ import Empleados from './components/Empleados.vue';
 import Planilla from './components/Planilla.vue';
 import EdicionUsuarios from './components/EdicionUsuarios.vue';
 import AgregacionInventario from './components/AgregacionInventario.vue';
-import Calificaciones from './components/Calificaciones.vue';
+import Calificaciones from './pages/Calificaciones.vue';
 import estudianteCursosIndex from './pages/estudiante-cursos-index.vue';
 import estudianteCursosDetalle from './pages/estudiante-curso-detalle.vue';
 import EstudianteCurso from './pages/EstudianteCurso.vue';
