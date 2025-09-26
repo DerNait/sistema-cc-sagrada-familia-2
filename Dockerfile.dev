@@ -12,17 +12,22 @@ RUN apk add --no-cache bash \
 # Usuario/grupo 'www'
 RUN addgroup -g 1000 -S www && adduser -u 1000 -S www -G www
 
-# Carpetas de Laravel (nota: si montas volúmenes, se vuelven a crear vacías en runtime)
+# Carpetas Laravel (nota: si montas volúmenes, se recrean vacías en runtime)
 RUN mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache \
     && chown -R www:www storage bootstrap/cache
 
-# **AQUÍ** ya que somos root, dejamos opcache apagado para dev
-RUN printf "opcache.enable=0\nopcache.validate_timestamps=1\n" \
-    > /usr/local/etc/php/conf.d/dev.ini
+# PHP dev overrides (OPcache off)
+RUN cat > /usr/local/etc/php/conf.d/zz-dev.ini <<'INI'
+opcache.enable=0
+opcache.validate_timestamps=1
+INI
+
+# ⚠️ Pool FPM: que los *workers* corran como 'www'
+RUN sed -ri 's/^user\s*=.*/user = www/; s/^group\s*=.*/group = www/' /usr/local/etc/php-fpm.d/www.conf
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-USER www
+# No pongas USER aquí (dejamos que el maestro FPM sea root)
 EXPOSE 9000
 CMD ["php-fpm", "-F"]
