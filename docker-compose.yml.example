@@ -2,54 +2,80 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: your-namespace/app:latest
+      dockerfile: Dockerfile          # Dockerfile de PROD (OPcache ON, sin dev-deps)
+    image: your-namespace/app:latest  # <-- cambia tu namespace/registry si usas ECR/GHCR/DockerHub
     container_name: l_app
     env_file:
-      - .env           # cada dev crea su propio .env a partir de .env.example
+      - .env                          # en el server, .env de PRODUCCIÓN
     depends_on:
       - db
+    volumes:
+      - storage:/var/www/html/storage # <-- volumen compartido para uploads (runtime)
     healthcheck:
       test: ["CMD", "php", "-r", "echo extension_loaded('pdo_pgsql') ? 'OK' : 'NO';"]
       interval: 10s
       timeout: 3s
       retries: 6
+    restart: unless-stopped
+    networks: [appnet]
 
   web:
     image: nginx:1.27-alpine
     container_name: l_web
-    depends_on:
-      - app
+    depends_on: [app]
     ports:
       - "80:80"
       - "443:443"
+    # Config + certs del host (no subas certificados al repo)
     volumes:
       - ./ops/nginx/app.conf:/etc/nginx/conf.d/default.conf:ro
-      # Cambiar las rutas de certificados según tu server/proyecto
-      - /srv/certs/cloudflare.crt:/etc/nginx/ssl/cloudflare.crt:ro
-      - /srv/certs/cloudflare.key:/etc/nginx/ssl/cloudflare.key:ro
-    volumes_from:
-      - app_public:ro
+      - /srv/certs/arkend.crt:/etc/nginx/ssl/arkend.crt:ro   # <-- ajusta nombres/ruta
+      - /srv/certs/arkend.key:/etc/nginx/ssl/arkend.key:ro   # <-- ajusta nombres/ruta
+      # Public del build y uploads de storage:
+      - app_public:/var/www/html/public:ro
+      - storage:/var/www/html/storage:ro
+    restart: unless-stopped
+    networks: [appnet]
 
-  # Volumen con /public para que Nginx lo lea en prod
+  # Volumen con /public para que Nginx lo lea (assets buildeados)
   app_public:
     image: busybox
     container_name: l_app_public
     volumes:
       - app_public:/var/www/html/public
+    command: ["sh", "-c", "tail -f /dev/null"]  # mantener vivo (opcional)
+    networks: [appnet]
 
   db:
     image: postgres:14
     container_name: pg_database
+    # No exponemos el puerto en PROD; acceso solo desde la red interna
     environment:
-      POSTGRES_DB: ${DB_DATABASE}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}         # <-- define en tu .env de prod
+      POSTGRES_USER: ${DB_USERNAME}       # <--
+      POSTGRES_PASSWORD: ${DB_PASSWORD}   # <--
     env_file:
       - .env
     volumes:
       - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks: [appnet]
+
+  # Pruebas de carga k6 (manual)
+  k6:
+    image: grafana/k6:latest
+    container_name: k6_runner
+    depends_on: [web]
+    working_dir: /scripts
+    volumes:
+      - ./k6:/scripts:ro                 # <-- coloca tus scripts .js aquí
+    entrypoint: ["tail", "-f", "/dev/null"]  # no arranca solo; lo invocas manualmente
+    networks: [appnet]
 
 volumes:
   pgdata:
   app_public:
+  storage:
+
+networks:
+  appnet:
