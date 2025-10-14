@@ -178,11 +178,23 @@
       <button 
         v-if="!props.readonly" 
         class="btn btn-primary flex-grow-1"
+        :disabled="busy"
       >
-        <i class="fa-solid fa-floppy-disk"></i>
-        Guardar
+        <div v-if="!busy">
+          <i class="fa-solid fa-floppy-disk"></i>
+          Guardar
+        </div>
+        <div v-else>
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          Guardando...
+        </div>
       </button>
-      <button type="button" class="btn btn-secondary flex-grow-1" @click="$emit('cancel')">
+      <button 
+        type="button" 
+        class="btn btn-secondary flex-grow-1" 
+        @click="$emit('cancel')"
+        :disabled="busy"
+      >
         <i class="fa-solid fa-xmark"></i>
         {{ props.readonly ? 'Cerrar' : 'Cancelar' }}
       </button>
@@ -209,6 +221,7 @@ const csrf = document
   .getAttribute('content');
 
 const showPass = ref(false);
+const busy = ref(false);
 
 const form = reactive({});
 
@@ -313,7 +326,6 @@ async function onFileChange(e, c) {
   }
 }
 
-
 function clearFile(field) {
   form[field] = '';
   preview[field] = '';
@@ -327,14 +339,17 @@ function looksLikeImage(url) {
 async function handleSubmit() {
   if (props.readonly) return;  
 
+  busy.value = true;
   const method = props.item ? 'put' : 'post';
   
   try {
     console.log('trying to save in: ' + props.action);
     const { data } = await axios[method](props.action, form);
+    busy.value = false;
     emit('saved', data);        // devuelve el registro recién grabado
   } catch (err) {
     console.error(err);
+    busy.value = false;
     alert('Error al guardar');
   }
 }
