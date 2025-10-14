@@ -10,16 +10,16 @@ services:
       - storage:/var/www/html/storage
       - cache:/var/www/html/bootstrap/cache
     env_file:
-      - .env.dev       # cada dev crea su propio .env.dev a partir de .env.dev.example
+      - .env.dev
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
-    command: >
-      sh -lc '
-        mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache &&
-        chown -R www:www storage bootstrap/cache &&
-        exec php-fpm -F
-      '
+      command: >
+        sh -lc '
+          mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache &&
+          chown -R www:www storage bootstrap/cache &&
+          exec php-fpm -F
+        '
 
   web:
     depends_on:
@@ -42,12 +42,11 @@ services:
     command: sh -lc "npm ci --legacy-peer-deps && npm run dev -- --host"
     depends_on:
       - app
-
   db:
     ports:
-      - "5434:5432"    # mapeo alterno para conexiones locales
+      - "5434:5432"
     env_file:
-      - .env.dev
+      - .env.dev 
 
 volumes:
   vendor:
