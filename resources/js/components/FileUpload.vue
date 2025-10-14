@@ -41,6 +41,15 @@
       <p>Tamaño máximo: 1MB</p>
     </div>
 
+    <div v-if="has_template">
+      <FileTemplate
+        template_url="/templates/plantilla-secciones.xlsx"
+        icon="/icons/excel-icon.png"
+        file_title="Plantilla de Secciones"
+        class="mt-3"
+      />
+    </div>
+
     <!-- Archivo cargado -->
     <div v-if="selectedFile" class="uploaded-file mt-2">
       <template v-if="!fileBusy">
@@ -124,6 +133,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import Filtros from './Filtros.vue'
+import FileTemplate from './FileTemplate.vue'
 
 // Props
 const props = defineProps({
