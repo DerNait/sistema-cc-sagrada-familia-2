@@ -20,6 +20,7 @@ use App\Http\Controllers\CSVController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\PagosEstudianteController;
 use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\Catalogs\GradosController;
 
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
@@ -160,9 +161,17 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
             Route::get('{id}/editar',       [SeccionesController::class, 'edit'])->name('edit');
             Route::put('{id}',              [SeccionesController::class, 'update'])->name('update');
             Route::delete('{id}',           [SeccionesController::class, 'destroy'])->name('destroy');
-            Route::get('/upload',           [SeccionesController::class, 'createUpload'])->name('upload.create');
-            Route::post('/upload',          [SeccionesController::class, 'storeUpload'])->name('upload.store');
-            Route::get('/upload/template',  [SeccionesController::class, 'downloadTemplate'])->name('upload.template');
+        });
+
+        Route::prefix('grados')->name('grados.')->group(function () {
+            Route::get('/',                 [GradosController::class, 'index'])->name('index');
+            Route::get('/export',           [GradosController::class, 'export'])->name('export');
+            Route::get('{id}',              [GradosController::class, 'show'])->name('show');
+            Route::get('/crear',            [GradosController::class, 'create'])->name('create');
+            Route::post('/',                [GradosController::class, 'store'])->name('store');
+            Route::get('{id}/editar',       [GradosController::class, 'edit'])->name('edit');
+            Route::put('{id}',              [GradosController::class, 'update'])->name('update');
+            Route::delete('{id}',           [GradosController::class, 'destroy'])->name('destroy');
         });
 
         Route::prefix('perfil')->name('perfil.')->group(function () {
