@@ -421,6 +421,7 @@ class CursoController extends Controller
         })->values();
 
         $canEdit = Forerunner::allows('admin.cursos.edit');
+        $canActivity = Forerunner::allows('admin.actividades.create');
 
         $params = [
             'modo'                    => $rolId === 1 ? 'admin' : 'docente',
@@ -433,6 +434,7 @@ class CursoController extends Controller
             'selected_estudiante_ids' => $selectedEstudianteIds,
             'actividades'             => $actividadesPayload,
             'can_edit'                => $canEdit,
+            'can_create_activity'     => $canActivity,
         ];
 
         return view('component', [
