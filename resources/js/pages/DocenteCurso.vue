@@ -6,7 +6,7 @@
           {{ curso?.nombre || 'Curso' }}
         </h3>
         <button
-          v-if="!bulkEdit"
+          v-if="!bulkEdit && can_edit"
           class="btn btn-outline-primary"
           @click="editCourse()"
         >
@@ -242,6 +242,7 @@ const props = defineProps({
   estudiantes: { type: Array, default: () => [] },
   selected_estudiante_ids: { type: Array, default: () => [] },
   actividades: { type: Array, default: () => [] },
+  can_edit: { type: Boolean, default: false },
 });
 
 const busyData = ref(false);
