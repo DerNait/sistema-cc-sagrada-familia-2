@@ -267,6 +267,29 @@ async function onSaved(record) {
 
 onMounted(async () => {
   await nextTick();
+
+  const url = new URL(window.location.href);
+
+  if (url.searchParams.get('create') && props.abilities?.create) {
+    openCreate();
+    url.searchParams.delete('create');
+  } else if (url.searchParams.get('edit') && props.abilities?.update) {
+    const id = url.searchParams.get('edit');
+    const record = await loadLatest(id);
+    if (record) {
+      openEdit(record);
+      url.searchParams.delete('edit');
+    }
+  } else if (url.searchParams.get('show') && props.abilities?.read) {
+    const id = url.searchParams.get('show');
+    const record = await loadLatest(id);
+    if (record) {
+      openShow(record);
+      url.searchParams.delete('show');
+    }
+  }
+
+  history.replaceState(null, '', url.pathname + (url.search ? '?' + url.search : '') + url.hash);
 });
 
 watch([localFilters, globalSearch], applyFilters, { deep: true });
