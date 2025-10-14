@@ -1,7 +1,8 @@
 <template>
-  <div class="filtro" :class="{ dropup: direction === 'up' }" ref="root">
+  <!-- MODO SELECT (con dropdown, igual que antes) -->
+  <div v-if="resolvedMode==='select'" class="filtro" :class="{ dropup: direction === 'up' }" ref="root">
     <div class="input-group filtro-input">
-      <span class="input-group-text little-padding ps-2 bg-white border-0" style="color: #d2d2d2; padding-left: 0.75rem !important;">
+      <span class="input-group-text little-padding ps-2 bg-white border-0" style="color:#d2d2d2;padding-left:.75rem!important;">
         <i class="fa-solid fa-magnifying-glass"></i>
       </span>
       <input
@@ -28,8 +29,23 @@
           {{ opt[labelKey] }}
         </slot>
       </button>
-
       <div v-if="!filtered.length" class="dropdown-item disabled text-muted">Sin resultados</div>
+    </div>
+  </div>
+
+  <!-- MODO INPUT (text / numeric) -->
+  <div v-else class="filtro">
+    <div class="input-group filtro-input">
+      <span class="input-group-text little-padding ps-2 bg-white border-0" style="color:#d2d2d2;padding-left:.75rem!important;">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </span>
+      <input
+        :type="resolvedMode==='numeric' ? 'number' : 'text'"
+        class="form-control little-padding bg-white border-0 input-no-effects"
+        :placeholder="placeholder"
+        :value="stringModel"
+        @input="onInput($event.target.value)"
+      />
     </div>
   </div>
 </template>
@@ -39,19 +55,17 @@ import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 
 const props = defineProps({
   modelValue: [String, Number, Array, Object, null],
-  options: { type: Array, default: () => [] },
+  options: { type: Array, default: () => [] },   // sólo para select
   valueKey: { type: String, default: 'id' },
   labelKey: { type: String, default: 'nombre' },
   placeholder: { type: String, default: 'Selecciona…' },
-  // NUEVO: dirección del dropdown
-  direction: {
-    type: String,
-    default: 'down',
-    validator: v => ['up', 'down'].includes(v)
-  }
+  /** 'select' | 'text' | 'numeric'. Si no viene, infiere: options? 'select' : 'text' */
+  mode: { type: String, default: null },
+  direction: { type: String, default: 'down', validator: v => ['up','down'].includes(v) }
 });
-
 const emit = defineEmits(['update:modelValue']);
+
+const resolvedMode = computed(() => props.mode ?? (props.options?.length ? 'select' : 'text'));
 
 const q = ref('');
 const open = ref(false);
@@ -59,15 +73,15 @@ const open = ref(false);
 const filtered = computed(() => {
   const term = q.value.trim().toLowerCase();
   if (!term) return props.options;
-  return props.options.filter(o => String(o[props.labelKey] ?? '').toLowerCase().includes(term));
+  return props.options.filter(o =>
+    String(o[props.labelKey] ?? '').toLowerCase().includes(term)
+  );
 });
 
-// opción actualmente seleccionada
 const selectedOption = computed(() =>
   props.options.find(o => o[props.valueKey] === props.modelValue)
 );
 
-// label de la opción seleccionada (o cadena vacía)
 const selectedLabel = computed(() =>
   selectedOption.value ? String(selectedOption.value[props.labelKey] ?? '') : ''
 );
@@ -77,19 +91,12 @@ const placeholderText = computed(() =>
 );
 
 const displayText = computed({
-  get() {
-    return q.value !== '' ? q.value : selectedLabel.value;
-  },
-  set(v) {
-    q.value = v ?? '';
-  }
+  get() { return q.value !== '' ? q.value : selectedLabel.value; },
+  set(v) { q.value = v ?? ''; }
 });
 
-// Ícono según dirección y estado
 const caretIcon = computed(() => {
-  if (props.direction === 'up') {
-    return open.value ? 'fa-chevron-down' : 'fa-chevron-up';
-  }
+  if (props.direction === 'up') return open.value ? 'fa-chevron-down' : 'fa-chevron-up';
   return open.value ? 'fa-chevron-up' : 'fa-chevron-down';
 });
 
@@ -99,18 +106,27 @@ function select(val) {
 }
 
 const root = ref(null);
-
-function onFocus() {
-  open.value = true;
+function onFocus() { 
+  open.value = true; 
 }
 
-function handleDocClick(e) {
-  if (!root.value) return
-  if (!root.value.contains(e.target)) open.value = false
+function handleDocClick(e) { 
+  if (!root.value) return; if (!root.value.contains(e.target)) open.value = false; 
 }
 
-onMounted(() => document.addEventListener('click', handleDocClick))
-onBeforeUnmount(() => document.removeEventListener('click', handleDocClick))
+onMounted(() => document.addEventListener('click', handleDocClick));
+onBeforeUnmount(() => document.removeEventListener('click', handleDocClick));
+
+const stringModel = computed(() => (props.modelValue ?? '').toString());
+function onInput(v) {
+  if (resolvedMode.value === 'numeric') {
+    // Si está vacío, emite '', si no, número
+    if (v === '' || v === null || typeof v === 'undefined') emit('update:modelValue', '');
+    else emit('update:modelValue', Number(v));
+  } else {
+    emit('update:modelValue', v);
+  }
+}
 </script>
 
 <style scoped>

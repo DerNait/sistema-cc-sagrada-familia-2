@@ -27,22 +27,16 @@
         <template v-for="c in columns" :key="c.field">
           <div v-if="c.filterable" class="col-auto">
             <Filtros
-              v-if="c.filterType==='select' && c.filterOptions"
               v-model="localFilters[c.field]"
-              :options="Object.entries(c.filterOptions).map(([val,label]) => ({ id: val, nombre: label }))"
-              :placeholder="c.label"
-            />
-  
-            <input
-              v-else
-              :type="inputType(c.filterType)"
-              v-model="localFilters[c.field]"
-              class="form-control"
+              :mode="c.filterType === 'select' ? 'select' : c.filterType"
+              :options="c.filterType==='select' && c.filterOptions
+                        ? Object.entries(c.filterOptions).map(([val,label]) => ({ id: val, nombre: label }))
+                        : []"
               :placeholder="c.label"
             />
           </div>
         </template>
-  
+
         <div v-if="hasActiveFilters" class="align-self-end">
           <button class="btn btn-outline-secondary" @click="clearFilters">
             Limpiar
