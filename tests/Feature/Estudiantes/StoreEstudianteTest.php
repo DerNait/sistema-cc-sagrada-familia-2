@@ -28,7 +28,7 @@ class StoreEstudianteTest extends TestCase
         $this->withSession(['_token' => $token]);
 
         $response = $this->post(
-            route('catalogos.estudiantes.store'),
+            route('admin.estudiantes.store'),
             [
                 '_token'     => $token,
                 'usuario_id' => $user->id,
@@ -36,7 +36,7 @@ class StoreEstudianteTest extends TestCase
             ]
         );
 
-        $response->assertRedirect(route('catalogos.estudiantes.index'));
+        $response->assertRedirect(route('admin.estudiantes.index'));
         $this->assertDatabaseHas('estudiantes', [
             'usuario_id' => $user->id,
             'beca_id'    => $beca->id,

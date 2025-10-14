@@ -81,10 +81,10 @@ class SeccionesController extends CrudControllerBase
             ->icon('fa-shuffle')
             ->btn('btn-outline-danger')
             ->ability('randomize')
-            ->url('/catalogos/secciones/upload')
+            ->url('/admin/secciones/upload')
             ->method('GET');
 
-        $this->syncAbilities('catalogos.secciones');
+        $this->syncAbilities('admin.secciones');
     }
 
     public function createUpload () {

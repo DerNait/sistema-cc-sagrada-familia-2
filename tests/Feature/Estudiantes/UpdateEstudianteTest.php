@@ -28,7 +28,7 @@ class UpdateEstudianteTest extends TestCase
         $this->withSession(['_token' => $token]);
 
         $response = $this->put(
-            route('catalogos.estudiantes.update', $estudiante),
+            route('admin.estudiantes.update', $estudiante),
             [
                 '_token'     => $token,
                 'usuario_id' => $nuevoUsuario->id,
@@ -36,7 +36,7 @@ class UpdateEstudianteTest extends TestCase
             ]
         );
 
-        $response->assertRedirect(route('catalogos.estudiantes.index'));
+        $response->assertRedirect(route('admin.estudiantes.index'));
 
         $this->assertDatabaseHas('estudiantes', [
             'id'         => $estudiante->id,

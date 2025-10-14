@@ -57,7 +57,7 @@ class EmpleadosController extends CrudControllerBase
             ->type('datetime')
             ->readonly();
 
-        $this->syncAbilities('catalogos.empleados');
+        $this->syncAbilities('admin.empleados');
     }
 
     public function planilla()

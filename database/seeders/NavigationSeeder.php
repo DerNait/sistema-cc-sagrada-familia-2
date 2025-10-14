@@ -20,16 +20,16 @@ class NavigationSeeder extends Seeder
             new NavModule('Dashboard','dashboard',200,'fas fa-chart-pie', null, NavModule::READ),
             new NavModule('Cursos','cursos',300,'fas fa-graduation-cap', null, NavModule::READ),
             new NavModule('Pagos','pagos',400,'fas fa-credit-card', null, array_merge(NavModule::CRUD)),
-            new NavModule('Catálogos','catalogos',500,'fas fa-book', null, NavModule::READ),
+            new NavModule('Admin','admin',500,'fas fa-book', null, NavModule::READ),
 
-            new NavModule('Usuarios', 'catalogos.usuarios', 100, 'fas fa-user-shield', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
-            new NavModule('Roles', 'catalogos.roles', 200, 'fas fa-user-tag', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
-            new NavModule('Empleados','catalogos.empleados', 300,'fas fa-id-badge','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
-            new NavModule('Estudiantes','catalogos.estudiantes', 400,'fas fa-user-graduate','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
-            new NavModule('Productos','catalogos.productos', 600,'fas fa-box-open','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
-            new NavModule('Cursos','catalogos.cursos', 700,'fas fa-chalkboard-teacher','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
-            new NavModule('Secciones','catalogos.secciones', 800,'fas fa-th-large','catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT, NavModule::RANDOMIZE)),
-            new NavModule('Actividades', 'catalogos.actividades', 900, 'fas fa-tasks', 'catalogos', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Usuarios', 'admin.usuarios', 100, 'fas fa-user-shield', 'admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Roles', 'admin.roles', 200, 'fas fa-user-tag', 'admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Empleados','admin.empleados', 300,'fas fa-id-badge','admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Estudiantes','admin.estudiantes', 400,'fas fa-user-graduate','admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Productos','admin.productos', 600,'fas fa-box-open','admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Cursos','admin.cursos', 700,'fas fa-chalkboard-teacher','admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Secciones','admin.secciones', 800,'fas fa-th-large','admin', array_merge(NavModule::CRUD, NavModule::EXPORT, NavModule::RANDOMIZE)),
+            new NavModule('Actividades', 'admin.actividades', 900, 'fas fa-tasks', 'admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
             
 
         ]);

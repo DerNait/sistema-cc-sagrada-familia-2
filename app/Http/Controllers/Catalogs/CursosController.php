@@ -100,6 +100,6 @@ class CursosController extends CrudControllerBase
             ->type('datetime')
             ->readonly();
 
-        $this->syncAbilities('catalogos.cursos');
+        $this->syncAbilities('admin.cursos');
     }
 }
