@@ -248,52 +248,21 @@ async function deleteRow(row) {
   }
 }
 
-// ✅ Guardar con SweetAlert
-async function saveItem(formData) {
-  try {
-    const { data } = await axios.post(baseUrl, formData);
-    rows.value.unshift(data);
-    originalRows.value.unshift(data);
+async function onSaved(record) {
+  if (formMode.value === 'create') {
+    rows.value.unshift(record);
+    originalRows.value.unshift(record);
     showSuccess('Guardado', 'Registro creado correctamente');
-    close();
-    return data;
-  } catch (error) {
-    console.error(error);
-    showError('Error', 'No se pudo guardar el registro');
-    throw error;
-  }
-}
-
-// ✅ Actualizar con SweetAlert
-async function updateItem(id, formData) {
-  try {
-    const { data } = await axios.put(`${baseUrl}/${id}`, formData);
-    const idx = rows.value.findIndex(r => r.id === id);
+  } else {
+    const idx = rows.value.findIndex(r => r.id === record.id);
     if (idx > -1) {
-      rows.value[idx] = data;
-      originalRows.value[idx] = data;
+      rows.value[idx] = record;
+      const idx2 = originalRows.value.findIndex(r => r.id === record.id);
+      if (idx2 > -1) originalRows.value[idx2] = record;
     }
     showSuccess('Actualizado', 'Registro modificado correctamente');
-    close();
-    return data;
-  } catch (error) {
-    console.error(error);
-    showError('Error', 'No se pudo actualizar el registro');
-    throw error;
   }
-}
-
-// ✅ onSaved redirige según modo
-async function onSaved(record) {
-  try {
-    if (formMode.value === 'create') {
-      await saveItem(record);
-    } else {
-      await updateItem(record.id, record);
-    }
-  } catch (error) {
-    // Ya manejado en saveItem/updateItem
-  }
+  close();
 }
 
 onMounted(async () => {
