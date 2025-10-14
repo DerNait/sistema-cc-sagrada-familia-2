@@ -1,20 +1,11 @@
 <template>
   <div class="container py-4">
     <h2 class="mb-4 text-center fw-normal">Selecciona el <span class="fw-semibold text-primary">curso</span> que deseas ver</h2>
-
-    <Filtro>
-      <div class="input-group">
-        <input 
-          type="text" 
-          class="form-control" 
-          placeholder="Buscar curso..." 
-          v-model="busqueda"
-        />
-        <span class="input-group-text">
-          <i class="fas fa-search"></i>
-        </span>
+    <div class="d-flex justify-content-center">
+      <div class="mb-3 w-50">
+        <SearchBar v-model="busqueda" placeholder="Buscar curso..." />
       </div>
-    </Filtro>
+    </div>
     <div class="row row-cols-1 row-cols-md-4 g-4">
       <div v-if="can_create">
         <a 
@@ -40,7 +31,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import Filtro from '@/components/Filtro.vue'
+import SearchBar from '../components/SearchBar.vue'
 import Card from '@/components/Card.vue'
 
 const props = defineProps({
