@@ -117,6 +117,14 @@
       </transition>
     </div>
   </transition>
+  <transition name="backdrop">
+    <div
+      v-if="busy"
+      class="crud-busy-backdrop d-flex align-items-center justify-content-center"
+    >
+      <i class="fa-solid fa-spinner fa-spin fa-2xl text-white"></i>
+    </div>
+  </transition>
 </template>
 
 <script setup>
@@ -127,6 +135,7 @@ import SearchBar from '../SearchBar.vue';
 import Filtros from '../Filtros.vue'
 import Form from './Form.vue';
 
+const busy = ref(false);
 const showForm   = ref(false);
 const editingRow = ref(null);
 const formAction = ref('');
@@ -170,7 +179,9 @@ function openCreate() {
 
 function openShow(row) {
   formMode.value = 'show';
+  busy.value = true;
   loadLatest(row.id).then(record => {
+    busy.value = false;
     editingRow.value = record;
     formAction.value = '';
     open();
@@ -244,7 +255,9 @@ async function deleteRow(row) {
   if (!result.isConfirmed) return;
 
   try {
+    busy.value = true;
     await axios.delete(`${baseUrl}/${row.id}`);
+    busy.value = false;
     const idx = rows.value.findIndex(r => r.id === row.id);
     if (idx > -1) {
       rows.value.splice(idx, 1);
@@ -252,6 +265,7 @@ async function deleteRow(row) {
     }
     showSuccess('Eliminado', 'El registro ha sido eliminado correctamente');
   } catch (error) {
+    busy.value = false;
     console.error(error);
     showError('Error', 'No se pudo eliminar el registro');
   }
@@ -393,8 +407,11 @@ const hasActiveFilters = computed(() =>
 );
 
 function exportData() {
+  busy.value = true;
   axios.get(`${baseUrl}/export`, { responseType: 'blob' })
     .then(response => {
+      busy.value = false;
+      
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
