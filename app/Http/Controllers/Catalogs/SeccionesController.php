@@ -75,5 +75,7 @@ class SeccionesController extends CrudControllerBase
             ->pivot('estudiantes')   // <- nombre del método en el modelo Seccion
             ->multiRelation()
             ->hide();
+
+        $this->syncAbilities('admin.secciones');
     }
 }
