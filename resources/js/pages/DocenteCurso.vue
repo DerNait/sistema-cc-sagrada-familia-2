@@ -20,6 +20,14 @@
 
       <div class="d-flex justify-content-evenly gap-2">
         <button
+          v-if="!bulkEdit && can_create_activity"
+          class="btn btn-secondary"
+          @click="createActivity()"
+        >
+          <i class="fa-solid fa-plus me-1"></i>
+          Crear actividad
+        </button>
+        <button
           v-if="!bulkEdit"
           class="btn btn-primary"
           @click="toggleBulkEdit(true)"
@@ -243,6 +251,7 @@ const props = defineProps({
   selected_estudiante_ids: { type: Array, default: () => [] },
   actividades: { type: Array, default: () => [] },
   can_edit: { type: Boolean, default: false },
+  can_create_activity: { type: Boolean, default: false },
 });
 
 const busyData = ref(false);
@@ -649,6 +658,10 @@ async function fetchData(params = {}) {
 
 function editCourse() {
   window.location.href = `/admin/cursos?edit=${props.curso.id}`;
+}
+
+function createActivity() {
+  window.location.href = `/admin/actividades?create=1`;
 }
 
 </script>
