@@ -11,6 +11,7 @@ use App\Models\SeccionEstudiante;
 use App\Models\EstudianteNota;
 use Illuminate\Http\Request;
 use App\Trait\PdfExport;
+use App\Support\Forerunner\Forerunner;
 class CursoController extends Controller
 {
     public function index(Request $request)
@@ -42,8 +43,11 @@ class CursoController extends Controller
                             ->get();
         }
 
+        $canCreate = Forerunner::allows('admin.cursos.create');
+
         $params = [
             'cursos' => $cursos,
+            'can_create' => $canCreate,
         ];
 
         return view('component', [
