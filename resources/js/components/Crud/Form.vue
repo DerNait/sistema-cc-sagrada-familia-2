@@ -20,7 +20,7 @@
             class="form-select"
           >
             <option value="">-- Selecciona --</option>
-            <option v-for="(label,val) in c.options" :key="val" :value="val">
+            <option v-for="(label,val) in c.options" :key="val" :value="String(val)">
               {{ label }}
             </option>
           </select>
@@ -200,7 +200,7 @@ const props = defineProps({
   action:   String,
   readonly: { type: Boolean, default: false },
   uploadUrl: String,
-
+  defaults: Object, 
 });
 const emit  = defineEmits(['saved', 'cancel']);
 
@@ -211,14 +211,24 @@ const csrf = document
 const showPass = ref(false);
 
 const form = reactive({});
+
 Object.values(props.columns).forEach(c => {
   if (c.isMultiRelation) {
-    const val = props.item ? getValue(props.item, c.field) : [];
-    form[c.field] = Array.isArray(val) ? [...val] : [];
+    const val = props.item ? getValue(props.item, c.field)
+              : (props.defaults?.[c.field] ?? []);
+    form[c.field] = Array.isArray(val) ? [...val] : (val ? [val] : []);
   } else {
-    form[c.field] = props.item ? getValue(props.item, c.field) ?? '' : '';
+    let base = props.item ? getValue(props.item, c.field) ?? ''
+              : (props.defaults?.[c.field] ?? '');
+
+    if (c.type === 'relation' && base !== '' && base !== null) {
+      base = String(base);
+    }
+
+    form[c.field] = base;
   }
 });
+
 
 const hasPassword = computed(() => Object.values(props.columns).some(c => c.type==='password'));
 if (hasPassword.value) form.password_confirmation = '';

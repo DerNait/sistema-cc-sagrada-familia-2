@@ -117,6 +117,7 @@
           :columns="columns"
           :action="formAction"
           :readonly="formMode === 'show'"
+          :defaults="formDefaults"
           @saved="onSaved"
           @cancel="close" />
       </transition>
@@ -152,10 +153,24 @@ const localFilters = reactive(
   )
 );
 
+const formDefaults = ref({});
+
+function readPrefillFromUrl() {
+  const url = new URL(window.location.href);
+  const obj = {};
+  // aceptamos cualquier prefill_* que exista entre tus columnas
+  Object.values(props.columns).forEach(c => {
+    const val = url.searchParams.get(`prefill_${c.field}`);
+    if (val !== null) obj[c.field] = val;
+  });
+  formDefaults.value = obj;
+}
+
 function openCreate() {
   formMode.value  = 'create';
   editingRow.value = null;
   formAction.value = baseUrl;
+  readPrefillFromUrl();
   open();
 }
 
@@ -272,7 +287,14 @@ onMounted(async () => {
 
   if (url.searchParams.get('create') && props.abilities?.create) {
     openCreate();
+    // opcional: limpiar params de la URL para que no se quede
     url.searchParams.delete('create');
+    // también puedes limpiar los prefill_* si quieres:
+    Array.from(url.searchParams.keys())
+      .filter(k => k.startsWith('prefill_'))
+      .forEach(k => url.searchParams.delete(k));
+
+    history.replaceState(null, '', url.pathname + (url.search ? '?' + url.search : '') + url.hash);
   } else if (url.searchParams.get('edit') && props.abilities?.update) {
     const id = url.searchParams.get('edit');
     const record = await loadLatest(id);
@@ -361,6 +383,12 @@ const segment = segments.filter(Boolean).pop();
 const entityTitle = computed(() => {
   return segment.charAt(0).toUpperCase() + segment.slice(1);
 });
+
+function castByType(val, col) {
+  if (!col) return val;
+  if (col.type === 'numeric' || col.type === 'number') return Number(val);
+  return val;
+}
 
 function clearFilters () {
   Object.keys(localFilters).forEach(k => (localFilters[k] = ''));

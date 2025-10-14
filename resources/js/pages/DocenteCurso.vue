@@ -661,7 +661,18 @@ function editCourse() {
 }
 
 function createActivity() {
-  window.location.href = `/admin/actividades?create=1`;
+  const cursoId  = props.curso?.id ?? null;
+
+  const selectedFromUI   = gradoId.value ?? null;
+  const selectedFromProp = props.selected_grado_id ?? null;
+  const onlyOneGrado     = (gradosLocal.value?.length === 1) ? gradosLocal.value[0]?.id : null;
+  const gradoIdResolved  = selectedFromUI ?? selectedFromProp ?? onlyOneGrado ?? null;
+
+  const params = new URLSearchParams({ create: 1 });
+  if (gradoIdResolved) params.set('prefill_grado_id', gradoIdResolved);
+  if (cursoId)         params.set('prefill_curso_id', cursoId);
+
+  window.location.href = `/admin/actividades?${params.toString()}`;
 }
 
 </script>
