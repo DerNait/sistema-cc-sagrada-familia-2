@@ -10,7 +10,7 @@ use App\Models\Seccion;
 use App\Models\SeccionEstudiante;
 use App\Models\EstudianteNota;
 use Illuminate\Http\Request;
-
+use App\Trait\PdfExport;
 class CursoController extends Controller
 {
     public function index(Request $request)
