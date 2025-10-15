@@ -30,7 +30,7 @@
       <p class="text-muted">Cargando datos del dashboard...</p>
     </div>
 
-    <!-- Gráficos -->
+    <!-- Gráficos - Primera fila -->
     <div v-if="params && params.charts" class="row g-4 mt-4 charts-row">
       <!-- Gráfico circular de estudiantes -->
       <div class="col-md-4 d-flex">
@@ -96,6 +96,20 @@
           :show-labels="staffStatusData.labels"
           :colors="['#8FBC8F', '#2F4F4F']"
           donut-size="35%"
+        />
+      </div>
+    </div>
+
+    <!-- Tercera fila de gráficos - Productos más vendidos -->
+    <div v-if="params && params.charts" class="row g-4 mt-1 charts-row">
+      <div class="col-md-12 d-flex">
+        <Chart
+          title="Productos más vendidos"
+          type="bar"
+          :height="300"
+          :series="topProductsData.series"
+          :categories="topProductsData.categories"
+          :colors="['#8FBC8F']"
         />
       </div>
     </div>
@@ -196,6 +210,22 @@ export default {
         series: [data.paid, data.unpaid],
         labels: ['Pagado', 'No pagado']
       }
+    },
+
+    // Datos para productos más vendidos (bar)
+    topProductsData() {
+      if (!this.params?.charts?.top_products_bar) {
+        return { series: [], categories: [] }
+      }
+      
+      const data = this.params.charts.top_products_bar
+      return {
+        series: [{
+          name: 'Cantidad vendida',
+          data: data.map(item => item.value)
+        }],
+        categories: data.map(item => item.label)
+      }
     }
   }
 }
@@ -215,6 +245,14 @@ export default {
 }
 
 .charts-row .col-md-8 > * {
+  flex: 1;
+}
+
+.charts-row .col-md-12 {
+  display: flex;
+}
+
+.charts-row .col-md-12 > * {
   flex: 1;
 }
 </style>
