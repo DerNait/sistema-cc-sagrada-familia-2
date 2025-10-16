@@ -11,6 +11,7 @@ use App\Models\SeccionEstudiante;
 use App\Models\EstudianteNota;
 use Illuminate\Http\Request;
 use App\Trait\PdfExport;
+use App\Support\Forerunner\Forerunner;
 class CursoController extends Controller
 {
     public function index(Request $request)
@@ -42,8 +43,11 @@ class CursoController extends Controller
                             ->get();
         }
 
+        $canCreate = Forerunner::allows('admin.cursos.create');
+
         $params = [
             'cursos' => $cursos,
+            'can_create' => $canCreate,
         ];
 
         return view('component', [
@@ -416,6 +420,9 @@ class CursoController extends Controller
             ];
         })->values();
 
+        $canEdit = Forerunner::allows('admin.cursos.edit');
+        $canActivity = Forerunner::allows('admin.actividades.create');
+
         $params = [
             'modo'                    => $rolId === 1 ? 'admin' : 'docente',
             'curso'                   => ['id' => $curso->id, 'nombre' => $curso->nombre],
@@ -426,6 +433,8 @@ class CursoController extends Controller
             'estudiantes'             => $estudiantes,
             'selected_estudiante_ids' => $selectedEstudianteIds,
             'actividades'             => $actividadesPayload,
+            'can_edit'                => $canEdit,
+            'can_create_activity'     => $canActivity,
         ];
 
         return view('component', [

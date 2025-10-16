@@ -44,3 +44,12 @@
   transition: opacity .35s ease;
 }
 .backdrop-enter-from, .backdrop-leave-to { opacity: 0; }
+
+.crud-busy-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 1200; /* por encima del drawer del form */
+}

@@ -66,7 +66,7 @@ class ActividadesController extends CrudControllerBase
         $this->column('created_at')->label('Creado')->type('datetime')->readonly()->hide();
         $this->column('updated_at')->label('Actualizado')->type('datetime')->readonly()->hide();
 
-        $this->syncAbilities('catalogos.actividades');
+        $this->syncAbilities('admin.actividades');
     }
 
     /* ---------- override store ---------- */

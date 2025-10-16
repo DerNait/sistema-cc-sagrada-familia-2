@@ -76,31 +76,6 @@ class SeccionesController extends CrudControllerBase
             ->multiRelation()
             ->hide();
 
-        $this->globalAction('upload')
-            ->label('Cargar')
-            ->icon('fa-shuffle')
-            ->btn('btn-outline-danger')
-            ->ability('randomize')
-            ->url('/catalogos/secciones/upload')
-            ->method('GET');
-
-        $this->syncAbilities('catalogos.secciones');
-    }
-
-    public function createUpload () {
-
-        return view('component', [
-            'component' => 'cargar-seccion',
-        ]);
-    }
-
-    public function storeUpload () {
-        // TODO: implementar metodo para cargar csv y sobreescribir las secciones del año
-        return;
-    }
-
-    public function downloadTemplate() {
-        // TODO: implementar descargar plantilla.csv para la creacion de secciones
-        return;
+        $this->syncAbilities('admin.secciones');
     }
 }

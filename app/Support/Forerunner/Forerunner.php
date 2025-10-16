@@ -15,7 +15,7 @@ class Forerunner
         $pos = strrpos($ability, '.');
         if ($pos === false) return false;
 
-        $moduleKey = substr($ability, 0, $pos);        // p.ej. 'catalogos.secciones'
+        $moduleKey = substr($ability, 0, $pos);        // p.ej. 'admin.secciones'
         $permKey   = substr($ability, $pos + 1);       // p.ej. 'read'
 
         $moduleId = \App\Models\Module::where('modulo', $moduleKey)->value('id');

@@ -17,10 +17,10 @@ return [
     // Alias por módulo (cuando el nombre NO coincide con CRUD)
     'aliases' => [
         'empleados' => [
-            'planilla' => 'export',     // catalogos.empleados.planilla
+            'planilla' => 'export',     // admin.empleados.planilla
         ],
         'roles' => [
-            'permisos' => 'update',     // catalogos.roles.permisos
+            'permisos' => 'update',     // admin.roles.permisos
         ],
         // agrega más si sale algo especial
     ],

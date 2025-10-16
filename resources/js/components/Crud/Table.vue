@@ -27,22 +27,16 @@
         <template v-for="c in columns" :key="c.field">
           <div v-if="c.filterable" class="col-auto">
             <Filtros
-              v-if="c.filterType==='select' && c.filterOptions"
               v-model="localFilters[c.field]"
-              :options="Object.entries(c.filterOptions).map(([val,label]) => ({ id: val, nombre: label }))"
-              :placeholder="c.label"
-            />
-  
-            <input
-              v-else
-              :type="inputType(c.filterType)"
-              v-model="localFilters[c.field]"
-              class="form-control"
+              :mode="c.filterType === 'select' ? 'select' : c.filterType"
+              :options="c.filterType==='select' && c.filterOptions
+                        ? Object.entries(c.filterOptions).map(([val,label]) => ({ id: val, nombre: label }))
+                        : []"
               :placeholder="c.label"
             />
           </div>
         </template>
-  
+
         <div v-if="hasActiveFilters" class="align-self-end">
           <button class="btn btn-outline-secondary" @click="clearFilters">
             Limpiar
@@ -117,9 +111,18 @@
           :columns="columns"
           :action="formAction"
           :readonly="formMode === 'show'"
+          :defaults="formDefaults"
           @saved="onSaved"
           @cancel="close" />
       </transition>
+    </div>
+  </transition>
+  <transition name="backdrop">
+    <div
+      v-if="busy"
+      class="crud-busy-backdrop d-flex align-items-center justify-content-center"
+    >
+      <i class="fa-solid fa-spinner fa-spin fa-2xl text-white"></i>
     </div>
   </transition>
 </template>
@@ -132,6 +135,7 @@ import SearchBar from '../SearchBar.vue';
 import Filtros from '../Filtros.vue'
 import Form from './Form.vue';
 
+const busy = ref(false);
 const showForm   = ref(false);
 const editingRow = ref(null);
 const formAction = ref('');
@@ -152,16 +156,32 @@ const localFilters = reactive(
   )
 );
 
+const formDefaults = ref({});
+
+function readPrefillFromUrl() {
+  const url = new URL(window.location.href);
+  const obj = {};
+  // aceptamos cualquier prefill_* que exista entre tus columnas
+  Object.values(props.columns).forEach(c => {
+    const val = url.searchParams.get(`prefill_${c.field}`);
+    if (val !== null) obj[c.field] = val;
+  });
+  formDefaults.value = obj;
+}
+
 function openCreate() {
   formMode.value  = 'create';
   editingRow.value = null;
   formAction.value = baseUrl;
+  readPrefillFromUrl();
   open();
 }
 
 function openShow(row) {
   formMode.value = 'show';
+  busy.value = true;
   loadLatest(row.id).then(record => {
+    busy.value = false;
     editingRow.value = record;
     formAction.value = '';
     open();
@@ -235,7 +255,9 @@ async function deleteRow(row) {
   if (!result.isConfirmed) return;
 
   try {
+    busy.value = true;
     await axios.delete(`${baseUrl}/${row.id}`);
+    busy.value = false;
     const idx = rows.value.findIndex(r => r.id === row.id);
     if (idx > -1) {
       rows.value.splice(idx, 1);
@@ -243,61 +265,61 @@ async function deleteRow(row) {
     }
     showSuccess('Eliminado', 'El registro ha sido eliminado correctamente');
   } catch (error) {
+    busy.value = false;
     console.error(error);
     showError('Error', 'No se pudo eliminar el registro');
   }
 }
 
-// ✅ Guardar con SweetAlert
-async function saveItem(formData) {
-  try {
-    const { data } = await axios.post(baseUrl, formData);
-    rows.value.unshift(data);
-    originalRows.value.unshift(data);
+async function onSaved(record) {
+  if (formMode.value === 'create') {
+    rows.value.unshift(record);
+    originalRows.value.unshift(record);
     showSuccess('Guardado', 'Registro creado correctamente');
-    close();
-    return data;
-  } catch (error) {
-    console.error(error);
-    showError('Error', 'No se pudo guardar el registro');
-    throw error;
-  }
-}
-
-// ✅ Actualizar con SweetAlert
-async function updateItem(id, formData) {
-  try {
-    const { data } = await axios.put(`${baseUrl}/${id}`, formData);
-    const idx = rows.value.findIndex(r => r.id === id);
+  } else {
+    const idx = rows.value.findIndex(r => r.id === record.id);
     if (idx > -1) {
-      rows.value[idx] = data;
-      originalRows.value[idx] = data;
+      rows.value[idx] = record;
+      const idx2 = originalRows.value.findIndex(r => r.id === record.id);
+      if (idx2 > -1) originalRows.value[idx2] = record;
     }
     showSuccess('Actualizado', 'Registro modificado correctamente');
-    close();
-    return data;
-  } catch (error) {
-    console.error(error);
-    showError('Error', 'No se pudo actualizar el registro');
-    throw error;
   }
-}
-
-// ✅ onSaved redirige según modo
-async function onSaved(record) {
-  try {
-    if (formMode.value === 'create') {
-      await saveItem(record);
-    } else {
-      await updateItem(record.id, record);
-    }
-  } catch (error) {
-    // Ya manejado en saveItem/updateItem
-  }
+  close();
 }
 
 onMounted(async () => {
   await nextTick();
+
+  const url = new URL(window.location.href);
+
+  if (url.searchParams.get('create') && props.abilities?.create) {
+    openCreate();
+    // opcional: limpiar params de la URL para que no se quede
+    url.searchParams.delete('create');
+    // también puedes limpiar los prefill_* si quieres:
+    Array.from(url.searchParams.keys())
+      .filter(k => k.startsWith('prefill_'))
+      .forEach(k => url.searchParams.delete(k));
+
+    history.replaceState(null, '', url.pathname + (url.search ? '?' + url.search : '') + url.hash);
+  } else if (url.searchParams.get('edit') && props.abilities?.update) {
+    const id = url.searchParams.get('edit');
+    const record = await loadLatest(id);
+    if (record) {
+      openEdit(record);
+      url.searchParams.delete('edit');
+    }
+  } else if (url.searchParams.get('show') && props.abilities?.read) {
+    const id = url.searchParams.get('show');
+    const record = await loadLatest(id);
+    if (record) {
+      openShow(record);
+      url.searchParams.delete('show');
+    }
+  }
+
+  history.replaceState(null, '', url.pathname + (url.search ? '?' + url.search : '') + url.hash);
 });
 
 watch([localFilters, globalSearch], applyFilters, { deep: true });
@@ -370,6 +392,12 @@ const entityTitle = computed(() => {
   return segment.charAt(0).toUpperCase() + segment.slice(1);
 });
 
+function castByType(val, col) {
+  if (!col) return val;
+  if (col.type === 'numeric' || col.type === 'number') return Number(val);
+  return val;
+}
+
 function clearFilters () {
   Object.keys(localFilters).forEach(k => (localFilters[k] = ''));
 }
@@ -379,8 +407,11 @@ const hasActiveFilters = computed(() =>
 );
 
 function exportData() {
+  busy.value = true;
   axios.get(`${baseUrl}/export`, { responseType: 'blob' })
     .then(response => {
+      busy.value = false;
+      
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;

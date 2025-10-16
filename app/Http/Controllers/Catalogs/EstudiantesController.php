@@ -52,6 +52,6 @@ class EstudiantesController extends CrudControllerBase
             ->type('datetime')
             ->readonly();
 
-        $this->syncAbilities('catalogos.estudiantes');
+        $this->syncAbilities('admin.estudiantes');
     }
 }

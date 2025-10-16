@@ -147,17 +147,17 @@ export function flujoAutenticado() {
     check(dash, { 'GET /dashboard 200': r => r.status === 200 })
   })
 
-  group('auth:catalogos:index', () => {
+  group('auth:admin:index', () => {
     const rutas = [
-      '/catalogos/empleados',
-      '/catalogos/usuarios',
-      '/catalogos/roles',
-      '/catalogos/estudiantes',
-      '/catalogos/productos',
-      '/catalogos/cursos',
-      '/catalogos/pagos',
-      '/catalogos/actividades',
-      '/catalogos/secciones',
+      '/admin/empleados',
+      '/admin/usuarios',
+      '/admin/roles',
+      '/admin/estudiantes',
+      '/admin/productos',
+      '/admin/cursos',
+      '/admin/pagos',
+      '/admin/actividades',
+      '/admin/secciones',
     ]
     for (const path of rutas) {
       const r = getWithRetry(`${BASE}${path}`, { tags: { step: 'index', path } }, 2)
@@ -169,7 +169,7 @@ export function flujoAutenticado() {
   if (DO_WRITES) {
     group('auth:writes(opcional)', () => {
       // 1) Form de create para obtener CSRF fresco
-      const pageNew = getWithRetry(`${BASE}/catalogos/productos/crear`, { tags: { step: 'productos_create_form' } }, 2)
+      const pageNew = getWithRetry(`${BASE}/admin/productos/crear`, { tags: { step: 'productos_create_form' } }, 2)
       const csrf2 = parseCsrfToken(pageNew.body)
       if (!csrf2) {
         c_csrf_parse_fail.add(1)
@@ -177,7 +177,7 @@ export function flujoAutenticado() {
       } else {
         // 2) POST create (payload mínimo; ajusta a tu formulario)
         const create = http.post(
-          `${BASE}/catalogos/productos`,
+          `${BASE}/admin/productos`,
           {
             _token: csrf2,
             name: `K6 Item ${Math.random().toString(36).slice(2, 8)}`,

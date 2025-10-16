@@ -20,6 +20,8 @@ use App\Http\Controllers\CSVController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\PagosEstudianteController;
 use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\Catalogs\GradosController;
+use App\Http\Controllers\Catalogs\BolsasController;
 
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
@@ -51,9 +53,12 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
     Route::get('/pagos', [PagosController::class, 'index'])->name('pagos.index');
     Route::post('/pagos', [PagosController::class, 'store'])->name('pagos.store');
 
-    Route::post('/catalogos/roles/{role}/permisos', [RoleModulePermissionController::class, 'update'])->name('roles.permisos.update');
+    Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
+    Route::post('/inventario', [InventarioController::class, 'store'])->name('inventario.store');
 
-    Route::prefix('catalogos')->name('catalogos.')->group(function () {
+    Route::post('/admin/roles/{role}/permisos', [RoleModulePermissionController::class, 'update'])->name('roles.permisos.update');
+
+    Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('empleados')->name('empleados.')->group(function () {
             Route::get('/',           [EmpleadosController::class, 'index'])->name('index');
             Route::get('/export',     [EmpleadosController::class, 'export'])->name('export');
@@ -160,9 +165,17 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
             Route::get('{id}/editar',       [SeccionesController::class, 'edit'])->name('edit');
             Route::put('{id}',              [SeccionesController::class, 'update'])->name('update');
             Route::delete('{id}',           [SeccionesController::class, 'destroy'])->name('destroy');
-            Route::get('/upload',           [SeccionesController::class, 'createUpload'])->name('upload.create');
-            Route::post('/upload',          [SeccionesController::class, 'storeUpload'])->name('upload.store');
-            Route::get('/upload/template',  [SeccionesController::class, 'downloadTemplate'])->name('upload.template');
+        });
+
+        Route::prefix('grados')->name('grados.')->group(function () {
+            Route::get('/',                 [GradosController::class, 'index'])->name('index');
+            Route::get('/export',           [GradosController::class, 'export'])->name('export');
+            Route::get('{id}',              [GradosController::class, 'show'])->name('show');
+            Route::get('/crear',            [GradosController::class, 'create'])->name('create');
+            Route::post('/',                [GradosController::class, 'store'])->name('store');
+            Route::get('{id}/editar',       [GradosController::class, 'edit'])->name('edit');
+            Route::put('{id}',              [GradosController::class, 'update'])->name('update');
+            Route::delete('{id}',           [GradosController::class, 'destroy'])->name('destroy');
         });
 
         Route::prefix('perfil')->name('perfil.')->group(function () {
@@ -170,6 +183,17 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
             Route::get('/editar', [PerfilController::class, 'edit'])->name('edit');
             Route::post('/editar', [PerfilController::class, 'update'])->name('update');
             Route::post('/foto/eliminar', [PerfilController::class, 'destroyPhoto'])->name('foto.destroy');
+        });
+
+        Route::prefix('bolsas')->name('bolsas.')->group(function () {
+            Route::get('/',                 [BolsasController::class, 'index'])->name('index');
+            Route::get('/export',           [BolsasController::class, 'export'])->name('export');
+            Route::get('{id}',              [BolsasController::class, 'show'])->name('show');
+            Route::get('/crear',            [BolsasController::class, 'create'])->name('create');
+            Route::post('/',                [BolsasController::class, 'store'])->name('store');
+            Route::get('{id}/editar',       [BolsasController::class, 'edit'])->name('edit');
+            Route::put('{id}',              [BolsasController::class, 'update'])->name('update');
+            Route::delete('{id}',           [BolsasController::class, 'destroy'])->name('destroy');
         });
     });
 });

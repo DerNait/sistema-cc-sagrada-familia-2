@@ -6,6 +6,7 @@ use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Estudiante;
+use App\Models\Movimiento;
 
 class DashboardController extends Controller
 {
@@ -19,6 +20,7 @@ class DashboardController extends Controller
      * - Totales, becas, pagos de estudiantes
      * - Estado del personal (este mes)
      * - Notas promedio por grado
+     * - Productos más vendidos
      */
     public function index(): View
     {
@@ -107,6 +109,26 @@ class DashboardController extends Controller
             ];
         });
 
+        // === Productos más vendidos (Top 10) ===
+        $topProducts = DB::table('movimientos')
+            ->join('productos', 'movimientos.producto_id', '=', 'productos.id')
+            ->whereRaw('LOWER(movimientos.tipo) = ?', ['salida'])
+            ->select(
+                'productos.nombre as product_name',
+                DB::raw('SUM(movimientos.cantidad) as total_vendido')
+            )
+            ->groupBy('productos.id', 'productos.nombre')
+            ->orderByDesc('total_vendido')
+            ->limit(10)
+            ->get();
+
+        $topProductsChart = $topProducts->map(function ($row) {
+            return [
+                'label' => $row->product_name,
+                'value' => (int) $row->total_vendido,
+            ];
+        });
+
         // === Armamos $params para la vista ===
         $params = [
             'filters' => [
@@ -148,6 +170,7 @@ class DashboardController extends Controller
                 'progress_paid_percent' => $pctPaid,
                 'grades_avg_bar'        => $gradesAvgChart,
                 'staff_paid_progress'   => $pctEmployeesPaidThisMonth,
+                'top_products_bar'      => $topProductsChart,
             ],
             'kpis' => [
                 ['label' => 'Empleados',                  'value' => $totalEmployees],

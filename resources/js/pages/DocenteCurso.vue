@@ -5,6 +5,14 @@
         <h3 class="p-3 fw-bold m-0">
           {{ curso?.nombre || 'Curso' }}
         </h3>
+        <button
+          v-if="!bulkEdit && can_edit"
+          class="btn btn-outline-primary"
+          @click="editCourse()"
+        >
+          <i class="fa-solid fa-pen-to-square me-1"></i>
+          Editar curso
+        </button>
         <span v-if="bulkEdit" class="badge-editando text-primary fw-semibold">
           EDITANDO TODO
         </span>
@@ -12,12 +20,20 @@
 
       <div class="d-flex justify-content-evenly gap-2">
         <button
+          v-if="!bulkEdit && can_create_activity"
+          class="btn btn-secondary"
+          @click="createActivity()"
+        >
+          <i class="fa-solid fa-plus me-1"></i>
+          Crear actividad
+        </button>
+        <button
           v-if="!bulkEdit"
           class="btn btn-primary"
           @click="toggleBulkEdit(true)"
         >
           <i class="fa-solid fa-pen-to-square me-1"></i>
-          Editar todo
+          Editar todas las notas
         </button>
 
         <template v-else>
@@ -234,6 +250,8 @@ const props = defineProps({
   estudiantes: { type: Array, default: () => [] },
   selected_estudiante_ids: { type: Array, default: () => [] },
   actividades: { type: Array, default: () => [] },
+  can_edit: { type: Boolean, default: false },
+  can_create_activity: { type: Boolean, default: false },
 });
 
 const busyData = ref(false);
@@ -369,7 +387,7 @@ function normalizeDraftToCompare(val) {
 function snapshotOriginalNotas() {
   const snap = {};
   for (const r of rowsLocal.value) {
-    for (const a of actividadesLocal) {
+    for (const a of actividadesLocal.value) {
       const key = cellKey(r.id, a.id);
       const cell = r[`act_${a.id}`] || {};
       snap[key] = normalizeDraftToCompare(cell.nota);
@@ -380,7 +398,7 @@ function snapshotOriginalNotas() {
 
 function preloadAllDrafts() {
   for (const r of rowsLocal.value) {
-    for (const a of actividadesLocal) {
+    for (const a of actividadesLocal.value) {
       const key = cellKey(r.id, a.id);
       const cell = r[`act_${a.id}`] || {};
       ui.noteDraft[key] = (cell.nota ?? '').toString();
@@ -402,7 +420,7 @@ function toggleBulkEdit(state) {
 function cancelBulkEdit() {
   // Revertir drafts a los valores del snapshot
   for (const r of rowsLocal.value) {
-    for (const a of actividadesLocal) {
+    for (const a of actividadesLocal.value) {
       const key = cellKey(r.id, a.id);
       const orig = originalNotas.value[key];
       ui.noteDraft[key] = (orig === 0 ? 0 : (orig ?? '')).toString();
@@ -414,7 +432,7 @@ function cancelBulkEdit() {
 function getChangedCells() {
   const changes = [];
   for (const r of rowsLocal.value) {
-    for (const a of actividadesLocal) {
+    for (const a of actividadesLocal.value) {
       const key = cellKey(r.id, a.id);
       const rowCell = r[`act_${a.id}`] || {};
       const before = originalNotas.value[key]; // normalizado
@@ -636,6 +654,25 @@ async function fetchData(params = {}) {
     syncing.value = false;
     busyData.value = false;
   }
+}
+
+function editCourse() {
+  window.location.href = `/admin/cursos?edit=${props.curso.id}`;
+}
+
+function createActivity() {
+  const cursoId  = props.curso?.id ?? null;
+
+  const selectedFromUI   = gradoId.value ?? null;
+  const selectedFromProp = props.selected_grado_id ?? null;
+  const onlyOneGrado     = (gradosLocal.value?.length === 1) ? gradosLocal.value[0]?.id : null;
+  const gradoIdResolved  = selectedFromUI ?? selectedFromProp ?? onlyOneGrado ?? null;
+
+  const params = new URLSearchParams({ create: 1 });
+  if (gradoIdResolved) params.set('prefill_grado_id', gradoIdResolved);
+  if (cursoId)         params.set('prefill_curso_id', cursoId);
+
+  window.location.href = `/admin/actividades?${params.toString()}`;
 }
 
 </script>

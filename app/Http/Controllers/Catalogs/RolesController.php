@@ -37,10 +37,10 @@ class RolesController extends CrudControllerBase
              ->label('Permisos')
              ->icon('fa-lock')
              ->btn('btn-outline-warning')
-             ->url('/catalogos/roles/__ID__/permisos');
+             ->url('/admin/roles/__ID__/permisos');
 
         // 4) Calcular permisos CRUD (modulo "usuarios")
-        $this->syncAbilities('catalogos.roles');
+        $this->syncAbilities('admin.roles');
     }
 
 	public function permisos(Request $request, int $rolId)

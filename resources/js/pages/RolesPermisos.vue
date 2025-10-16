@@ -61,7 +61,7 @@ async function save () {
     .map(([k]) => Number(k))
 
   try {
-    await axios.post(`/catalogos/roles/${props.rol.id}/permisos`, {
+    await axios.post(`/admin/roles/${props.rol.id}/permisos`, {
       modulo_permiso_ids: elegidos
     })
 

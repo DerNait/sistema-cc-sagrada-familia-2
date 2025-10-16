@@ -15,7 +15,7 @@ class ForerunnerAbility
             return $next($request);
         }
 
-        $name = Route::currentRouteName(); // p.ej. 'catalogos.cursos.index' o 'cursos.index'
+        $name = Route::currentRouteName(); // p.ej. 'admin.cursos.index' o 'cursos.index'
         if (!$name) {
             \Log::warning('Ruta sin nombre detectada');
             return abort(403, 'Ruta sin nombre');
@@ -31,8 +31,8 @@ class ForerunnerAbility
 
         // Acción = último segmento
         $action = array_pop($segments);          // index | show | edit | update | ...
-        // Módulo = TODO lo demás junto con puntos (soporta 'catalogos.cursos', 'admin.usuarios', etc.)
-        $module = implode('.', $segments);       // 'catalogos.cursos' | 'cursos' | 'dashboard' ...
+        // Módulo = TODO lo demás junto con puntos (soporta 'admin.cursos', 'admin.usuarios', etc.)
+        $module = implode('.', $segments);       // 'admin.cursos' | 'cursos' | 'dashboard' ...
 
         // Lee config (tu archivo tiene 'crud' y 'aliases' en la raíz)
         $crudMap = config('forerunner.crud', []);        // index->read, edit->update, ...
