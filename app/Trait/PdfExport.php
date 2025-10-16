@@ -7,17 +7,17 @@ trait PdfExport
     /**
      * Export multiple sheets (name => Collection/array) as an Excel/CSV download.
      *
-     * Usage:
-     *  $this->export([
-     *    'Calificaciones' => collect($rows),
-     *  ], 'calificaciones.csv', 'csv');
+    * Usage:
+    *  $this->exportPdf([
+    *    'Calificaciones' => collect($rows),
+    *  ], 'calificaciones.csv', 'csv');
      *
      * @param array $sheets  Associative array: sheetName => iterable (Collection|array)
      * @param string $filename
      * @param string $format   'csv'|'xlsx' (defaults to 'csv')
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\Response
      */
-    public function export(array $sheets, string $filename = 'export.csv', string $format = 'csv')
+    public function exportPdf(array $sheets, string $filename = 'export.csv', string $format = 'csv')
     {
         // Prefer Maatwebsite\Excel if available
         if (class_exists(\Maatwebsite\Excel\Facades\Excel::class)) {
