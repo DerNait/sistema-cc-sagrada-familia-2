@@ -41,6 +41,15 @@
       <p>Tamaño máximo: 1MB</p>
     </div>
 
+    <div v-if="has_template">
+      <FileTemplate
+        template_url="/templates/plantilla-secciones.xlsx"
+        icon="/icons/excel-icon.png"
+        file_title="Plantilla de Secciones"
+        class="mt-3"
+      />
+    </div>
+
     <!-- Archivo cargado -->
     <div v-if="selectedFile" class="uploaded-file mt-2">
       <template v-if="!fileBusy">
@@ -54,6 +63,12 @@
               <p class="m-0 p-0" style="color: #A9A9A9;">{{ prettySize(selectedFile.size) }}</p>
             </div>
           </div>
+          
+          <button class="x-button" @click.stop="clearFile">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="mt-2 d-flex justify-content-evenly gap-2">
           <Filtros
             v-if="!uploadingTemp"
             v-model="meses"
@@ -80,9 +95,6 @@
             />
             <i class="fa-solid fa-coins amount-icon"></i>
           </div>
-          <button class="x-button" @click.stop="clearFile">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
         </div>
   
         <!-- Progreso -->
@@ -124,13 +136,17 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import Filtros from './Filtros.vue'
+import FileTemplate from './FileTemplate.vue'
 
 // Props
 const props = defineProps({
   accept: { type: String, default: '' },
   hint:   { type: String, default: '' },
-  tiposPago: { type: Array, default: () => [] }
+  tiposPago: { type: Array, default: () => [] },
+  pendienteExtra: { type: Boolean, default: false },
 })
+
+const emit = defineEmits(['uploaded'])
 
 const tiposPagoOptions = computed(() =>
   (props.tiposPago || []).map(t => ({ id: t.id, nombre: t.nombre }))
@@ -362,6 +378,22 @@ const uploadFile = async () => {
     return
   }
 
+  let result = { isConfirmed: true };
+  if (props.pendienteExtra) {
+    try {
+      const confirmation = await showConfirmation(
+        'ADVERTENCIA',
+        'Ya cuentas con un comprobante pendiente de revisión, si subes otro se eliminará el anterior. ¿Deseas continuar?',
+        'Sí, continuar'
+      );
+      result = confirmation || {};
+    } catch (e) {
+      result = {};
+    }
+  }
+
+  if (!result || !result.isConfirmed) return;
+
   uploading.value = true
   message.value = ''
 
@@ -381,12 +413,21 @@ const uploadFile = async () => {
 
     message.value = data?.message ?? 'Pago registrado.'
 
+    // Emitir evento al padre
+    emit('uploaded', data)
+
     // Limpieza visual
     selectedFile.value = null
     progress.value = 0
     message.value = ''
     tipoPagoId.value = null
     monto.value = ''
+
+    if (fileInput.value) fileInput.value.value = ''
+
+    uploadedPath.value = null
+    cleanupDone.value = false
+
   } catch (err) {
     console.error(err)
     message.value = err?.response?.data?.message ?? 'No se pudo registrar el pago.'
@@ -395,6 +436,19 @@ const uploadFile = async () => {
   }
 }
 
+async function showConfirmation(title, text, confirmText = 'Confirmar') {
+  return await Swal.fire({
+    title: title,
+    text: text,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#83aa6b',
+    cancelButtonColor: '#00284B',
+    confirmButtonText: confirmText,
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  });
+}
 </script>
 
 <style scoped>
