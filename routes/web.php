@@ -52,6 +52,9 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
     Route::get('/pagos', [PagosController::class, 'index'])->name('pagos.index');
     Route::post('/pagos', [PagosController::class, 'store'])->name('pagos.store');
 
+    Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
+    Route::post('/inventario', [InventarioController::class, 'store'])->name('inventario.store');
+
     Route::post('/admin/roles/{role}/permisos', [RoleModulePermissionController::class, 'update'])->name('roles.permisos.update');
 
     Route::prefix('admin')->name('admin.')->group(function () {
