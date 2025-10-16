@@ -15,6 +15,7 @@ use App\Support\Forerunner\Forerunner;
 class CursoController extends Controller
 {
     public function index(Request $request)
+    use PdfExport;
     {
         $user   = auth()->user();
         $rolId  = $user->rol_id;
