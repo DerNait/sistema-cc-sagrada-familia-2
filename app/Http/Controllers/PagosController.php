@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PagosController extends Controller
 {
@@ -51,8 +53,17 @@ class PagosController extends Controller
         elseif ($rolId === 5) {
             $tiposPago = TipoPago::select('id','nombre')->orderBy('nombre')->get();
 
+            $estudiante = auth()->user()->estudiante;
+
+            $estado = EstudiantePago::estadoActual(
+                $estudiante->id,
+                null,
+                optional(auth()->user())->created_at ?? $estudiante->created_at
+            );
+
             $params = [
-                'tipos_pago' => $tiposPago,
+                'tipos_pago'    => $tiposPago,
+                'estado_pago' => $estado,
             ];
 
             return view('component', [
@@ -69,7 +80,6 @@ class PagosController extends Controller
 
     public function store(Request $request)
     {
-        // 1) Validar entrada mínima
         $data = $request->validate([
             'path'           => ['required', 'string'],
             'meses_pagados'  => ['nullable', 'integer', 'min:1', 'max:12'],
@@ -77,46 +87,34 @@ class PagosController extends Controller
             'monto_pagado'   => ['required', 'numeric', 'min:0.01'],
         ]);
 
-        // 2) Sanitizar y mover el archivo a carpeta final
+        // Sanitiza y mueve el archivo
         $tmpPath = ltrim($data['path'], '/');
-
         if (str_contains($tmpPath, '..') || !str_starts_with($tmpPath, 'uploads/')) {
             return response()->json(['message' => 'Ruta de archivo inválida.'], 422);
         }
-
         $disk = Storage::disk('public');
-
         if (!$disk->exists($tmpPath)) {
             return response()->json(['message' => 'El archivo no existe (quizá ya fue limpiado).'], 422);
         }
 
-        // Mover a carpeta "definitiva"
         $filename = basename($tmpPath);
         $destDir  = 'uploads/comprobantes';
         $destPath = $destDir . '/' . $filename;
-
-        // Evitar colisiones simples
         if ($disk->exists($destPath)) {
             $name = pathinfo($filename, PATHINFO_FILENAME);
             $ext  = pathinfo($filename, PATHINFO_EXTENSION);
             $destPath = $destDir . '/' . $name . '-' . uniqid() . ($ext ? ".{$ext}" : '');
         }
-
         $disk->move($tmpPath, $destPath);
         $publicUrl = $disk->url($destPath);
 
-        // 3) Defaults razonables si aún no mandas todo desde la UI
         $meses = (int) ($data['meses_pagados'] ?? 1);
-        $today = now()->startOfDay();
+        $today = Carbon::today();
 
-        $periodoInicio = $data['periodo_inicio'] ?? $today->toDateString();
-        $periodoFin    = $data['periodo_fin']    ?? $today->copy()->addMonths($meses)->subDay()->toDateString();
-
-        // Resolver estudiante + grado desde la sección (vía pivote)
-        $estudiante = auth()->user()->estudiante()->firstOrFail();
+        // Resuelve estudiante/grado
+        $estudiante   = auth()->user()->estudiante()->firstOrFail();
         $estudianteId = $estudiante->id;
 
-        // Usa el accessor nuevo; si por algo es null, cae al query directo
         $gradoId = $estudiante->grado_id ?? $estudiante->secciones()
             ->select('secciones.grado_id')
             ->orderByDesc('seccion_estudiantes.created_at')
@@ -126,19 +124,49 @@ class PagosController extends Controller
             return response()->json(['message' => 'El estudiante no tiene sección o grado asignado.'], 422);
         }
 
-        // OJO: tu tabla es singular 'grado_precio'
         $gradoPrecioId = GradoPrecio::where('grado_id', $gradoId)->value('id');
-
         if (!$gradoPrecioId) {
             return response()->json([
                 'message' => "No hay precio configurado para el grado {$gradoId}. Crea un registro en grado_precio."
             ], 422);
         }
 
-        $tipoPagoId     = $data['tipo_pago_id'] ?? null;
-        $montoPagado    = $data['monto_pagado'] ?? null;
+        $tipoPagoId  = $data['tipo_pago_id'];
+        $montoPagado = $data['monto_pagado'];
 
-        // 4) Crear el registro
+        // --- AQUÍ VIENEN TUS REGLAS NUEVAS ---
+        $nuevoInicio = $today->copy();           // por defecto hoy
+        $nuevoFin    = $today->copy()->addMonths($meses)->subDay();
+
+        DB::transaction(function () use (
+            $estudianteId, $today, $meses, &$nuevoInicio, &$nuevoFin
+        ) {
+            $actuales = EstudiantePago::where('estudiante_id', $estudianteId)
+                ->whereDate('periodo_fin',    '>=', $today->toDateString())
+                ->orderByDesc('periodo_fin')
+                ->get();
+
+            $pendienteActual = $actuales->firstWhere('aprobado_en', null);
+            $aprobadoActual  = $actuales->firstWhere('aprobado_en', '!=', null);
+
+            // Regla 2: si hay pendiente activo → eliminarlo
+            if ($pendienteActual) {
+                if ($pendienteActual->comprobante) { Storage::disk('public')->delete(parse_url($pendienteActual->comprobante, PHP_URL_PATH)); }
+                $pendienteActual->delete();
+            }
+
+            // Regla 1: si hay aprobado activo → encadenar desde su fin
+            if ($aprobadoActual) {
+                $base = $aprobadoActual->periodo_fin->copy()->addDay(); // día siguiente al fin actual
+                $nuevoInicio = $base;
+                $nuevoFin    = $base->copy()->addMonths($meses)->subDay();
+            }
+        });
+
+        $periodoInicio = $nuevoInicio->toDateString();
+        $periodoFin    = $nuevoFin->toDateString();
+
+        // Crear el NUEVO pendiente
         $pago = new EstudiantePago();
         $pago->grado_precio_id = $gradoPrecioId;
         $pago->estudiante_id   = $estudianteId;
@@ -148,17 +176,26 @@ class PagosController extends Controller
         $pago->periodo_inicio  = $periodoInicio;
         $pago->periodo_fin     = $periodoFin;
 
-        $pago->tipo_estado_id  = 1;
+        $pago->tipo_estado_id  = 1;      // pendiente
         $pago->aprobado_id     = null;
         $pago->aprobado_en     = null;
         $pago->comprobante     = $publicUrl;
 
         $pago->save();
 
+        $estado = EstudiantePago::estadoActual(
+            $estudiante->id,
+            null,
+            optional(auth()->user())->created_at ?? $estudiante->created_at
+        );
+
         return response()->json([
-            'message' => 'Pago enviado correctamente. Quedó en revisión.',
-            'pago_id' => $pago->id,
+            'message'         => 'Pago enviado correctamente. Quedó en revisión.',
+            'pago_id'         => $pago->id,
             'comprobante_url' => $publicUrl,
+            'periodo_inicio'  => $periodoInicio,
+            'periodo_fin'     => $periodoFin,
+            'estado_pago'     => $estado,
         ]);
     }
 }
