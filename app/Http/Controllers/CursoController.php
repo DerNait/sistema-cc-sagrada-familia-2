@@ -10,12 +10,12 @@ use App\Models\Seccion;
 use App\Models\SeccionEstudiante;
 use App\Models\EstudianteNota;
 use Illuminate\Http\Request;
-use App\Trait\PdfExport;
+use App\Traits\PdfExport;
 use App\Support\Forerunner\Forerunner;
 class CursoController extends Controller
 {
-    public function index(Request $request)
     use PdfExport;
+    public function index(Request $request)
     {
         $user   = auth()->user();
         $rolId  = $user->rol_id;
