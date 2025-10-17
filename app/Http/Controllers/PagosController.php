@@ -23,6 +23,9 @@ class PagosController extends Controller
         if ($rolId === 1 || $rolId === 2) {
             // Obtener todos los pagos con las relaciones necesarias
             $pagos = EstudiantePago::with(['estudiante.usuario'])
+                ->whereNotNull('comprobante')
+                ->whereNull('aprobado_en')
+                ->orderByDesc('created_at')
                 ->get()
                 ->map(function ($pago) {
                     $usuario = $pago->estudiante->usuario ?? null;
@@ -33,8 +36,10 @@ class PagosController extends Controller
                         'apellido' => $usuario->apellido ?? 'N/A',
                         'correo' => $usuario->email ?? 'N/A',
                         'meses_pagados' => $pago->meses_pagados,
+                        'monto_pagado' => 'Q' . $pago->monto_pagado,
+                        'periodo_inicio' => $pago->periodo_inicio->format('Y-m-d'),
+                        'periodo_fin' => $pago->periodo_fin->format('Y-m-d'),
                         'fecha_registro' => $usuario->fecha_registro ?? ($usuario ? $usuario->created_at->format('Y-m-d') : 'N/A'),
-                        'fecha_nacimiento' => $usuario->fecha_nacimiento ?? 'N/A',
                         'comprobante' => $pago->comprobante ?? null
                     ];
                 });
