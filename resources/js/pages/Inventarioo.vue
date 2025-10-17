@@ -94,7 +94,7 @@
                           :key="producto.id" 
                           :value="producto.id"
                         >
-                          📦 {{ producto.nombre }}
+                          {{ producto.nombre }}
                         </option>
                       </select>
                     </div>
