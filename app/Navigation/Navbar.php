@@ -5,8 +5,6 @@ use App\Support\Forerunner\Forerunner;
 use App\Models\Menu;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Navbar
@@ -24,8 +22,7 @@ class Navbar
 
     private static function traverse($nodes): string
     {
-        // contenedor UL
-        $html = '<ul class="nav nav-pills gap-2 align-items-center w-100">';
+        $html = '<ul class="nav nav-pills gap-2">';
 
         foreach ($nodes as $node) {
 
@@ -59,14 +56,16 @@ class Navbar
             if ($children->isNotEmpty()) {
                 $html .= '
                     <li class="nav-item dropdown">
-                        <a class="nav-link '.$isActive.' dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link '.$isActive.' dropdown-toggle" href="#" role="button">
                             '.$icon.e($node->name).'
                         </a>
                         <ul class="dropdown-menu shadow-sm">';
+
                         foreach ($children as $child) {
                             $href = route($child->route);
                             $html .= '<li><a class="dropdown-item" href="'.$href.'">'.e($child->name).'</a></li>';
                         }
+
                 $html .= '</ul></li>';
 
             // ----- 4. Render padre simple si no hay hijos -----
@@ -81,81 +80,7 @@ class Navbar
             }
         }
 
-        // ======== 5) Bloque de usuario a la derecha ========
-        $html .= self::userMenu();
-
         $html .= '</ul>';
         return $html;
-    }
-
-    private static function userMenu(): string
-    {
-        $u = Auth::user();
-        if (!$u) {
-            // Si no hay usuario autenticado, no mostramos el menú de usuario
-            return '';
-        }
-
-        // Intentar resolver URL de avatar:
-        // 1) accessor $user->foto_perfil_url
-        // 2) columna $user->foto_perfil (ruta en disco 'public')
-        // 3) null => usamos inicial
-        $avatarUrl = null;
-
-        if (isset($u->foto_perfil_url) && $u->foto_perfil_url) {
-            $avatarUrl = $u->foto_perfil_url;
-        } elseif (isset($u->foto_perfil) && $u->foto_perfil) {
-            // Si guardas solo la clave/ruta en 'public'
-            try {
-                $avatarUrl = Storage::url($u->foto_perfil);
-            } catch (\Throwable $e) {
-                $avatarUrl = null;
-            }
-        }
-
-        // Inicial (nombre|name)
-        $nombre = $u->nombre ?? $u->name ?? 'U';
-        $inicial = strtoupper(mb_substr($nombre, 0, 1, 'UTF-8'));
-
-        // Ruta para editar perfil (si no existe, usa '#')
-        $editHref = Route::has('profile.edit') ? route('profile.edit') : '#';
-
-        // Usamos ms-auto para empujar este li al extremo derecho dentro del UL (con w-100 en UL)
-        $avatar = $avatarUrl
-            ? '<img src="'.e($avatarUrl).'"
-                     alt="Foto de perfil"
-                     class="rounded-circle object-fit-cover"
-                     style="width:36px;height:36px;"/>'
-            : '<div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center text-white fw-semibold"
-                     style="width:36px;height:36px;">'.e($inicial).'</div>';
-
-        // Dropdown con Editar perfil + Logout (opcional)
-        $logoutForm = '';
-        if (Route::has('logout')) {
-            $logoutForm = '
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                  <form method="POST" action="'.route('logout').'">
-                    '.csrf_field().'
-                    <button class="dropdown-item text-danger" type="submit">Cerrar sesión</button>
-                  </form>
-                </li>';
-        }
-
-        return '
-            <li class="nav-item dropdown ms-auto">
-                <a class="nav-link d-flex align-items-center gap-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    '.$avatar.'
-                    <span class="d-none d-sm-inline">'.e($nombre).'</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                    <li>
-                        <a class="dropdown-item" href="'.$editHref.'">
-                            Editar perfil
-                        </a>
-                    </li>
-                    '.$logoutForm.'
-                </ul>
-            </li>';
     }
 }

@@ -21,6 +21,7 @@ class NavigationSeeder extends Seeder
             new NavModule('Cursos','cursos',300,'fas fa-graduation-cap', null, NavModule::READ),
             new NavModule('Pagos','pagos',400,'fas fa-credit-card', null, array_merge(NavModule::CRUD)),
             new NavModule('Admin','admin',500,'fas fa-book', null, NavModule::READ),
+            new NavModule('Inventario', 'inventario',600,'fas fa-warehouse',null, NavModule::READ),
 
             new NavModule('Usuarios', 'admin.usuarios', 100, 'fas fa-user-shield', 'admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
             new NavModule('Roles', 'admin.roles', 200, 'fas fa-user-tag', 'admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
@@ -31,6 +32,7 @@ class NavigationSeeder extends Seeder
             new NavModule('Grados', 'admin.grados', 1000, 'fas fa-school', 'admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
             new NavModule('Secciones','admin.secciones', 800,'fas fa-th-large','admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
             new NavModule('Actividades', 'admin.actividades', 900, 'fas fa-tasks', 'admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
+            new NavModule('Bolsas','admin.bolsas', 1100,'fas fa-pencil-alt','admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
         ]);
 
         // 3) Inserta módulos y permisos

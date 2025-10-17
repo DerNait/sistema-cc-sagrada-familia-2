@@ -58,11 +58,12 @@
                   >
                     <i class="fas fa-eye"></i>
                   </button>
-                  <!-- Botón Editar -->
+                  <!-- Botón Aprobar (cheque) -->
                   <button 
                     class="btn btn-outline-success btn-sm rounded-circle"
-                    @click="editPayment(row)"
-                    title="Editar"
+                    @click="quickApprovePayment(row)"
+                    title="Aprobar"
+                    :disabled="isProcessing"
                   >
                     <i class="fas fa-check"></i>
                   </button>
@@ -123,19 +124,21 @@
           <div class="d-flex justify-content-center gap-3 p-4" v-if="selectedPayment?.comprobante">
             <button 
               type="button"
-              class="btn btn-success btn-lg px-4 py-3 action-button-rect"
+              class="btn btn-primary btn-lg px-4 py-3 action-button-rect"
               @click="approvePayment"
+              :disabled="isProcessing"
             >
-              <i class="fas fa-clipboard-check me-2"></i>
-              Aprobar
+              <i class="fas fa-save me-2"></i>
+              {{ isProcessing ? 'Procesando...' : 'Aprobar' }}
             </button>
             <button 
               type="button"
               class="btn btn-danger btn-lg px-4 py-3 action-button-rect"
               @click="rejectPayment"
+              :disabled="isProcessing"
             >
               <i class="fas fa-times me-2"></i>
-              Rechazar
+              {{ isProcessing ? 'Procesando...' : 'Rechazar' }}
             </button>
           </div>
         </div>
@@ -159,6 +162,7 @@ const props = defineProps({
 // Estado reactivo
 const selectedFilter = ref('estudiante')
 const searchQuery = ref('')
+const isProcessing = ref(false)
 
 // Variables para el modal del comprobante
 const showComprobanteModal = ref(false)
@@ -167,6 +171,15 @@ const imageError = ref(false)
 
 // Usar los datos que vienen del controller
 const paymentsData = ref(props.pagos)
+
+// Obtener CSRF token
+const getCsrfToken = () => {
+  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+  if (!token) {
+    console.error('CSRF token no encontrado')
+  }
+  return token || ''
+}
 
 // Definición de columnas para la tabla
 const tableColumns = {
@@ -242,50 +255,192 @@ const closeComprobanteModal = () => {
   showComprobanteModal.value = false
   selectedPayment.value = null
   imageError.value = false
+  isProcessing.value = false
 }
 
-const approvePayment = () => {
-  if (!selectedPayment.value) return
+// Nueva función para aprobar directamente desde la tabla
+const quickApprovePayment = async (row) => {
+  if (isProcessing.value) return
   
-  if (confirm(`¿Estás seguro de aprobar el pago de ${selectedPayment.value.nombre} ${selectedPayment.value.apellido}?`)) {
-    console.log('Aprobar pago:', selectedPayment.value)
+  if (confirm(`¿Estás seguro de aprobar el pago de ${row.nombre} ${row.apellido}?`)) {
+    isProcessing.value = true
     
-    closeComprobanteModal()
-    
-    
+    try {
+      const formData = new FormData()
+      formData.append('_method', 'PUT')
+      formData.append('tipo_estado_id', '2') // 2 = Completado (aprobado)
+      
+      const response = await fetch(`/admin/pagos/${row.id}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': getCsrfToken()
+        },
+        body: formData
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response:', errorText)
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        alert('Pago aprobado correctamente')
+        window.location.reload()
+      } else {
+        alert('Error al aprobar el pago: ' + (data.message || 'Error desconocido'))
+      }
+    } catch (error) {
+      console.error('Error completo:', error)
+      alert('Error de conexión al aprobar el pago: ' + error.message)
+    } finally {
+      isProcessing.value = false
+    }
   }
 }
 
-const rejectPayment = () => {
-  if (!selectedPayment.value) return
+const approvePayment = async () => {
+  if (!selectedPayment.value || isProcessing.value) return
+  
+  if (confirm(`¿Estás seguro de aprobar el pago de ${selectedPayment.value.nombre} ${selectedPayment.value.apellido}?`)) {
+    isProcessing.value = true
+    
+    try {
+      const formData = new FormData()
+      formData.append('_method', 'PUT')
+      formData.append('tipo_estado_id', '2') // 2 = Completado (aprobado)
+      
+      const response = await fetch(`/admin/pagos/${selectedPayment.value.id}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': getCsrfToken()
+        },
+        body: formData
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response:', errorText)
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        alert('Pago aprobado correctamente')
+        window.location.reload()
+      } else {
+        alert('Error al aprobar el pago: ' + (data.message || 'Error desconocido'))
+      }
+    } catch (error) {
+      console.error('Error completo:', error)
+      alert('Error de conexión al aprobar el pago: ' + error.message)
+    } finally {
+      isProcessing.value = false
+      closeComprobanteModal()
+    }
+  }
+}
+
+const rejectPayment = async () => {
+  if (!selectedPayment.value || isProcessing.value) return
   
   if (confirm(`¿Estás seguro de rechazar el pago de ${selectedPayment.value.nombre} ${selectedPayment.value.apellido}?`)) {
-    console.log('Rechazar pago:', selectedPayment.value)
-   
+    isProcessing.value = true
     
-    // Cerrar modal después de rechazar
-    closeComprobanteModal()
-    
+    try {
+      const formData = new FormData()
+      formData.append('_method', 'PUT')
+      formData.append('tipo_estado_id', '3') // 3 = Cancelado (rechazado)
+      
+      const response = await fetch(`/admin/pagos/${selectedPayment.value.id}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': getCsrfToken()
+        },
+        body: formData
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response:', errorText)
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        alert('Pago rechazado correctamente')
+        window.location.reload()
+      } else {
+        alert('Error al rechazar el pago: ' + (data.message || 'Error desconocido'))
+      }
+    } catch (error) {
+      console.error('Error completo:', error)
+      alert('Error de conexión al rechazar el pago: ' + error.message)
+    } finally {
+      isProcessing.value = false
+      closeComprobanteModal()
+    }
   }
 }
 
 const editPayment = (row) => {
   console.log('Editar pago:', row)
+  alert('Funcionalidad de edición en desarrollo')
 }
 
-const deletePayment = (row) => {
-  console.log('Eliminar pago:', row)
+const deletePayment = async (row) => {
   if (confirm(`¿Estás seguro de eliminar el pago de ${row.nombre} ${row.apellido}?`)) {
-    const index = paymentsData.value.findIndex(item => item.id === row.id)
-    if (index > -1) {
-      paymentsData.value.splice(index, 1)
+    try {
+      const formData = new FormData()
+      formData.append('_method', 'DELETE')
+      
+      const response = await fetch(`/admin/pagos/${row.id}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': getCsrfToken()
+        },
+        body: formData
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response:', errorText)
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        alert('Pago eliminado correctamente')
+        const index = paymentsData.value.findIndex(item => item.id === row.id)
+        if (index > -1) {
+          paymentsData.value.splice(index, 1)
+        }
+      } else {
+        alert('Error al eliminar el pago: ' + (data.message || 'Error desconocido'))
+      }
+    } catch (error) {
+      console.error('Error completo:', error)
+      alert('Error de conexión al eliminar el pago: ' + error.message)
     }
   }
 }
 </script>
 
 <style scoped>
-
+/* Estilos personalizados para la vista de admin pagos */
 .btn-sm.rounded-circle {
   width: 32px;
   height: 32px;
@@ -295,7 +450,7 @@ const deletePayment = (row) => {
   padding: 0;
 }
 
-
+/* Mejorar la opacidad del contenedor blanco */
 .card {
   border-radius: 12px;
   background-color: rgba(248, 249, 250, 0.4) !important;
@@ -308,21 +463,21 @@ const deletePayment = (row) => {
   box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
-
+/* Mejorar el estilo del dropdown */
 .form-select {
   border-radius: 8px;
   border: 1px solid #dee2e6;
   padding: 0.5rem 2.5rem 0.5rem 0.75rem;
 }
 
-
+/* Mejorar el estilo del input de búsqueda */
 .form-control {
   border-radius: 8px;
   border: 1px solid #dee2e6;
   padding: 0.5rem 2.5rem 0.5rem 0.75rem;
 }
 
-
+/* Estilos para el modal del comprobante */
 .modal.show {
   display: block !important;
 }
@@ -343,9 +498,14 @@ const deletePayment = (row) => {
   transition: all 0.2s ease;
 }
 
-.action-button-rect:hover {
+.action-button-rect:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.action-button-rect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .action-button-rect i {

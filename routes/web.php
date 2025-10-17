@@ -21,6 +21,8 @@ use App\Http\Controllers\UploadController;
 use App\Http\Controllers\PagosEstudianteController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\Catalogs\GradosController;
+use App\Http\Controllers\Catalogs\BolsasController;
+use App\Http\Controllers\InventarioController;
 
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
@@ -51,6 +53,10 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
 
     Route::get('/pagos', [PagosController::class, 'index'])->name('pagos.index');
     Route::post('/pagos', [PagosController::class, 'store'])->name('pagos.store');
+
+    Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
+    Route::post('/inventario', [InventarioController::class, 'store'])->name('inventario.store');
+    Route::get('/inventario/stock/{id}', [InventarioController::class, 'getProductoStock'])->name('inventario.stock');
 
     Route::post('/admin/roles/{role}/permisos', [RoleModulePermissionController::class, 'update'])->name('roles.permisos.update');
 
@@ -179,6 +185,17 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
             Route::get('/editar', [PerfilController::class, 'edit'])->name('edit');
             Route::post('/editar', [PerfilController::class, 'update'])->name('update');
             Route::post('/foto/eliminar', [PerfilController::class, 'destroyPhoto'])->name('foto.destroy');
+        });
+
+        Route::prefix('bolsas')->name('bolsas.')->group(function () {
+            Route::get('/',                 [BolsasController::class, 'index'])->name('index');
+            Route::get('/export',           [BolsasController::class, 'export'])->name('export');
+            Route::get('{id}',              [BolsasController::class, 'show'])->name('show');
+            Route::get('/crear',            [BolsasController::class, 'create'])->name('create');
+            Route::post('/',                [BolsasController::class, 'store'])->name('store');
+            Route::get('{id}/editar',       [BolsasController::class, 'edit'])->name('edit');
+            Route::put('{id}',              [BolsasController::class, 'update'])->name('update');
+            Route::delete('{id}',           [BolsasController::class, 'destroy'])->name('destroy');
         });
     });
 });

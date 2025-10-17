@@ -66,4 +66,10 @@ class Estudiante extends Model
     {
         return $this->hasMany(EstudiantePago::class);
     }
+
+    public function estadoPagoActual(?Carbon $fechaAlta = null): array
+    {
+        $fechaAlta = $fechaAlta ?? optional($this->usuario)->created_at ?? $this->created_at;
+        return EstudiantePago::estadoActual($this->id, null, $fechaAlta);
+    }
 }

@@ -17,6 +17,7 @@ import EstudianteCurso from './pages/EstudianteCurso.vue';
 import DocenteCurso from './pages/DocenteCurso.vue';
 import Home from './pages/Home.vue';
 import Dashboard from './pages/Dashboard.vue';
+import Inventarioo from './pages/Inventarioo.vue';
 
 // CRUD
 import Table from './components/Crud/Table.vue';
@@ -53,5 +54,6 @@ app.component('roles-permisos', RolesPermisos);
 
 app.component('estudiante-pago', EstudiantePago);
 app.component('admin-pago', AdminPago);
+app.component('inventarioo', Inventarioo);
 
 app.mount('#app');
