@@ -1,146 +1,132 @@
 <template>
-  <div class="container-fluid p-4">
-    <!-- Contenedor principal blanco -->
-    <div class="card border-0 shadow-sm bg-light">
-      <div class="card-body p-4">
-        <!-- Título -->
-        <div class="row mb-4">
-          <div class="col-12">
-            <h2 class="fw-bold text-dark mb-0">Pagos</h2>
-          </div>
-        </div>
+  <div class="crud-container">
+    <div class="m-3 d-flex justify-content-between align-items-center">
+      <h4 class="fw-semibold">Pagos</h4>
+    </div>
 
-        <!-- Dropdown de filtro -->
-        <div class="row mb-3">
-          <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-              <div class="dropdown">
-                <select 
-                  v-model="selectedFilter" 
-                  class="form-select" 
-                  style="width: auto;"
-                >
-                  <option value="estudiante">Estudiante</option>
-                  <option value="profesor">Profesor</option>
-                  <option value="admin">Administrador</option>
-                </select>
-              </div>
-              <div class="position-relative">
-                <input 
-                  v-model="searchQuery"
-                  type="search" 
-                  class="form-control" 
-                  placeholder="Buscar" 
-                  style="width: 300px;"
-                />
-                <i class="fas fa-search position-absolute top-50 end-0 translate-middle-y me-3 text-muted"></i>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div class="filters-container d-flex px-3 py-4 d-flex justify-content-between align-items-center">
+      <div id="filters" class="d-flex flex-wrap gap-2">
+        <div>
+          <Filtros
+            :options="filtroOptions"
+            value-key="id"
+            label-key="nombre"
+            placeholder="Rol"
+          />
+       </div>
 
-        <!-- Tabla usando SortableTable -->
-        <div class="row">
-          <div class="col-12">
-            <SortableTable
-              :columns="tableColumns"
-              :rows="filteredRows"
-              :page-lengths="[10, 25, 50, 100, -1]"
-            >
-              <!-- Slot personalizado para las acciones -->
-              <template #row-actions="{ row }">
-                <div class="d-flex gap-1 justify-content-center">
-                  <!-- Botón Ver -->
-                  <button 
-                    class="btn btn-outline-dark btn-sm rounded-circle"
-                    @click="viewPayment(row)"
-                    title="Ver detalles"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <!-- Botón Aprobar (cheque) -->
-                  <button 
-                    class="btn btn-outline-success btn-sm rounded-circle"
-                    @click="quickApprovePayment(row)"
-                    title="Aprobar"
-                    :disabled="isProcessing"
-                  >
-                    <i class="fas fa-check"></i>
-                  </button>
-                  <!-- Botón Eliminar -->
-                  <button 
-                    class="btn btn-outline-danger btn-sm rounded-circle"
-                    @click="deletePayment(row)"
-                    title="Eliminar"
-                  >
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </template>
-            </SortableTable>
-          </div>
-        </div>
+        <!-- <div v-if="hasActiveFilters" class="align-self-end">
+          <button class="btn btn-outline-secondary" @click="clearFilters">
+            Limpiar
+          </button>
+        </div> -->
+      </div>
+  
+      <div style="max-width: 270px; flex:1">
+        <SearchBar v-model="searchQuery" />
       </div>
     </div>
 
-    <!-- Modal para mostrar comprobante -->
-    <div 
-      v-if="showComprobanteModal" 
-      class="modal fade show d-block" 
-      tabindex="-1" 
-      style="background-color: rgba(0,0,0,0.5);"
-    >
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-          <!-- Sin header/título -->
+    <!-- Tabla usando SortableTable -->
+    <div class="row">
+      <div class="col-12">
+        <SortableTable
+          :columns="tableColumns"
+          :rows="filteredRows"
+          :page-lengths="[10, 25, 50, 100, -1]"
+        >
+          <!-- Slot personalizado para las acciones -->
+          <template #row-actions="{ row }">
+            <div class="d-flex gap-1 justify-content-evenly">
+              <!-- Botón Ver -->
+              <button 
+                class="btn btn-outline-secondary"
+                @click="viewPayment(row)"
+                title="Ver detalles"
+              >
+                <i class="fas fa-eye"></i>
+              </button>
+              <!-- Botón Aprobar (cheque) -->
+              <button 
+                class="btn btn-outline-primary"
+                @click="quickApprovePayment(row)"
+                title="Aprobar"
+                :disabled="isProcessing"
+              >
+                <i class="fas fa-check"></i>
+              </button>
+              <!-- Botón Eliminar -->
+              <button 
+                class="btn btn-outline-danger"
+                @click="deletePayment(row)"
+                title="Eliminar"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </template>
+        </SortableTable>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para mostrar comprobante -->
+  <div 
+    v-if="showComprobanteModal" 
+    class="modal fade show d-block" 
+    tabindex="-1" 
+    style="background-color: rgba(0,0,0,0.5);"
+  >
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <!-- Sin header/título -->
+        <button 
+          type="button" 
+          class="btn-close position-absolute top-0 end-0 m-3" 
+          style="z-index: 1050;"
+          @click="closeComprobanteModal"
+        ></button>
+        
+        <div class="modal-body p-0 text-center">
+          <div v-if="selectedPayment?.comprobante" class="comprobante-container">
+            <img 
+              :src="selectedPayment.comprobante" 
+              :alt="`Comprobante de ${selectedPayment.nombre} ${selectedPayment.apellido}`"
+              class="img-fluid w-100"
+              style="max-height: 70vh; object-fit: contain;"
+              @error="imageError = true"
+            />
+            <div v-if="imageError" class="alert alert-warning m-3">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Error al cargar la imagen del comprobante
+            </div>
+          </div>
+          <div v-else class="alert alert-info m-3">
+            <i class="fas fa-info-circle me-2"></i>
+            No hay comprobante disponible para este pago
+          </div>
+        </div>
+        
+        <!-- Botones centrados sin footer -->
+        <div class="d-flex justify-content-center gap-3 p-4" v-if="selectedPayment?.comprobante">
           <button 
-            type="button" 
-            class="btn-close position-absolute top-0 end-0 m-3" 
-            style="z-index: 1050;"
-            @click="closeComprobanteModal"
-          ></button>
-          
-          <div class="modal-body p-0 text-center">
-            <div v-if="selectedPayment?.comprobante" class="comprobante-container">
-              <img 
-                :src="selectedPayment.comprobante" 
-                :alt="`Comprobante de ${selectedPayment.nombre} ${selectedPayment.apellido}`"
-                class="img-fluid w-100"
-                style="max-height: 70vh; object-fit: contain;"
-                @error="imageError = true"
-              />
-              <div v-if="imageError" class="alert alert-warning m-3">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                Error al cargar la imagen del comprobante
-              </div>
-            </div>
-            <div v-else class="alert alert-info m-3">
-              <i class="fas fa-info-circle me-2"></i>
-              No hay comprobante disponible para este pago
-            </div>
-          </div>
-          
-          <!-- Botones centrados sin footer -->
-          <div class="d-flex justify-content-center gap-3 p-4" v-if="selectedPayment?.comprobante">
-            <button 
-              type="button"
-              class="btn btn-primary btn-lg px-4 py-3 action-button-rect"
-              @click="approvePayment"
-              :disabled="isProcessing"
-            >
-              <i class="fas fa-save me-2"></i>
-              {{ isProcessing ? 'Procesando...' : 'Aprobar' }}
-            </button>
-            <button 
-              type="button"
-              class="btn btn-danger btn-lg px-4 py-3 action-button-rect"
-              @click="rejectPayment"
-              :disabled="isProcessing"
-            >
-              <i class="fas fa-times me-2"></i>
-              {{ isProcessing ? 'Procesando...' : 'Rechazar' }}
-            </button>
-          </div>
+            type="button"
+            class="btn btn-primary btn-lg px-4 py-3 action-button-rect"
+            @click="approvePayment"
+            :disabled="isProcessing"
+          >
+            <i class="fas fa-save me-2"></i>
+            {{ isProcessing ? 'Procesando...' : 'Aprobar' }}
+          </button>
+          <button 
+            type="button"
+            class="btn btn-danger btn-lg px-4 py-3 action-button-rect"
+            @click="deletePayment(selectedPayment)"
+            :disabled="isProcessing"
+          >
+            <i class="fas fa-times me-2"></i>
+            {{ isProcessing ? 'Procesando...' : 'Rechazar' }}
+          </button>
         </div>
       </div>
     </div>
@@ -150,6 +136,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import SortableTable from '@/components/SortableTable.vue'
+import Filtros from '@/components/Filtros.vue'
+import SearchBar from '@/components/SearchBar.vue'
 
 // Recibir los datos del controller Laravel
 const props = defineProps({
@@ -207,11 +195,29 @@ const tableColumns = {
     visible: true,
     filterType: 'text'
   },
+  monto_pagado: {
+    label: 'Monto pagado',
+    field: 'monto_pagado',
+    visible: true,
+    filterType: 'numeric'
+  },
   meses_pagados: {
     label: 'Meses pagados',
     field: 'meses_pagados',
     visible: true,
     filterType: 'numeric'
+  },
+  periodo_inicio: {
+    label: 'Periodo inicio',
+    field: 'periodo_inicio',
+    visible: true,
+    filterType: 'date'
+  },
+  periodo_fin: {
+    label: 'Periodo fin',
+    field: 'periodo_fin',
+    visible: true,
+    filterType: 'date'
   },
   fecha_registro: {
     label: 'Fecha registro',
@@ -219,13 +225,13 @@ const tableColumns = {
     visible: true,
     filterType: 'date'
   },
-  fecha_nacimiento: {
-    label: 'Fecha nacimiento',
-    field: 'fecha_nacimiento',
-    visible: true,
-    filterType: 'date'
-  }
 }
+
+const filtroOptions = [
+  { id: 'estudiante', nombre: 'Estudiante' },
+  { id: 'profesor', nombre: 'Profesor' },
+  { id: 'admin', nombre: 'Administrador' }
+]
 
 // Computed para filtrar los datos
 const filteredRows = computed(() => {
@@ -348,7 +354,7 @@ const approvePayment = async () => {
   }
 }
 
-const rejectPayment = async () => {
+/* const rejectPayment = async () => {
   if (!selectedPayment.value || isProcessing.value) return
   
   if (confirm(`¿Estás seguro de rechazar el pago de ${selectedPayment.value.nombre} ${selectedPayment.value.apellido}?`)) {
@@ -391,7 +397,7 @@ const rejectPayment = async () => {
       closeComprobanteModal()
     }
   }
-}
+} */
 
 const editPayment = (row) => {
   console.log('Editar pago:', row)
@@ -440,23 +446,6 @@ const deletePayment = async (row) => {
 </script>
 
 <style scoped>
-/* Estilos personalizados para la vista de admin pagos */
-.btn-sm.rounded-circle {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-
-/* Mejorar la opacidad del contenedor blanco */
-.card {
-  border-radius: 12px;
-  background-color: rgba(248, 249, 250, 0.4) !important;
-  backdrop-filter: blur(8px); /* efecto frosted glass */
-}
-
 .form-select:focus,
 .form-control:focus {
   border-color: #0d6efd;
