@@ -35,7 +35,17 @@
           <i class="fa-solid fa-pen-to-square me-1"></i>
           Editar todas las notas
         </button>
-
+        <!-- Botón estático para exportar PDF de calificaciones -->
+        <button
+          v-if="!bulkEdit"
+          class="btn btn-outline-danger"
+          type="button"
+          title="Descargar PDF de calificaciones"
+        >
+          <i class="fa-solid fa-file-pdf me-1"></i>
+          PDF calificaciones
+        </button>
+        
         <template v-else>
           <button
             class="btn btn-primary"
