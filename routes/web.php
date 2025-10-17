@@ -181,6 +181,7 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
         });
 
         Route::prefix('perfil')->name('perfil.')->group(function () {
+            Route::get('/index', [PerfilController::class, 'index'])->name('index');
             Route::get('/', [PerfilController::class, 'show'])->name('show');
             Route::get('/editar', [PerfilController::class, 'edit'])->name('edit');
             Route::put('/editar', [PerfilController::class, 'update'])->name('update');
