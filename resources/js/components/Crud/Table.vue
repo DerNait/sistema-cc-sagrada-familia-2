@@ -199,11 +199,20 @@ async function loadLatest(id) {
 }
 
 async function openEdit(row) {
+  busy.value = true;
+  try {
     formMode.value = 'edit';
-    editingRow.value = { ...row };
+    const fresh = await loadLatest(row.id);
+    editingRow.value = fresh ?? { ...row };
     formAction.value = `${baseUrl}/${row.id}`;
     open();
+  } catch (e) {
+    console.error(e);
+    showError('Error', 'No se pudo cargar el registro');
+  } finally {
+    busy.value = false;
   }
+}
 
 function open()  { showForm.value = true; document.body.style.overflow = 'hidden'; }
 function close() { showForm.value = false; document.body.style.overflow = '';      }
@@ -411,7 +420,7 @@ function exportData() {
   axios.get(`${baseUrl}/export`, { responseType: 'blob' })
     .then(response => {
       busy.value = false;
-      
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
