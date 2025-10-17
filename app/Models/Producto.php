@@ -22,4 +22,14 @@ class Producto extends Model
     public function movimientos(){
         return $this->hasMany(Movimiento::class);
     }
+
+    public function bolsas()
+    {
+        return $this->belongsToMany(
+            Bolsa::class,
+            'bolsas_detalles',
+            'producto_id',
+            'bolsa_id'
+        );
+    }
 }
