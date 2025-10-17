@@ -198,4 +198,76 @@ class PagosController extends Controller
             'estado_pago'     => $estado,
         ]);
     }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $pago = EstudiantePago::findOrFail($id);
+            
+            // Validar datos de entrada
+            $data = $request->validate([
+                'tipo_estado_id' => ['required', 'integer', 'in:2,3'], // Solo aceptar aprobado (2) o rechazado (3)
+            ]);
+
+            // Actualizar el estado del pago
+            $pago->tipo_estado_id = $data['tipo_estado_id'];
+            
+            // Si se está aprobando (estado "Completado" = 2), agregar datos del aprobador
+            if ($data['tipo_estado_id'] == 2) {
+                $pago->aprobado_id = Auth::id();
+                $pago->aprobado_en = now();
+            } 
+            // Si se está rechazando (estado "Cancelado" = 3), también registrar quién lo hizo
+            elseif ($data['tipo_estado_id'] == 3) {
+                $pago->aprobado_id = Auth::id();
+                $pago->aprobado_en = now();
+            }
+            
+            $pago->save();
+
+            $mensaje = match($data['tipo_estado_id']) {
+                2 => 'Pago aprobado correctamente',
+                3 => 'Pago rechazado correctamente', 
+                default => 'Estado del pago actualizado'
+            };
+
+            return response()->json([
+                'success' => true,
+                'message' => $mensaje,
+                'pago' => $pago
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el pago: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $pago = EstudiantePago::findOrFail($id);
+            
+            // Opcional: Eliminar también el archivo del comprobante
+            if ($pago->comprobante) {
+                $path = str_replace('/storage/', '', parse_url($pago->comprobante, PHP_URL_PATH));
+                Storage::disk('public')->delete($path);
+            }
+            
+            $pago->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pago eliminado correctamente'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar el pago: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
