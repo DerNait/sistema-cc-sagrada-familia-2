@@ -10,54 +10,50 @@ use Illuminate\Support\Facades\Validator;
 class PerfilController extends Controller
 {
     /**
-     * Dashboard del perfil del usuario.
+     * Dashboard del perfil del usuario autenticado.
      * GET /perfil/index -> perfil.index
      */
     public function index(Request $request)
     {
-        return view('perfil.index', [
-            'user' => $request->user(),
-        ]);
+        $user = $request->user();
+
+        // Convierte la ruta de imagen en URL pública si existe
+        if ($user->foto_perfil && !str_starts_with($user->foto_perfil, '/storage/')) {
+            $user->foto_perfil = Storage::disk('public')->url($user->foto_perfil);
+        }
+
+        return view('perfil.index', compact('user'));
     }
 
     /**
-     * Muestra los detalles del perfil.
-     * GET /perfil -> perfil.show
-     */
-    public function show(Request $request)
-    {
-        return view('perfil.show', [
-            'user' => $request->user(),
-        ]);
-    }
-
-    /**
-     * Formulario de edición de perfil.
+     * Muestra el formulario de edición del perfil.
      * GET /perfil/editar -> perfil.edit
      */
     public function edit(Request $request)
     {
-        return view('perfil.edit', [
-            'user' => $request->user(),
-        ]);
+        $user = $request->user();
+
+        if ($user->foto_perfil && !str_starts_with($user->foto_perfil, '/storage/')) {
+            $user->foto_perfil = Storage::disk('public')->url($user->foto_perfil);
+        }
+
+        return view('perfil.edit', compact('user'));
     }
 
     /**
-     * Actualiza datos del usuario, su foto o su contraseña.
+     * Actualiza la información, contraseña o foto del perfil.
      * PUT /perfil/editar -> perfil.update
      */
     public function update(Request $request)
     {
         $user = $request->user();
 
-        // ⚙️ Validación general
+        // 🔒 Validación completa (igual que RegisterController)
         $validator = Validator::make($request->all(), [
             'name'        => ['nullable', 'string', 'max:255', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/'],
             'email'       => ['nullable', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'foto_perfil' => ['nullable', 'image', 'max:2048'], // máx 2MB
-
-            // 🔐 Reglas de contraseña iguales al RegisterController
-            'password' => [
+            'foto_perfil' => ['nullable', 'image', 'max:2048'], // 2 MB
+            'password'    => [
                 'nullable',
                 'string',
                 'min:8',
@@ -74,6 +70,11 @@ class PerfilController extends Controller
         ]);
 
         if ($validator->fails()) {
+            // Si la solicitud es AJAX → responder JSON
+            if ($request->expectsJson()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
             return back()->withErrors($validator)->withInput();
         }
 
@@ -82,9 +83,7 @@ class PerfilController extends Controller
         try {
             // 🖼️ Si sube nueva foto
             if ($request->hasFile('foto_perfil')) {
-                if (!empty($user->foto_perfil)) {
-                    Storage::disk('public')->delete($user->foto_perfil);
-                }
+                $this->deleteOldPhoto($user);
 
                 $path = $request->file('foto_perfil')->store('avatars', 'public');
                 $data['foto_perfil'] = $path;
@@ -94,17 +93,37 @@ class PerfilController extends Controller
             if (!empty($data['password'])) {
                 $data['password'] = Hash::make($data['password']);
             } else {
-                unset($data['password']); // evita sobreescribir con null
+                unset($data['password']); // evita sobrescribir con null
             }
 
-            // 💾 Guarda todo
+            // 💾 Actualizar datos
             $user->fill($data)->save();
 
+            // ✅ Si fue una petición AJAX (JSON)
+            if ($request->expectsJson()) {
+                $user->refresh();
+                $user->foto_perfil = $user->foto_perfil
+                    ? Storage::disk('public')->url($user->foto_perfil)
+                    : null;
+
+                return response()->json([
+                    'message' => 'Perfil actualizado correctamente.',
+                    'user'    => $user,
+                ]);
+            }
+
+            // ✅ Si fue formulario tradicional (Blade)
             return redirect()
                 ->route('perfil.index')
                 ->with('success', 'Perfil actualizado correctamente.');
+
         } catch (\Throwable $e) {
             report($e);
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Error al actualizar el perfil.'], 500);
+            }
+
             return back()->withInput()->with('error', 'No se pudo actualizar el perfil.');
         }
     }
@@ -118,16 +137,34 @@ class PerfilController extends Controller
         $user = $request->user();
 
         try {
-            if (!empty($user->foto_perfil)) {
-                Storage::disk('public')->delete($user->foto_perfil);
-                $user->foto_perfil = null;
-                $user->save();
+            $this->deleteOldPhoto($user);
+
+            $user->foto_perfil = null;
+            $user->save();
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Foto de perfil eliminada.']);
             }
 
             return back()->with('success', 'Foto de perfil eliminada.');
         } catch (\Throwable $e) {
             report($e);
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'No se pudo eliminar la foto.'], 500);
+            }
+
             return back()->with('error', 'No se pudo eliminar la foto.');
+        }
+    }
+
+    /**
+     * 🔧 Elimina la foto anterior del usuario si existe.
+     */
+    private function deleteOldPhoto($user): void
+    {
+        if (!empty($user->foto_perfil) && Storage::disk('public')->exists($user->foto_perfil)) {
+            Storage::disk('public')->delete($user->foto_perfil);
         }
     }
 }
