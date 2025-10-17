@@ -18,6 +18,7 @@ import DocenteCurso from './pages/DocenteCurso.vue';
 import Home from './pages/Home.vue';
 import Dashboard from './pages/Dashboard.vue';
 import Inventarioo from './pages/Inventarioo.vue';
+import InventarioHistorial from './pages/InventarioHistorial.vue';
 
 // CRUD
 import Table from './components/Crud/Table.vue';
@@ -44,6 +45,7 @@ app.component('estudiante-curso', EstudianteCurso);
 app.component('docente-curso', DocenteCurso);
 app.component('home', Home);
 app.component('dashboard', Dashboard);
+app.component('inventario-historial', InventarioHistorial);
 
 // CRUD
 app.component('crud-table', Table);
