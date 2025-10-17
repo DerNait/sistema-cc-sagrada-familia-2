@@ -28,6 +28,10 @@ import RolesPermisos from './pages/RolesPermisos.vue';
 
 import EstudiantePago from './pages/EstudiantePago.vue';
 import AdminPago from './pages/AdminPago.vue';
+
+// Perfil
+import Perfil from './Pages/Perfil.vue';
+
 const app = createApp({});
 
 // El primero nombre donde lo llamaran, el celeste como tienen que llamar al archivo.vue
@@ -55,5 +59,8 @@ app.component('roles-permisos', RolesPermisos);
 app.component('estudiante-pago', EstudiantePago);
 app.component('admin-pago', AdminPago);
 app.component('inventarioo', Inventarioo);
+
+// Perfil
+app.component('perfil', Perfil);
 
 app.mount('#app');
