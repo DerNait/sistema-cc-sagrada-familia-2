@@ -22,6 +22,7 @@ use App\Http\Controllers\PagosEstudianteController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\Catalogs\GradosController;
 use App\Http\Controllers\Catalogs\BolsasController;
+use App\Http\Controllers\InventarioController;
 
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/productos/tipos', [ProductoController::class, 'tipos']);
@@ -55,6 +56,7 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
 
     Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
     Route::post('/inventario', [InventarioController::class, 'store'])->name('inventario.store');
+    Route::get('/inventario/stock/{id}', [InventarioController::class, 'getProductoStock'])->name('inventario.stock');
 
     Route::post('/admin/roles/{role}/permisos', [RoleModulePermissionController::class, 'update'])->name('roles.permisos.update');
 
