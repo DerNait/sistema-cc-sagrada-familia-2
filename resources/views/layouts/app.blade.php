@@ -36,17 +36,8 @@
                         {{-- ======= User dropdown ======= --}}
                         @php
                             $u = Auth::user();
-                            $avatarUrl = null;
-                            // Si tienes accessor $user->foto_perfil_url, úsalo:
-                            if (isset($u->foto_perfil_url) && $u->foto_perfil_url) {
-                                $avatarUrl = $u->foto_perfil_url;
-                            } elseif (!empty($u->foto_perfil ?? null)) {
-                                try {
-                                    $avatarUrl = \Illuminate\Support\Facades\Storage::url($u->foto_perfil);
-                                } catch (\Throwable $e) {
-                                    $avatarUrl = null;
-                                }
-                            }
+                            $avatarUrl = $u->foto_perfil ? Storage::url($u->foto_perfil) : null;
+                            
                             $initial = strtoupper(mb_substr($u->name ?? 'U', 0, 1, 'UTF-8'));
                             $editHref = \Illuminate\Support\Facades\Route::has('perfil.edit')
                                 ? route('perfil.edit')
@@ -55,15 +46,14 @@
 
                         <div class="user-dropdown-wrapper dropdown ms-2">
                             <button
-                                class="btn btn-user nav-user-bg dropdown-toggle d-flex align-items-center justify-content-center p-0"
+                                class="btn btn-user nav-user-bg d-flex align-items-center justify-content-center p-0"
                                 type="button"
-                                data-bs-toggle="dropdown"
                                 aria-expanded="false"
                                 aria-label="Menú de usuario"
-                                style="width:40px;height:40px;border-radius:50%;overflow:hidden;"
+                                style="width:55px;height:55px;"
                             >
                                 @if($avatarUrl)
-                                    <img src="{{ $avatarUrl }}" alt="Foto de perfil"
+                                    <img src="{{ $avatarUrl }}" alt="Foto de perfil" class="rounded-circle"
                                          style="width:100%;height:100%;object-fit:cover;">
                                 @else
                                     <span class="d-inline-block text-white fw-semibold"
