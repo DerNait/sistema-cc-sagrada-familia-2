@@ -17,7 +17,6 @@ class PerfilController extends Controller
     {
         $user = $request->user();
 
-        // Convierte la ruta de imagen en URL pública si existe
         if ($user->foto_perfil && !str_starts_with($user->foto_perfil, '/storage/')) {
             $user->foto_perfil = Storage::disk('public')->url($user->foto_perfil);
         }
@@ -48,7 +47,6 @@ class PerfilController extends Controller
     {
         $user = $request->user();
 
-        // 🔒 Validación completa (igual que RegisterController)
         $validator = Validator::make($request->all(), [
             'name'        => ['nullable', 'string', 'max:255', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/'],
             'email'       => ['nullable', 'email', 'max:255', 'unique:users,email,' . $user->id],
@@ -70,36 +68,38 @@ class PerfilController extends Controller
         ]);
 
         if ($validator->fails()) {
-            // Si la solicitud es AJAX → responder JSON
             if ($request->expectsJson()) {
                 return response()->json(['errors' => $validator->errors()], 422);
             }
-
             return back()->withErrors($validator)->withInput();
         }
 
         $data = $validator->validated();
 
         try {
-            // 🖼️ Si sube nueva foto
+            // 🖼️ Subir nueva foto con nombre normalizado
             if ($request->hasFile('foto_perfil')) {
                 $this->deleteOldPhoto($user);
 
-                $path = $request->file('foto_perfil')->store('avatars', 'public');
+                $file = $request->file('foto_perfil');
+                $extension = $file->getClientOriginalExtension();
+                $filename = uniqid('avatar_') . '.' . $extension;
+
+                // Guardar con nombre limpio
+                $path = $file->storeAs('avatars', $filename, 'public');
                 $data['foto_perfil'] = $path;
             }
 
-            // 🔒 Si cambia la contraseña
+            // 🔒 Encriptar contraseña si se actualiza
             if (!empty($data['password'])) {
                 $data['password'] = Hash::make($data['password']);
             } else {
-                unset($data['password']); // evita sobrescribir con null
+                unset($data['password']);
             }
 
-            // 💾 Actualizar datos
             $user->fill($data)->save();
 
-            // ✅ Si fue una petición AJAX (JSON)
+            // ✅ Si la petición es AJAX → devolver JSON
             if ($request->expectsJson()) {
                 $user->refresh();
                 $user->foto_perfil = $user->foto_perfil
@@ -112,11 +112,10 @@ class PerfilController extends Controller
                 ]);
             }
 
-            // ✅ Si fue formulario tradicional (Blade)
+            // ✅ Si es desde Blade (formulario normal)
             return redirect()
                 ->route('perfil.index')
                 ->with('success', 'Perfil actualizado correctamente.');
-
         } catch (\Throwable $e) {
             report($e);
 
