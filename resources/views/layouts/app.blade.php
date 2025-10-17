@@ -36,11 +36,16 @@
                         {{-- ======= User dropdown ======= --}}
                         @php
                             $u = Auth::user();
-                            $avatarUrl = $u->foto_perfil ? Storage::url($u->foto_perfil) : null;
+                            $avatarUrl = null;
+                            if ($u->foto_perfil) {
+                                $avatarUrl = Str::startsWith($u->foto_perfil, ['http://', 'https://', '/storage/'])
+                                    ? $u->foto_perfil
+                                    : Storage::url($u->foto_perfil);
+                            }
                             
                             $initial = strtoupper(mb_substr($u->name ?? 'U', 0, 1, 'UTF-8'));
-                            $editHref = \Illuminate\Support\Facades\Route::has('perfil.edit')
-                                ? route('perfil.edit')
+                            $editHref = \Illuminate\Support\Facades\Route::has('perfil.index')
+                                ? route('perfil.index')
                                 : '#';
                         @endphp
 
