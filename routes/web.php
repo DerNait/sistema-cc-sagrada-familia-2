@@ -35,13 +35,8 @@ Auth::routes();
 
 
 Route::group(['middleware' => ['auth']], function () {
-    Route::prefix('perfil')->name('perfil.')->group(function () {
-        Route::get('/index', [PerfilController::class, 'index'])->name('index');
-        Route::get('/', [PerfilController::class, 'show'])->name('show');
-        Route::get('/editar', [PerfilController::class, 'edit'])->name('edit');
-        Route::put('/editar', [PerfilController::class, 'update'])->name('update');
-        Route::post('/foto/eliminar', [PerfilController::class, 'destroyPhoto'])->name('foto.destroy');
-    });
+    Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
+    Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
 
     Route::post('/upload', [UploadController::class, 'store'])->name('upload');
     Route::delete('/upload', [UploadController::class, 'destroy'])->name('upload.delete');
@@ -64,10 +59,6 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
             'update' => 'notas.update',
         ]);
     });
-
-    // ----- UPLOAD -----
-    Route::post('/upload', [UploadController::class, 'store'])->name('upload');
-    Route::delete('/upload', [UploadController::class, 'destroy'])->name('upload.delete');
 
     // ----- PAGOS -----
     Route::get('/pagos', [PagosController::class, 'index'])->name('pagos.index');
