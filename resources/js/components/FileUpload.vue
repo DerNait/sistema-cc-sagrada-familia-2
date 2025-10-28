@@ -41,15 +41,6 @@
       <p>Tamaño máximo: 1MB</p>
     </div>
 
-    <div v-if="has_template">
-      <FileTemplate
-        template_url="/templates/plantilla-secciones.xlsx"
-        icon="/icons/excel-icon.png"
-        file_title="Plantilla de Secciones"
-        class="mt-3"
-      />
-    </div>
-
     <!-- Archivo cargado -->
     <div v-if="selectedFile" class="uploaded-file mt-2">
       <template v-if="!fileBusy">
@@ -133,7 +124,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import axios from 'axios'
 import Filtros from './Filtros.vue'
 import FileTemplate from './FileTemplate.vue'
@@ -144,6 +135,7 @@ const props = defineProps({
   hint:   { type: String, default: '' },
   tiposPago: { type: Array, default: () => [] },
   pendienteExtra: { type: Boolean, default: false },
+  precioGrado: { type: Number, default: 0 }
 })
 
 const emit = defineEmits(['uploaded'])
@@ -449,6 +441,23 @@ async function showConfirmation(title, text, confirmText = 'Confirmar') {
     reverseButtons: true
   });
 }
+
+function recalcMonto() {
+  // Soporta que "meses" sea { id, nombre } o un número directo
+  const mesesSel = meses.value?.id ?? meses.value
+  const mesesNum = Number(mesesSel) || 0
+  const precio   = Number(props.precioGrado) || 0
+
+  if (mesesNum > 0 && precio > 0) {
+    // 2 decimales por si el precio tiene centavos
+    monto.value = (mesesNum * precio).toFixed(2)
+  } else {
+    // deja vacío si no hay datos suficientes
+    monto.value = ''
+  }
+}
+
+watch([meses, () => props.precioGrado], recalcMonto, { immediate: true })
 </script>
 
 <style scoped>
