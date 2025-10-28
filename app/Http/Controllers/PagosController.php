@@ -66,9 +66,16 @@ class PagosController extends Controller
                 optional(auth()->user())->created_at ?? $estudiante->created_at
             );
 
+            $gradoPrecio = GradoPrecio::where('grado_id', $estudiante->grado_id);
+            $precio = null;
+            if ($gradoPrecio->exists()) {
+                $precio = $gradoPrecio->value('mensualidad');
+            }
+
             $params = [
                 'tipos_pago'    => $tiposPago,
                 'estado_pago' => $estado,
+                'precio_grado' => $precio,
             ];
 
             return view('component', [
