@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EstudiantePago;
 use App\Models\GradoPrecio;
 use App\Models\TipoPago;
+use App\Models\TipoEstado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -215,38 +216,61 @@ class PagosController extends Controller
     {
         try {
             $pago = EstudiantePago::findOrFail($id);
-            
-            // Validar datos de entrada
+
+            // Resolvemos IDs por nombre para evitar números mágicos
+            $idPendiente = TipoEstado::where('tipo', 'Pendiente')->value('id');
+            $idCompletado = TipoEstado::where('tipo', 'Completado')->value('id');
+            $idCancelado = TipoEstado::where('tipo', 'Cancelado')->value('id');
+            $idReembolsado = TipoEstado::where('tipo', 'Reembolsado')->value('id');
+            $idEnProceso = TipoEstado::where('tipo', 'En proceso')->value('id');
+
             $data = $request->validate([
-                'tipo_estado_id' => ['required', 'integer', 'in:2,3'], // Solo aceptar aprobado (2) o rechazado (3)
+                'tipo_estado_id' => [
+                    'required',
+                    'integer',
+                    Rule::in([$idPendiente, $idCompletado, $idCancelado, $idReembolsado, $idEnProceso]),
+                ],
             ]);
 
-            // Actualizar el estado del pago
-            $pago->tipo_estado_id = $data['tipo_estado_id'];
-            
-            // Si se está aprobando (estado "Completado" = 2), agregar datos del aprobador
-            if ($data['tipo_estado_id'] == 2) {
-                $pago->aprobado_id = Auth::id();
-                $pago->aprobado_en = now();
-            } 
-            // Si se está rechazando (estado "Cancelado" = 3), también registrar quién lo hizo
-            elseif ($data['tipo_estado_id'] == 3) {
-                $pago->aprobado_id = Auth::id();
-                $pago->aprobado_en = now();
+            $nuevoEstado = (int) $data['tipo_estado_id'];
+
+            // Si “aprueban” con el estado intermedio (Procesado), lo forzamos a Pagado
+            if ($nuevoEstado === (int) $idEnProceso) {
+                $nuevoEstado = (int) $idCompletado;
             }
-            
+
+            // Si ya estaba Pagado o Anulado, evita re-aprobar o re-anular
+            if (in_array((int)$pago->tipo_estado_id, [(int)$idCompletado, (int)$idCancelado], true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El pago ya fue cerrado (Pagado/Anulado).',
+                ], 422);
+            }
+
+            $pago->tipo_estado_id = $nuevoEstado;
+
+            // Si cerramos (Pagado/Anulado), registramos aprobador y fecha
+            if (in_array($nuevoEstado, [(int)$idCompletado, (int)$idCancelado], true)) {
+                $pago->aprobado_id = Auth::id();
+                $pago->aprobado_en = now();
+            } else {
+                // Estados abiertos: limpiamos marcas de aprobación (por si acaso)
+                $pago->aprobado_id = null;
+                $pago->aprobado_en = null;
+            }
+
             $pago->save();
 
-            $mensaje = match($data['tipo_estado_id']) {
-                2 => 'Pago aprobado correctamente',
-                3 => 'Pago rechazado correctamente', 
-                default => 'Estado del pago actualizado'
-            };
+            $mensaje = $nuevoEstado === (int)$idCompletado
+                ? 'Pago aprobado (marcado como Pagado) correctamente'
+                : ($nuevoEstado === (int)$idCancelado
+                    ? 'Pago anulado correctamente'
+                    : 'Estado del pago actualizado');
 
             return response()->json([
                 'success' => true,
                 'message' => $mensaje,
-                'pago' => $pago
+                'pago'    => $pago
             ]);
 
         } catch (\Exception $e) {
