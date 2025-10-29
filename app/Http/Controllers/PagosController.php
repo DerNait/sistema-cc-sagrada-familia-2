@@ -25,7 +25,6 @@ class PagosController extends Controller
             // Obtener todos los pagos con las relaciones necesarias
             $pagos = EstudiantePago::with(['estudiante.usuario'])
                 ->whereNotNull('comprobante')
-                ->whereNull('aprobado_en')
                 ->orderByDesc('created_at')
                 ->get()
                 ->map(function ($pago) {
@@ -285,24 +284,43 @@ class PagosController extends Controller
     {
         try {
             $pago = EstudiantePago::findOrFail($id);
-            
-            // Opcional: Eliminar también el archivo del comprobante
-            if ($pago->comprobante) {
-                $path = str_replace('/storage/', '', parse_url($pago->comprobante, PHP_URL_PATH));
-                Storage::disk('public')->delete($path);
+
+            // Resolver IDs según tu seeder actual
+            $idCancelado   = TipoEstado::where('tipo', 'Cancelado')->value('id');
+            $idCompletado  = TipoEstado::where('tipo', 'Completado')->value('id');
+
+            if (!$idCancelado || !$idCompletado) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Estados de pago incompletos. Verifica el seeder de TipoEstado.',
+                ], 422);
             }
-            
-            $pago->delete();
+
+            // Si ya está cancelado, responder idempotente
+            if ((int)$pago->tipo_estado_id === (int)$idCancelado) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'El pago ya estaba cancelado.',
+                    'pago'    => $pago,
+                ]);
+            }
+
+            // “Soft delete”: marcar como Cancelado + registrar aprobador y fecha
+            $pago->tipo_estado_id = (int)$idCancelado;
+            $pago->aprobado_id    = null;
+            $pago->aprobado_en    = null;
+            $pago->save();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Pago eliminado correctamente'
+                'message' => 'Pago cancelado correctamente (soft delete).',
+                'pago'    => $pago,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al eliminar el pago: ' . $e->getMessage()
+                'message' => 'Error al cancelar el pago: ' . $e->getMessage(),
             ], 500);
         }
     }
