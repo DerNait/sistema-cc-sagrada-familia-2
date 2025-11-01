@@ -15,4 +15,9 @@ class SeccionEstudiante extends Model
     {
         return $this->belongsTo(Seccion::class);
     }
+
+    public function estudiante()
+    {
+        return $this->belongsTo(Estudiante::class);
+    }
 }
