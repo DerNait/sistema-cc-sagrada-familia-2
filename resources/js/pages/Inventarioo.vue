@@ -75,28 +75,71 @@
               <div class="card-body p-5">
                 <form @submit.prevent="submitForm">
                   <div class="row g-4">
-                    <!-- Selector de Producto -->
+                    <!-- Selector de Producto con Buscador -->
                     <div class="col-md-6">
                       <label for="producto" class="form-label fw-bold fs-5 text-dark mb-3">
                         <i class="fas fa-box text-primary me-2"></i>Producto *
                       </label>
-                      <select
-                        id="producto"
-                        v-model="form.producto_id"
-                        @change="getStock"
-                        class="form-select form-select-lg shadow-sm"
-                        style="border-radius: 15px; border: 2px solid #e9ecef; padding: 1rem 1.5rem;"
-                        required
-                      >
-                        <option value="">Seleccionar producto...</option>
-                        <option 
-                          v-for="producto in productos" 
-                          :key="producto.id" 
-                          :value="producto.id"
+                      <div class="position-relative">
+                        <div 
+                          @click="toggleDropdown"
+                          class="form-select form-select-lg shadow-sm d-flex align-items-center justify-content-between"
+                          style="border-radius: 15px; border: 2px solid #e9ecef; padding: 1rem 1.5rem; cursor: pointer;"
+                          :class="{ 'border-primary': showDropdown }"
                         >
-                          {{ producto.nombre }}
-                        </option>
-                      </select>
+                          <span :class="{ 'text-muted': !form.producto_id }">
+                            {{ selectedProductName || 'Seleccionar producto...' }}
+                          </span>
+                          <i class="fas fa-chevron-down" :class="{ 'rotate-180': showDropdown }"></i>
+                        </div>
+                        
+                        <!-- Dropdown con buscador -->
+                        <div 
+                          v-show="showDropdown"
+                          class="dropdown-menu-custom shadow-lg"
+                          style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; max-height: 400px; overflow: hidden; border-radius: 15px; margin-top: 0.5rem; background: white; border: 2px solid #e9ecef;"
+                        >
+                          <!-- Campo de búsqueda -->
+                          <div class="p-3 border-bottom">
+                            <div class="position-relative">
+                              <i class="fas fa-search position-absolute" style="left: 15px; top: 50%; transform: translateY(-50%); color: #6c757d;"></i>
+                              <input
+                                ref="searchInput"
+                                v-model="searchQuery"
+                                type="text"
+                                class="form-control ps-5"
+                                placeholder="Buscar producto..."
+                                style="border-radius: 10px; border: 1px solid #dee2e6; padding: 0.75rem 1rem 0.75rem 2.5rem;"
+                                @click.stop
+                              >
+                            </div>
+                          </div>
+                          
+                          <!-- Lista de productos filtrados -->
+                          <div style="max-height: 300px; overflow-y: auto;">
+                            <div
+                              v-for="producto in filteredProductos"
+                              :key="producto.id"
+                              @click="selectProduct(producto)"
+                              class="dropdown-item-custom px-4 py-3"
+                              style="cursor: pointer; transition: all 0.2s;"
+                              :class="{ 'bg-primary text-white': form.producto_id === producto.id }"
+                            >
+                              <i class="fas fa-box me-2"></i>
+                              {{ producto.nombre }}
+                            </div>
+                            
+                            <!-- Mensaje cuando no hay resultados -->
+                            <div 
+                              v-if="filteredProductos.length === 0"
+                              class="text-center text-muted py-4"
+                            >
+                              <i class="fas fa-search me-2"></i>
+                              No se encontraron productos
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     <!-- Selector de Tipo -->
@@ -225,7 +268,9 @@ export default {
       messageType: '',
       loading: false,
       cantidadError: '',
-      cantidadTouched: false
+      cantidadTouched: false,
+      showDropdown: false,
+      searchQuery: ''
     };
   },
   computed: {
@@ -235,6 +280,19 @@ export default {
              this.form.cantidad > 0 && 
              this.form.descripcion.trim() &&
              !this.cantidadError;
+    },
+    selectedProductName() {
+      const producto = this.productos.find(p => p.id == this.form.producto_id);
+      return producto ? producto.nombre : '';
+    },
+    filteredProductos() {
+      if (!this.searchQuery.trim()) {
+        return this.productos;
+      }
+      const query = this.searchQuery.toLowerCase();
+      return this.productos.filter(producto => 
+        producto.nombre.toLowerCase().includes(query)
+      );
     }
   },
   methods: {
@@ -307,6 +365,31 @@ export default {
       return producto ? producto.nombre : 'Producto desconocido';
     },
 
+    toggleDropdown() {
+      this.showDropdown = !this.showDropdown;
+      if (this.showDropdown) {
+        this.$nextTick(() => {
+          if (this.$refs.searchInput) {
+            this.$refs.searchInput.focus();
+          }
+        });
+      }
+    },
+
+    selectProduct(producto) {
+      this.form.producto_id = producto.id;
+      this.showDropdown = false;
+      this.searchQuery = '';
+      this.getStock();
+    },
+
+    closeDropdown(event) {
+      if (!this.$el.contains(event.target)) {
+        this.showDropdown = false;
+        this.searchQuery = '';
+      }
+    },
+
     async submitForm() {
       if (!this.isFormValid) return;
 
@@ -377,7 +460,16 @@ export default {
       this.cantidadError = '';
       
       this.cantidadTouched = false;
+      this.searchQuery = '';
     }
+  },
+
+  mounted() {
+    document.addEventListener('click', this.closeDropdown);
+  },
+
+  beforeUnmount() {
+    document.removeEventListener('click', this.closeDropdown);
   },
 
   watch: {
@@ -480,5 +572,34 @@ export default {
 .form-select:disabled {
   background-color: rgba(233, 236, 239, 0.5);
   opacity: 0.8;
+}
+
+/* Estilos para el dropdown personalizado */
+.rotate-180 {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}
+
+.dropdown-item-custom:hover {
+  background-color: rgba(13, 110, 253, 0.1);
+}
+
+.dropdown-item-custom.bg-primary:hover {
+  background-color: #0056b3 !important;
+}
+
+.dropdown-menu-custom {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
