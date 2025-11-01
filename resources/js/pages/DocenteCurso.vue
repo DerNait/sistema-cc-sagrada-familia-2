@@ -41,6 +41,7 @@
           class="btn btn-outline-danger"
           type="button"
           title="Descargar PDF de calificaciones"
+          @click="exportPdfCalificaciones"
         >
           <i class="fa-solid fa-file-pdf me-1"></i>
           PDF calificaciones
@@ -683,6 +684,16 @@ function createActivity() {
   if (cursoId)         params.set('prefill_curso_id', cursoId);
 
   window.location.href = `/admin/actividades?${params.toString()}`;
+}
+
+function exportPdfCalificaciones() {
+  const cursoId = props.curso?.id;
+  if (!cursoId) {
+    console.error('No hay ID de curso disponible');
+    return;
+  }
+  // Abre en nueva ventana/pestaña para preview o descarga
+  window.open(`/cursos/${cursoId}/export-pdf`, '_blank');
 }
 
 </script>
