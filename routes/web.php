@@ -15,10 +15,9 @@ use App\Http\Controllers\CursoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotasController;
 use App\Http\Controllers\RoleModulePermissionController;
-use App\Http\Controllers\PagosController;
+use App\Http\Controllers\PagosEstudianteController;
 use App\Http\Controllers\CSVController;
 use App\Http\Controllers\UploadController;
-use App\Http\Controllers\PagosEstudianteController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\Catalogs\GradosController;
 use App\Http\Controllers\Catalogs\BolsasController;
@@ -61,8 +60,13 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
     });
 
     // ----- PAGOS -----
-    Route::get('/pagos', [PagosController::class, 'index'])->name('pagos.index');
-    Route::post('/pagos', [PagosController::class, 'store'])->name('pagos.store');
+    Route::prefix('pagos')->name('pagos.')->group(function () {
+        Route::get('/pagos/estudiante', [PagosEstudianteController::class, 'index'])->name('estudiante.index');
+        Route::post('/pagos/estudiante', [PagosEstudianteController::class, 'store'])->name('estudiante.store');
+    
+        Route::get('/pagos/empleado', [PagosEmpleadoController::class, 'index'])->name('empleado.index');
+        Route::post('/pagos/empleado', [PagosEmpleadoController::class, 'store'])->name('empleado.store');
+    });
 
     // ----- INVENTARIO -----
     Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
@@ -156,15 +160,15 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
 
         // PAGOS
         Route::prefix('pagos')->name('pagos.')->group(function () {
-            Route::get('/', [PagosController::class, 'index'])->name('index');
-            Route::get('crear', [PagosController::class, 'create'])->name('create');
-            Route::post('/', [PagosController::class, 'store'])->name('store');
-            Route::get('{id}', [PagosController::class, 'show'])->name('show');
-            Route::get('{id}/editar', [PagosController::class, 'edit'])->name('edit');
-            Route::put('{id}', [PagosController::class, 'update'])->name('update');
-            Route::delete('{id}', [PagosController::class, 'destroy'])->name('destroy');
-            Route::get('cargar', [PagosController::class, 'createUpload'])->name('cargar');
-            Route::post('cargar', [PagosController::class, 'storeUpload'])->name('cargar.store');
+            Route::get('/', [PagosEstudianteController::class, 'index'])->name('index');
+            Route::get('crear', [PagosEstudianteController::class, 'create'])->name('create');
+            Route::post('/', [PagosEstudianteController::class, 'store'])->name('store');
+            Route::get('{id}', [PagosEstudianteController::class, 'show'])->name('show');
+            Route::get('{id}/editar', [PagosEstudianteController::class, 'edit'])->name('edit');
+            Route::put('{id}', [PagosEstudianteController::class, 'update'])->name('update');
+            Route::delete('{id}', [PagosEstudianteController::class, 'destroy'])->name('destroy');
+            Route::get('cargar', [PagosEstudianteController::class, 'createUpload'])->name('cargar');
+            Route::post('cargar', [PagosEstudianteController::class, 'storeUpload'])->name('cargar.store');
         });
 
         // CSV
