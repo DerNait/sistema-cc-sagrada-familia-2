@@ -577,13 +577,58 @@ public function exportCalificaciones(int $cursoId)
     {
         $cursoId = $curso->id;
 
-        // Aquí iría la lógica real para obtener datos del estudiante/curso
-        // Por ahora retorna la vista estática
+        // Obtener todas las actividades del curso (ordenadas)
+        $actividades = Actividad::whereHas('gradoCurso', function ($q) use ($cursoId) {
+                $q->where('curso_id', $cursoId);
+            })
+            ->select('id', 'nombre', 'total', 'grado_curso_id')
+            ->orderBy('nombre')
+            ->get();
+
+        // Obtener todos los estudiantes que tienen notas en este curso
+        $estudiantesIds = EstudianteNota::whereIn('actividad_id', $actividades->pluck('id'))
+            ->distinct()
+            ->pluck('seccion_estudiante_id');
+
+        $estudiantes = SeccionEstudiante::with('estudiante.usuario:id,name,apellido')
+            ->whereIn('id', $estudiantesIds)
+            ->get()
+            ->map(function($se) {
+                $usuario = $se->estudiante->usuario ?? null;
+                return [
+                    'id' => $se->estudiante_id,
+                    'nombre' => trim(($usuario->name ?? '') . ' ' . ($usuario->apellido ?? '')),
+                ];
+            })
+            ->sortBy('nombre')
+            ->values();
+
+        // Construir matriz de notas [estudiante_id][actividad_id] => nota
+        $seccionEstudianteMap = SeccionEstudiante::whereIn('id', $estudiantesIds)
+            ->pluck('id', 'estudiante_id');
+
+        $notasCollection = EstudianteNota::whereIn('actividad_id', $actividades->pluck('id'))
+            ->whereIn('seccion_estudiante_id', $seccionEstudianteMap->values())
+            ->select('actividad_id', 'seccion_estudiante_id', 'nota')
+            ->get();
+
+        $notas = [];
+        foreach($estudiantes as $est) {
+            $notas[$est['id']] = [];
+            foreach($actividades as $act) {
+                $seId = $seccionEstudianteMap->get($est['id']);
+                $nota = $notasCollection->first(function($n) use ($act, $seId) {
+                    return $n->actividad_id == $act->id && $n->seccion_estudiante_id == $seId;
+                });
+                $notas[$est['id']][$act->id] = $nota ? $nota->nota : null;
+            }
+        }
+
         $data = [
             'curso' => $curso,
-            // 'estudiante' => ...,
-            // 'calificaciones' => ...,
-            // 'asistencia' => ...,
+            'actividades' => $actividades,
+            'estudiantes' => $estudiantes,
+            'notas' => $notas,
         ];
 
         // Si tienes DomPDF instalado:
