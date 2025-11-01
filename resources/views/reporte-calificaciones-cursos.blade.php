@@ -128,8 +128,8 @@
     <section class="print-block avoid-break">
         <div class="header">
             <div>
-                <!-- Si usas DomPDF, public_path funciona -->
-                <img class="logo" src="{{ public_path('images/logo-sagrada-familia.png') }}" alt="Logo">
+                <!-- Para navegador usa asset(), para PDF usa public_path() -->
+                <img class="logo" src="{{ asset('images/logo-sagrada-familia.png') }}" alt="Logo">
             </div>
             <div class="title">
                 <h1 class="brand-green">Centro Cultural Sagrada Familia 2</h1>
