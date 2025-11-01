@@ -632,10 +632,10 @@ public function exportCalificaciones(int $cursoId)
         ];
 
         // Si tienes DomPDF instalado:
-        // $pdf = \PDF::loadView('reporte-calificaciones', $data);
+        // $pdf = \PDF::loadView('reporte-calificaciones-cursos', $data);
         // return $pdf->download("calificaciones-{$curso->nombre}.pdf");
 
         // Mientras tanto, devuelve la vista (para preview):
-        return view('reporte-calificaciones', $data);
+        return view('reporte-calificaciones-cursos', $data);
     }
 }
