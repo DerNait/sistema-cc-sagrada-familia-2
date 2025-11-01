@@ -129,7 +129,7 @@
         <div class="header">
             <div>
                 <!-- Si usas DomPDF, public_path funciona -->
-                <img class="logo" src="{{ public_path('images/logo.png') }}" alt="Logo">
+                <img class="logo" src="{{ public_path('images/logo-sagrada-familia.png') }}" alt="Logo">
             </div>
             <div class="title">
                 <h1 class="brand-green">Centro Cultural Sagrada Familia 2</h1>
