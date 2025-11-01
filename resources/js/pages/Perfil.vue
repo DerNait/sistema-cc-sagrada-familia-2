@@ -2,8 +2,8 @@
   <div class="center-container">
     <div class="d-flex flex-column justify-content-center align-items-center">
       <div class="d-flex justify-content-center my-5">
-        <h1>
-          <i class="fas fa-user text-primary me-2 fw-bold"></i>
+        <h1 class="fw-bold">
+          <i class="fas fa-user text-primary me-2"></i>
           Perfil de Usuario
         </h1>
       </div>

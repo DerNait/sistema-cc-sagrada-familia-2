@@ -16,10 +16,10 @@ class TipoEstadosSeeder extends Seeder
         TipoEstado::truncate();
         TipoEstado::insert([
             ['tipo' => 'Pendiente'],
-            ['tipo' => 'Generado'],
-            ['tipo' => 'Procesado'],
-            ['tipo' => 'Pagado'],
-            ['tipo' => 'Anulado'],
+            ['tipo' => 'Completado'],
+            ['tipo' => 'Cancelado'],
+            ['tipo' => 'Reembolsado'],
+            ['tipo' => 'En proceso'],
         ]);
     }
 }

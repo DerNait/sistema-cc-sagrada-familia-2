@@ -18,6 +18,8 @@
 	  <FileUpload 
       :tiposPago="tipos_pago"
       :pendienteExtra="estado.pendiente_extra"
+      :precioGrado="precio_grado"
+      accept="image/jpeg,image/png,image/jpg"
       @uploaded="onUploaded" 
     />
   </div>
@@ -29,7 +31,7 @@ import FileUpload from '../components/FileUpload.vue'
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
-const props = defineProps(['tipos_pago', 'estado_pago'])
+const props = defineProps(['tipos_pago', 'estado_pago', 'precio_grado']);
 
 const estado = ref('');
 estado.value = props.estado_pago;
