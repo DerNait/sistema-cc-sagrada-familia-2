@@ -568,4 +568,29 @@ public function exportCalificaciones(int $cursoId)
         \Maatwebsite\Excel\Excel::CSV 
     );
 }
+
+    /**
+     * Exporta PDF de calificaciones del curso usando la vista Blade.
+     * Requiere barryvdh/laravel-dompdf o similar.
+     */
+    public function exportPdfCalificaciones(Curso $curso)
+    {
+        $cursoId = $curso->id;
+
+        // Aquí iría la lógica real para obtener datos del estudiante/curso
+        // Por ahora retorna la vista estática
+        $data = [
+            'curso' => $curso,
+            // 'estudiante' => ...,
+            // 'calificaciones' => ...,
+            // 'asistencia' => ...,
+        ];
+
+        // Si tienes DomPDF instalado:
+        // $pdf = \PDF::loadView('reporte-calificaciones', $data);
+        // return $pdf->download("calificaciones-{$curso->nombre}.pdf");
+
+        // Mientras tanto, devuelve la vista (para preview):
+        return view('reporte-calificaciones', $data);
+    }
 }
