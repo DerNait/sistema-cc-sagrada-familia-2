@@ -5,6 +5,7 @@ class NavModule
 {
     public const CRUD  = ['create', 'read', 'update', 'delete'];
     public const READ  = ['read'];
+    public const CREATE  = ['create'];
     public const EXPORT  = ['read', 'export'];
     public const NONE  = [];
 
