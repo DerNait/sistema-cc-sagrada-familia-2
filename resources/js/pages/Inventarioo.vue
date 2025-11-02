@@ -83,8 +83,8 @@
                       <div class="position-relative">
                         <div 
                           @click="toggleDropdown"
-                          class="form-select form-select-lg shadow-sm d-flex align-items-center justify-content-between"
-                          style="border-radius: 15px; border: 2px solid #e9ecef; padding: 1rem 1.5rem; cursor: pointer;"
+                          class="custom-select shadow-sm d-flex align-items-center justify-content-between"
+                          style="border-radius: 15px; border: 2px solid #e9ecef; padding: 1rem 1.5rem; cursor: pointer; background: white; font-size: 1.1rem;"
                           :class="{ 'border-primary': showDropdown }"
                         >
                           <span :class="{ 'text-muted': !form.producto_id }">
@@ -397,20 +397,20 @@ export default {
       this.message = '';
 
       try {
-        const formData = new FormData();
-        formData.append('producto_id', this.form.producto_id);
-        formData.append('tipo', this.form.tipo);
-        formData.append('cantidad', this.form.cantidad);
-        formData.append('descripcion', this.form.descripcion);
-
         const response = await fetch('/inventario', {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
+            'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': this.getCsrfToken()
           },
-          body: formData
+          body: JSON.stringify({
+            producto_id: this.form.producto_id,
+            tipo: this.form.tipo,
+            cantidad: this.form.cantidad,
+            descripcion: this.form.descripcion
+          })
         });
 
         if (!response.ok) {
@@ -490,8 +490,8 @@ export default {
 
 .form-select:focus,
 .form-control:focus {
-  border-color: #007bff !important;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+  border-color: #198754 !important;
+  box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15) !important;
   outline: none;
 }
 
@@ -502,7 +502,7 @@ export default {
 
 .form-select:hover,
 .form-control:hover {
-  border-color: #007bff;
+  border-color: #198754;
   transform: translateY(-1px);
 }
 
@@ -564,7 +564,7 @@ export default {
 .form-control:focus,
 .form-select:focus {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(13, 110, 253, 0.15) !important;
+  box-shadow: 0 8px 25px rgba(25, 135, 84, 0.15) !important;
 }
 
 
@@ -575,6 +575,19 @@ export default {
 }
 
 /* Estilos para el dropdown personalizado */
+.custom-select {
+  transition: all 0.3s ease;
+}
+
+.custom-select:hover {
+  border-color: #198754 !important;
+}
+
+.custom-select.border-primary {
+  border-color: #198754 !important;
+  box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15);
+}
+
 .rotate-180 {
   transform: rotate(180deg);
   transition: transform 0.3s ease;
