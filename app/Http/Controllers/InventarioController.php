@@ -12,7 +12,7 @@ class InventarioController extends Controller
     public function index()
     {
         // Cargar todos los productos para el select
-        $productos = Producto::select('id', 'nombre')->get();
+        $productos = Producto::select('id', 'nombre', 'cantidad')->get();
 
         $params = [
             'productos' => $productos
@@ -35,9 +35,10 @@ class InventarioController extends Controller
         ]);
 
         try {
+            $producto = Producto::findOrFail($request->producto_id);
+
             // Si es una salida, verificar que hay suficiente stock
             if ($request->tipo === 'salida') {
-                $producto = Producto::find($request->producto_id);
                 if ($producto->cantidad < $request->cantidad) {
                     return response()->json([
                         'success' => false,
@@ -56,7 +57,6 @@ class InventarioController extends Controller
             ]);
 
             // Actualizar el stock del producto
-            $producto = Producto::find($request->producto_id);
             if ($request->tipo === 'entrada') {
                 $producto->cantidad += $request->cantidad;
             } else {
@@ -67,7 +67,8 @@ class InventarioController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Movimiento registrado exitosamente',
-                'movimiento' => $movimiento->load('producto')
+                'movimiento' => $movimiento->load('producto'),
+                'nuevo_stock' => $producto->cantidad
             ]);
 
         } catch (\Exception $e) {
