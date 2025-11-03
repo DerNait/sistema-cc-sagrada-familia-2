@@ -102,6 +102,17 @@
         label-key="nombre"
         placeholder="Filtrar por actividad"
       />
+
+      <!-- Botón para limpiar filtros -->
+      <button
+        v-if="hasActiveFilters"
+        class="btn btn-outline-secondary"
+        @click="limpiarFiltros"
+        title="Limpiar todos los filtros"
+      >
+        <i class="fa-solid fa-filter-circle-xmark me-1"></i>
+        Limpiar
+      </button>
     </div>
 
     <div v-if="busyData" class="p-5 text-center text-muted">
@@ -277,6 +288,22 @@ const gradosLocal = ref(props.grados || []);
 
 const filtroEstudianteId = ref(null);
 const filtroActividadId = ref(null);
+
+// Computed para detectar si hay filtros activos
+const hasActiveFilters = computed(() => {
+  return gradoId.value !== null || 
+         seccionId.value !== null || 
+         filtroEstudianteId.value !== null || 
+         filtroActividadId.value !== null;
+});
+
+// Función para limpiar todos los filtros locales
+function limpiarFiltros() {
+  gradoId.value = props.selected_grado_id;
+  seccionId.value = props.selected_seccion_id;
+  filtroEstudianteId.value = null;
+  filtroActividadId.value = null;
+}
 
 const actsFuente = computed(() =>
   filtroActividadId.value
