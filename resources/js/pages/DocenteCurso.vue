@@ -148,9 +148,13 @@
               <input
                 type="number"
                 class="form-control form-control-sm nota-input"
+                :class="{ 'is-invalid border-danger': ui.notaError[cellKey(row.id, act.id)] }"
                 v-model.number="ui.noteDraft[cellKey(row.id, act.id)]"
                 :disabled="ui.globalBusy || ui.busy[cellKey(row.id, act.id)]"
                 step="0.01"
+                min="0"
+                max="100"
+                @input="validateNota(row.id, act.id)"
                 @keyup.enter="saveNota(row.id, act.id)"
                 @keyup.esc="cancelEdit(row.id, act.id)"
               />
@@ -167,13 +171,17 @@
                 <!-- Guardar -->
                 <button
                   class="btn btn-sm btn-link p-0"
-                  :disabled="ui.globalBusy || ui.busy[cellKey(row.id, act.id)]"
+                  :disabled="ui.globalBusy || ui.busy[cellKey(row.id, act.id)] || ui.notaError[cellKey(row.id, act.id)]"
                   @click="saveNota(row.id, act.id)"
                   title="Guardar"
                 >
                   <i class="fa-solid fa-check"></i>
                 </button>
               </div>
+            </div>
+            <!-- Mensaje de error de validación -->
+            <div v-if="ui.notaError[cellKey(row.id, act.id)]" class="invalid-feedback d-block mt-1" style="font-size: 0.75rem;">
+              <i class="fa-solid fa-exclamation-circle me-1"></i>{{ ui.notaError[cellKey(row.id, act.id)] }}
             </div>
           </template>
 
@@ -402,6 +410,7 @@ const ui = reactive({
   commentDraft: {},  // key -> string
   busy: {},          // key -> loading
   globalBusy: false, // 🔵 deshabilita acciones en guardado masivo
+  notaError: {},     // key -> mensaje de error
 });
 
 const originalNotas = ref({});
@@ -543,10 +552,43 @@ function setHover(key, state) {
   hovered.value[key] = state;
 }
 
+function validateNota(estId, actId) {
+  const key = cellKey(estId, actId);
+  const valor = ui.noteDraft[key];
+  
+  ui.notaError[key] = '';
+  
+  // Validar que sea un número válido
+  if (valor === '' || valor === null || valor === undefined) {
+    ui.notaError[key] = 'Debe ingresar una calificación';
+    return false;
+  }
+  
+  const num = Number(valor);
+  
+  if (isNaN(num)) {
+    ui.notaError[key] = 'Debe ingresar un número válido';
+    return false;
+  }
+  
+  if (num < 0) {
+    ui.notaError[key] = 'La calificación no puede ser negativa';
+    return false;
+  }
+  
+  if (num > 100) {
+    ui.notaError[key] = 'La calificación no puede ser mayor a 100';
+    return false;
+  }
+  
+  return true;
+}
+
 function openEdit(estId, actId, notaActual) {
   const key = cellKey(estId, actId);
   ui.edit[key] = true;
   ui.noteDraft[key] = (notaActual ?? '').toString();
+  ui.notaError[key] = ''; // Limpiar error al abrir
 }
 
 function cancelEdit(estId, actId) {
@@ -557,6 +599,7 @@ function cancelEdit(estId, actId) {
     ui.noteDraft[key] = (cell.nota ?? '').toString();
   }
   ui.edit[key] = false;
+  ui.notaError[key] = ''; // Limpiar error al cancelar
 }
 
 function openComment(estId, actId, comentarioActual) {
@@ -576,6 +619,12 @@ function closeComment(estId, actId) {
  * ========================= */
 function saveNota(estId, actId) {
   const key = cellKey(estId, actId);
+  
+  // Validar antes de guardar
+  if (!validateNota(estId, actId)) {
+    return; // No guardar si hay error de validación
+  }
+  
   const draftRaw = ui.noteDraft[key];
   const draftNum = draftRaw === '' || draftRaw === null || typeof draftRaw === 'undefined'
     ? null
@@ -602,6 +651,7 @@ function saveNota(estId, actId) {
       // usa lo que diga el backend; si no viene, cae a 0
       cell.nota = (typeof data.nota !== 'undefined') ? data.nota : 0;
       ui.edit[key] = false;
+      ui.notaError[key] = ''; // Limpiar error después de guardar exitosamente
       if (!bulkEdit.value) ui.edit[key] = false;
       ui.busy[key] = false;
     })
