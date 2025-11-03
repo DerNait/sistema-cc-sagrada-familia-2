@@ -111,16 +111,19 @@ class DashboardController extends Controller
 
         // === Productos más vendidos (Top 10) ===
         $topProducts = DB::table('movimientos')
-            ->join('productos', 'movimientos.producto_id', '=', 'productos.id')
-            ->whereRaw('LOWER(movimientos.tipo) = ?', ['salida'])
-            ->select(
-                'productos.nombre as product_name',
-                DB::raw('SUM(movimientos.cantidad) as total_vendido')
-            )
-            ->groupBy('productos.id', 'productos.nombre')
-            ->orderByDesc('total_vendido')
-            ->limit(10)
-            ->get();
+        ->join('productos', 'movimientos.producto_id', '=', 'productos.id')
+        ->join('tipo_movimientos', 'movimientos.tipo_movimiento_id', '=', 'tipo_movimientos.id')
+        ->where('movimientos.tipo_movimiento_id', 1) // 1 = salida
+        ->select(
+            'productos.nombre as product_name',
+            DB::raw('SUM(movimientos.cantidad) as total_vendido')
+        )
+        ->groupBy('productos.id', 'productos.nombre')
+        ->orderByDesc('total_vendido')
+        ->limit(10)
+        ->get();
+
+
 
         $topProductsChart = $topProducts->map(function ($row) {
             return [
