@@ -23,6 +23,7 @@ use App\Http\Controllers\Catalogs\GradosController;
 use App\Http\Controllers\Catalogs\BolsasController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\InventarioHistorialController;
+use App\Http\Controllers\PagosEmpleadoController;
 
 // -----------------------------
 // RUTAS PÚBLICAS
@@ -65,8 +66,8 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
         Route::get('/pagos/estudiante', [PagosEstudianteController::class, 'index'])->name('estudiante.index');
         Route::post('/pagos/estudiante', [PagosEstudianteController::class, 'store'])->name('estudiante.store');
     
-        Route::get('/pagos/empleado', [PagosEmpleadoController::class, 'index'])->name('empleado.index');
-        Route::post('/pagos/empleado', [PagosEmpleadoController::class, 'store'])->name('empleado.store');
+        Route::get('/empleado', [PagosEmpleadoController::class, 'index'])->name('empleado.index');
+        Route::post('/empleado', [PagosEmpleadoController::class, 'store'])->name('empleado.store');
     });
 
     // ----- INVENTARIO -----
