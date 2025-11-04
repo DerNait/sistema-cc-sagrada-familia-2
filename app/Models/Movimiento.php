@@ -10,10 +10,11 @@ class Movimiento extends Model
 
     protected $fillable = [
         'producto_id',
-        'tipo',          
+        'tipo_movimiento_id',  // Cambiado de 'tipo' a 'tipo_movimiento_id'
         'cantidad',
         'descripcion',
         'fecha',
+        'usuario_id',
     ];
 
     public $timestamps = false;
