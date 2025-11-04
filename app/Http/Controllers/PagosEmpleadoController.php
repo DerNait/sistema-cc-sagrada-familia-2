@@ -209,4 +209,47 @@ class PagosEmpleadoController extends Controller
         }
     }
 
+    /**
+     * Cancelar un pago de empleado (soft delete)
+     */
+    public function destroy($id)
+    {
+        try {
+            $pago = PagosEmpleado::findOrFail($id);
+
+            $idCancelado  = TipoEstado::where('tipo', 'Cancelado')->value('id');
+            $idCompletado = TipoEstado::where('tipo', 'Completado')->value('id');
+
+            if (!$idCancelado || !$idCompletado) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Estados de pago incompletos. Verifica el seeder de TipoEstado.',
+                ], 422);
+            }
+
+            if ((int)$pago->tipo_estado_id === (int)$idCancelado) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'El pago ya estaba cancelado.',
+                    'pago'    => $pago,
+                ]);
+            }
+
+            $pago->tipo_estado_id = (int)$idCancelado;
+            $pago->aprobado_id = null;
+            $pago->aprobado_en = null;
+            $pago->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pago cancelado correctamente.',
+                'pago'    => $pago,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cancelar el pago: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }
