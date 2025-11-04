@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\PagosEmpleado;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class EmpleadosController extends CrudControllerBase
 {
@@ -30,22 +31,9 @@ class EmpleadosController extends CrudControllerBase
                     ->toArray()
             );
 
-        $this->column('user.role.nombre')
+        $this->column('rol_nombre')
             ->label('Rol')
             ->readonly();
-
-        $this->column('user.role.id')
-            ->label('Filtrar por rol')
-            ->type('relation')
-            ->filterable('select')
-            ->filterOptions(
-                Role::orderBy('nombre')
-                    ->pluck('nombre','id')
-                    ->toArray()
-            )
-            ->hide()
-            ->readonly();
-
 
         $this->column('salario_base')
             ->label('Salario')
@@ -58,6 +46,28 @@ class EmpleadosController extends CrudControllerBase
             ->readonly();
 
         $this->syncAbilities('admin.empleados');
+    }
+
+    public function edit(Request $request, $id)
+    {
+        $this->configure($request);
+        abort_unless($this->abilities['update'] ?? false, 403);
+
+        // Cargar el item con las relaciones necesarias
+        $item = $this->newModelQuery()
+            ->with(['user.role']) // Cargar user y su relación role
+            ->findOrFail($id);
+
+        $params = [
+            'item'    => $item,
+            'columns' => $this->columns,
+            'action'  => route(Str::beforeLast($request->route()->getName(), '.') . '.update', $item->getKey()),
+        ];
+
+        return view('component', [
+            'component' => 'crud-form',
+            'params'    => $params
+        ]);
     }
 
     public function planilla()

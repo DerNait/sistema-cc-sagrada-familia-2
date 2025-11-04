@@ -17,24 +17,34 @@ class Empleado extends Model
         'updated_at',
     ];
 
-    protected $appends = ['nombre_completo'];
+    protected $appends = ['nombre_completo', 'rol_nombre'];
 
+    
     public function user()
     {
         return $this->belongsTo(User::class, 'usuario_id');
     }
 
+    
     public function pagos() {
         return $this->hasMany(PagosEmpleado::class);
     }
 
+    
     public function scopeDocentes($q, $rolDocenteId = 4)
     {
         return $q->whereHas('user', fn($u) => $u->where('rol_id', $rolDocenteId));
     }
 
+    
     public function getNombreCompletoAttribute()
     {
         return trim(($this->user->name ?? '') . ' ' . ($this->user->apellido ?? ''));
+    }
+
+
+    public function getRolNombreAttribute()
+    {
+        return $this->user?->role?->nombre ?? '';
     }
 }
