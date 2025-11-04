@@ -11,4 +11,24 @@ class PagosEmpleadoController extends Controller
     {
         $this->middleware('auth');
     }
+    public function index()
+    {
+        $pagos = DB::table('pagos_empleados')
+            ->join('empleados', 'empleados.id', '=', 'pagos_empleados.empleado_id')
+            ->select(
+                'pagos_empleados.id',
+                'empleados.nombre',
+                'pagos_empleados.fecha_ingreso',
+                'pagos_empleados.salario_base',
+                'pagos_empleados.bonificacion_ley',
+                'pagos_empleados.bonificacion_extra',
+                'pagos_empleados.descuento_igss',
+                'pagos_empleados.descuentos_varios',
+                'pagos_empleados.total'
+            )
+            ->orderBy('empleados.nombre')
+            ->paginate(15);
+
+        return response()->json($pagos);
+    }
 }
