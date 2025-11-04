@@ -30,6 +30,6 @@ class Movimiento extends Model
 
     public function usuario()
     {
-        return $this->belongsTo(User::class, 'user_id'); // ajusta si tu FK se llama distinto
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
