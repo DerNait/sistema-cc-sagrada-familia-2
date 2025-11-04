@@ -2,125 +2,183 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Empleado;
 use App\Models\PagosEmpleado;
 use App\Models\TipoEstado;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Http\Request;
 
 class PagosEmpleadoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $user = Auth::user();
+        $user  = Auth::user();
         $rolId = $user->rol_id;
+        if ($rolId !== 1 && $rolId !== 2) abort(403);
 
-        // Solo admin (1) o secretaria (2) pueden ver la vista
-        if ($rolId === 1 || $rolId === 2) {
-            $tiposEstado = TipoEstado::select('id', 'tipo')->orderBy('tipo')->get();
+        $mes  = (int) ($request->query('mes')  ?? now()->month);
+        $anio = (int) ($request->query('anio') ?? now()->year);
 
-            // Pagos con relaciones
-            $pagos = PagosEmpleado::with(['empleado.user', 'tipoEstado'])
-                ->orderByDesc('created_at')
-                ->get()
-                ->map(function ($pago) {
-                    $usuario = $pago->empleado->user ?? null;
+        $tiposEstado  = TipoEstado::select('id','tipo')->orderBy('tipo')->get();
+        $idPendiente  = (int) TipoEstado::where('tipo','Pendiente')->value('id');
+        $idCompletado = (int) TipoEstado::where('tipo','Completado')->value('id');
 
-                    return [
-                        'id'                 => $pago->id,
-                        'nombre'             => $usuario->name ?? 'N/A',
-                        'apellido'           => $usuario->apellido ?? 'N/A',
-                        'correo'             => $usuario->email ?? 'N/A',
-                        'fecha_ingreso'      => optional($pago->fecha_ingreso)->format('Y-m-d'),
-                        'salario_base'       => $pago->salario_base,
-                        'bonificacion_ley'   => $pago->bonificacion_ley,
-                        'bonificacion_extra' => $pago->bonificacion_extra,
-                        'descuento_igss'     => $pago->descuento_igss,
-                        'descuentos_varios'  => $pago->descuentos_varios,
-                        'total'              => $pago->total,
-                        'tipo_estado_id'     => $pago->tipo_estado_id,
-                        'tipo_estado_nombre' => $pago->tipoEstado->tipo ?? 'N/A',
-                    ];
-                });
+        $pagosPeriodo = PagosEmpleado::with(['empleado.user','tipoEstado'])
+            ->where('periodo_mes', $mes)
+            ->where('periodo_anio', $anio)
+            ->get()
+            ->keyBy('empleado_id');
 
-            $params = [
-                'pagos' => $pagos,
-                'tipos_estado' => $tiposEstado
+        $empleados = Empleado::with('user')->get();
+
+        $rows = $empleados->map(function ($emp) use ($pagosPeriodo, $mes, $anio, $idPendiente) {
+            $pago = $pagosPeriodo->get($emp->id);
+
+            $nombre   = $emp->user->name     ?? 'N/A';
+            $apellido = $emp->user->apellido ?? 'N/A';
+            $correo   = $emp->user->email    ?? 'N/A';
+            $salarioBaseEmpleado = (float) ($emp->salario_base ?? 0);
+
+            if ($pago) {
+                return [
+                    'id'                  => $pago->id,
+                    'empleado_id'         => $emp->id,
+                    'nombre'              => $nombre,
+                    'apellido'            => $apellido,
+                    'correo'              => $correo,
+                    'fecha_ingreso'       => optional($pago->fecha_ingreso)->format('Y-m-d'),
+                    'salario_base'        => $pago->salario_base ?? $salarioBaseEmpleado,
+                    'bonificacion_ley'    => $pago->bonificacion_ley,
+                    'bonificacion_extra'  => $pago->bonificacion_extra,
+                    'descuento_igss'      => $pago->descuento_igss,
+                    'descuentos_varios'   => $pago->descuentos_varios,
+                    'total'               => $pago->total,
+                    'tipo_estado_id'      => $pago->tipo_estado_id,
+                    'tipo_estado_nombre'  => optional($pago->tipoEstado)->tipo ?? 'Pendiente',
+                    'periodo_mes'         => $pago->periodo_mes,
+                    'periodo_anio'        => $pago->periodo_anio,
+                    'periodo_label'       => sprintf('%02d/%d', $pago->periodo_mes, $pago->periodo_anio),
+                ];
+            }
+
+            return [
+                'id'                  => null,
+                'empleado_id'         => $emp->id,
+                'nombre'              => $nombre,
+                'apellido'            => $apellido,
+                'correo'              => $correo,
+                'fecha_ingreso'       => null,
+                'salario_base'        => $salarioBaseEmpleado,
+                'bonificacion_ley'    => 0,
+                'bonificacion_extra'  => 0,
+                'descuento_igss'      => 0,
+                'descuentos_varios'   => 0,
+                'total'               => null,
+                'tipo_estado_id'      => $idPendiente,
+                'tipo_estado_nombre'  => 'Pendiente',
+                'periodo_mes'         => $mes,
+                'periodo_anio'        => $anio,
+                'periodo_label'       => sprintf('%02d/%d', $mes, $anio),
             ];
+        })->values();
 
-            return view('component', [
-                'component' => 'admin-pago-empleado',
-                'params'    => $params,
+        return view('component', [
+            'component' => 'empleado-pago',
+            'params'    => [
+                'rows'         => $rows,
+                'tipos_estado' => $tiposEstado,
+                'periodo'      => ['mes' => $mes, 'anio' => $anio],
+            ],
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $estados = TipoEstado::pluck('id','tipo');
+        $idCompletado = (int) ($estados['Completado'] ?? 0);
+
+        $hasAprobadoId = Schema::hasColumn('pagos_empleados', 'aprobado_id');
+        $hasAprobadoEn = Schema::hasColumn('pagos_empleados', 'aprobado_en');
+
+        // 1) Si viene un ID → marcar ese registro como Completado
+        $pagoId = $request->input('id') ?? $request->input('pago_id');
+        if ($pagoId) {
+            $pago = PagosEmpleado::findOrFail($pagoId);
+            $pago->tipo_estado_id = $idCompletado;
+
+            if ($hasAprobadoId) $pago->aprobado_id = Auth::id();
+            if ($hasAprobadoEn) $pago->aprobado_en = now();
+
+            $pago->updated_at = now();
+            $pago->save();
+
+            return response()->json([
+                'id'      => $pago->id,
+                'total'   => $pago->total,
+                'success' => true,
             ]);
         }
 
-        // Otros roles no autorizados
-        abort(403, 'No tienes permisos para acceder a esta sección.');
-    }
-
-    /**
-     * Registrar un nuevo pago de empleado
-     */
-    public function store(Request $request)
-    {
+        // 2) Sin ID → validación completa para crear/actualizar por periodo
         $data = $request->validate([
-            'empleado_id'       => ['required', 'integer', 'exists:empleados,id'],
-            'periodo_mes'       => ['required', 'integer', 'min:1', 'max:12'],
-            'periodo_anio'      => ['required', 'integer', 'min:2000'],
-            'salario_base'      => ['required', 'numeric', 'min:0.01'],
-            'bonificacion_ley'  => ['nullable', 'numeric', 'min:0'],
-            'bonificacion_extra'=> ['nullable', 'numeric', 'min:0'],
-            'descuento_igss'    => ['nullable', 'numeric', 'min:0'],
-            'descuentos_varios' => ['nullable', 'numeric', 'min:0'],
+            'empleado_id'        => ['required','integer','exists:empleados,id'],
+            'periodo_mes'        => ['required','integer','min:1','max:12'],
+            'periodo_anio'       => ['required','integer','min:2000'],
+            'salario_base'       => ['required','numeric','min:0'],
+            'bonificacion_ley'   => ['nullable','numeric','min:0'],
+            'bonificacion_extra' => ['nullable','numeric','min:0'],
+            'descuento_igss'     => ['nullable','numeric','min:0'],
+            'descuentos_varios'  => ['nullable','numeric','min:0'],
         ]);
 
-        $total =
-            ($data['salario_base'] ?? 0) +
-            ($data['bonificacion_ley'] ?? 0) +
-            ($data['bonificacion_extra'] ?? 0) -
-            ($data['descuento_igss'] ?? 0) -
-            ($data['descuentos_varios'] ?? 0);
+        $data['total']          = PagosEmpleado::calcularTotal($data);
+        $data['tipo_estado_id'] = $idCompletado; // crear/actualizar como Completado
+        $data['updated_at']     = now();
+        $data['created_at']     = now();
 
-        $data['total'] = $total;
-        $data['tipo_estado_id'] = 1; // “Pendiente” por defecto
-        $data['created_at'] = now();
-        $data['updated_at'] = now();
-
-        // Si ya existía pago del mismo mes/año para ese empleado → actualizarlo
         $existing = PagosEmpleado::where('empleado_id', $data['empleado_id'])
-            ->where('periodo_mes', $data['periodo_mes'])
+            ->where('periodo_mes',  $data['periodo_mes'])
             ->where('periodo_anio', $data['periodo_anio'])
             ->first();
 
         if ($existing) {
-            $existing->update($data);
+            // Actualiza montos + estado
+            $existing->fill($data);
+            if ($hasAprobadoId) $existing->aprobado_id = Auth::id();
+            if ($hasAprobadoEn) $existing->aprobado_en = now();
+            $existing->save();
+
             return response()->json([
-                'message' => 'Pago actualizado correctamente.',
-                'pago_id' => $existing->id,
+                'id'      => $existing->id,
+                'total'   => $existing->total,
+                'success' => true,
             ]);
         }
 
         $pago = PagosEmpleado::create($data);
 
+        // Setea aprobador/fecha si existen columnas
+        $touched = false;
+        if ($hasAprobadoId) { $pago->aprobado_id = Auth::id(); $touched = true; }
+        if ($hasAprobadoEn) { $pago->aprobado_en = now();      $touched = true; }
+        if ($touched) $pago->save();
+
         return response()->json([
-            'message' => 'Pago de empleado registrado correctamente.',
-            'pago_id' => $pago->id,
+            'id'      => $pago->id,
             'total'   => $pago->total,
+            'success' => true,
         ]);
     }
 
-    /**
-     * Mostrar detalle de un pago específico
-     */
     public function show($id)
     {
-        $pago = PagosEmpleado::with(['empleado.user', 'tipoEstado'])->findOrFail($id);
+        $pago = PagosEmpleado::with(['empleado.user','tipoEstado','ajustes.tipoAjuste'])->findOrFail($id);
         $usuario = $pago->empleado->user ?? null;
 
         return response()->json([
             'id'                 => $pago->id,
+            'empleado_id'        => $pago->empleado_id,
             'nombre'             => $usuario->name ?? 'N/A',
             'apellido'           => $usuario->apellido ?? 'N/A',
             'correo'             => $usuario->email ?? 'N/A',
@@ -132,120 +190,47 @@ class PagosEmpleadoController extends Controller
             'descuentos_varios'  => $pago->descuentos_varios,
             'total'              => $pago->total,
             'tipo_estado_id'     => $pago->tipo_estado_id,
-            'tipo_estado_nombre' => $pago->tipoEstado->tipo ?? 'N/A',
+            'tipo_estado_nombre' => optional($pago->tipoEstado)->tipo ?? 'N/A',
+            'ajustes'            => $pago->ajustes->map(fn($a) => [
+                'tipo'        => $a->tipoAjuste->ajuste,
+                'descripcion' => $a->descripcion,
+                'monto'       => $a->monto,
+            ]),
+            'periodo_mes'        => $pago->periodo_mes,
+            'periodo_anio'       => $pago->periodo_anio,
         ]);
     }
 
-    /**
-     * Actualizar el estado del pago de empleado (Pagado, Pendiente, Cancelado, etc.)
-     */
     public function update(Request $request, $id)
     {
-        try {
-            $pago = PagosEmpleado::findOrFail($id);
+        $pago = PagosEmpleado::findOrFail($id);
+        $estados = TipoEstado::pluck('id','tipo');
 
-            // Resolver IDs por nombre (evitar “números mágicos”)
-            $idPendiente  = TipoEstado::where('tipo', 'Pendiente')->value('id');
-            $idCompletado = TipoEstado::where('tipo', 'Completado')->value('id');
-            $idCancelado  = TipoEstado::where('tipo', 'Cancelado')->value('id');
-            $idReembolsado= TipoEstado::where('tipo', 'Reembolsado')->value('id');
-            $idEnProceso  = TipoEstado::where('tipo', 'En proceso')->value('id');
+        $data = $request->validate([
+            'tipo_estado_id' => ['required','integer','in:'.implode(',', $estados->values()->all())],
+        ]);
 
-            $data = $request->validate([
-                'tipo_estado_id' => [
-                    'required',
-                    'integer',
-                    Rule::in([$idPendiente, $idCompletado, $idCancelado, $idReembolsado, $idEnProceso]),
-                ],
-            ]);
+        $nuevo = (int) $data['tipo_estado_id'];
+        $pago->tipo_estado_id = $nuevo;
 
-            $nuevoEstado = (int) $data['tipo_estado_id'];
+        $hasAprobadoId = Schema::hasColumn('pagos_empleados', 'aprobado_id');
+        $hasAprobadoEn = Schema::hasColumn('pagos_empleados', 'aprobado_en');
 
-            // Si viene “En proceso” → lo forzamos a Completado
-            if ($nuevoEstado === (int)$idEnProceso) {
-                $nuevoEstado = (int)$idCompletado;
-            }
-
-            // Evita re-aprobar o re-anular si ya está cerrado
-            if (in_array((int)$pago->tipo_estado_id, [(int)$idCompletado, (int)$idCancelado], true)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'El pago ya fue cerrado (Pagado/Anulado).',
-                ], 422);
-            }
-
-            $pago->tipo_estado_id = $nuevoEstado;
-
-            if (in_array($nuevoEstado, [(int)$idCompletado, (int)$idCancelado], true)) {
-                $pago->aprobado_id = Auth::id();
-                $pago->aprobado_en = now();
-            } else {
-                $pago->aprobado_id = null;
-                $pago->aprobado_en = null;
-            }
-
+        if (($estados['Pendiente'] ?? null) !== null && $nuevo === (int) $estados['Pendiente']) {
+            if ($hasAprobadoId) $pago->aprobado_id = null;
+            if ($hasAprobadoEn) $pago->aprobado_en = null;
             $pago->save();
 
-            $mensaje = match ($nuevoEstado) {
-                (int)$idCompletado => 'Pago aprobado correctamente (Pagado).',
-                (int)$idCancelado  => 'Pago cancelado correctamente.',
-                default             => 'Estado del pago actualizado correctamente.',
-            };
-
-            return response()->json([
-                'success' => true,
-                'message' => $mensaje,
-                'pago'    => $pago,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al actualizar el pago: ' . $e->getMessage(),
-            ], 500);
+            return response()->json(['success' => true, 'pago' => $pago]);
         }
-    }
 
-    /**
-     * Cancelar un pago de empleado (soft delete)
-     */
-    public function destroy($id)
-    {
-        try {
-            $pago = PagosEmpleado::findOrFail($id);
-
-            $idCancelado  = TipoEstado::where('tipo', 'Cancelado')->value('id');
-            $idCompletado = TipoEstado::where('tipo', 'Completado')->value('id');
-
-            if (!$idCancelado || !$idCompletado) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Estados de pago incompletos. Verifica el seeder de TipoEstado.',
-                ], 422);
-            }
-
-            if ((int)$pago->tipo_estado_id === (int)$idCancelado) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'El pago ya estaba cancelado.',
-                    'pago'    => $pago,
-                ]);
-            }
-
-            $pago->tipo_estado_id = (int)$idCancelado;
-            $pago->aprobado_id = null;
-            $pago->aprobado_en = null;
-            $pago->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Pago cancelado correctamente.',
-                'pago'    => $pago,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al cancelar el pago: ' . $e->getMessage(),
-            ], 500);
+        if (($estados['Completado'] ?? null) !== null && $nuevo === (int) $estados['Completado']) {
+            if ($hasAprobadoId) $pago->aprobado_id = Auth::id();
+            if ($hasAprobadoEn) $pago->aprobado_en = now();
         }
+
+        $pago->save();
+
+        return response()->json(['success' => true, 'pago' => $pago]);
     }
 }

@@ -31,6 +31,10 @@ class PagosEmpleado extends Model
         return $this->belongsTo(Empleado::class);
     }
 
+    public function ajustes() {
+        return $this->hasMany(AjusteSalarial::class, 'pago_empleado_id');
+    }
+
     /**
      * Estado del pago (Pendiente, Pagado, Cancelado, etc.)
      */
