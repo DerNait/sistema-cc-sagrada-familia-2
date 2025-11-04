@@ -64,4 +64,55 @@ class PagosEmpleadoController extends Controller
         abort(403, 'No tienes permisos para acceder a esta sección.');
     }
 
+    /**
+     * Registrar un nuevo pago de empleado
+     */
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'empleado_id'       => ['required', 'integer', 'exists:empleados,id'],
+            'periodo_mes'       => ['required', 'integer', 'min:1', 'max:12'],
+            'periodo_anio'      => ['required', 'integer', 'min:2000'],
+            'salario_base'      => ['required', 'numeric', 'min:0.01'],
+            'bonificacion_ley'  => ['nullable', 'numeric', 'min:0'],
+            'bonificacion_extra'=> ['nullable', 'numeric', 'min:0'],
+            'descuento_igss'    => ['nullable', 'numeric', 'min:0'],
+            'descuentos_varios' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        $total =
+            ($data['salario_base'] ?? 0) +
+            ($data['bonificacion_ley'] ?? 0) +
+            ($data['bonificacion_extra'] ?? 0) -
+            ($data['descuento_igss'] ?? 0) -
+            ($data['descuentos_varios'] ?? 0);
+
+        $data['total'] = $total;
+        $data['tipo_estado_id'] = 1; // “Pendiente” por defecto
+        $data['created_at'] = now();
+        $data['updated_at'] = now();
+
+        // Si ya existía pago del mismo mes/año para ese empleado → actualizarlo
+        $existing = PagosEmpleado::where('empleado_id', $data['empleado_id'])
+            ->where('periodo_mes', $data['periodo_mes'])
+            ->where('periodo_anio', $data['periodo_anio'])
+            ->first();
+
+        if ($existing) {
+            $existing->update($data);
+            return response()->json([
+                'message' => 'Pago actualizado correctamente.',
+                'pago_id' => $existing->id,
+            ]);
+        }
+
+        $pago = PagosEmpleado::create($data);
+
+        return response()->json([
+            'message' => 'Pago de empleado registrado correctamente.',
+            'pago_id' => $pago->id,
+            'total'   => $pago->total,
+        ]);
+    }
+
 }
