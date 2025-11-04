@@ -115,4 +115,29 @@ class PagosEmpleadoController extends Controller
         ]);
     }
 
+    /**
+     * Mostrar detalle de un pago específico
+     */
+    public function show($id)
+    {
+        $pago = PagosEmpleado::with(['empleado.user', 'tipoEstado'])->findOrFail($id);
+        $usuario = $pago->empleado->user ?? null;
+
+        return response()->json([
+            'id'                 => $pago->id,
+            'nombre'             => $usuario->name ?? 'N/A',
+            'apellido'           => $usuario->apellido ?? 'N/A',
+            'correo'             => $usuario->email ?? 'N/A',
+            'fecha_ingreso'      => optional($pago->fecha_ingreso)->format('Y-m-d'),
+            'salario_base'       => $pago->salario_base,
+            'bonificacion_ley'   => $pago->bonificacion_ley,
+            'bonificacion_extra' => $pago->bonificacion_extra,
+            'descuento_igss'     => $pago->descuento_igss,
+            'descuentos_varios'  => $pago->descuentos_varios,
+            'total'              => $pago->total,
+            'tipo_estado_id'     => $pago->tipo_estado_id,
+            'tipo_estado_nombre' => $pago->tipoEstado->tipo ?? 'N/A',
+        ]);
+    }
+
 }
