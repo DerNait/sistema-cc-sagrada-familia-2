@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Producto;
 use App\Models\Movimiento;
+use App\Models\TipoMovimiento;
 use Carbon\Carbon;
 
 class InventarioController extends Controller
@@ -13,9 +14,13 @@ class InventarioController extends Controller
     {
         // Cargar todos los productos para el select
         $productos = Producto::select('id', 'nombre', 'cantidad')->get();
+        
+        // Cargar los tipos de movimiento
+        $tiposMovimiento = TipoMovimiento::all();
 
         $params = [
-            'productos' => $productos
+            'productos' => $productos,
+            'tipos_movimiento' => $tiposMovimiento
         ];
 
         return view('component', [
@@ -29,16 +34,17 @@ class InventarioController extends Controller
         // Validar los datos del formulario
         $request->validate([
             'producto_id' => 'required|exists:productos,id',
-            'tipo' => 'required|in:entrada,salida',
+            'tipo_movimiento_id' => 'required|exists:tipo_movimientos,id',
             'cantidad' => 'required|integer|min:1',
             'descripcion' => 'required|string|max:255'
         ]);
 
         try {
             $producto = Producto::findOrFail($request->producto_id);
+            $tipoMovimiento = TipoMovimiento::findOrFail($request->tipo_movimiento_id);
 
-            // Si es una salida, verificar que hay suficiente stock
-            if ($request->tipo === 'salida') {
+            // Si es una salida (ID 1), verificar que hay suficiente stock
+            if ($request->tipo_movimiento_id == 1) {
                 if ($producto->cantidad < $request->cantidad) {
                     return response()->json([
                         'success' => false,
@@ -50,16 +56,16 @@ class InventarioController extends Controller
             // Crear el movimiento
             $movimiento = Movimiento::create([
                 'producto_id' => $request->producto_id,
-                'tipo' => $request->tipo,
+                'tipo_movimiento_id' => $request->tipo_movimiento_id,
                 'cantidad' => $request->cantidad,
                 'descripcion' => $request->descripcion,
                 'fecha' => Carbon::now()
             ]);
 
             // Actualizar el stock del producto
-            if ($request->tipo === 'entrada') {
+            if ($request->tipo_movimiento_id == 2) { // Entrada
                 $producto->cantidad += $request->cantidad;
-            } else {
+            } else { // Salida (ID 1)
                 $producto->cantidad -= $request->cantidad;
             }
             $producto->save();
@@ -67,7 +73,7 @@ class InventarioController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Movimiento registrado exitosamente',
-                'movimiento' => $movimiento->load('producto'),
+                'movimiento' => $movimiento->load(['producto', 'tipoMovimiento']),
                 'nuevo_stock' => $producto->cantidad
             ]);
 

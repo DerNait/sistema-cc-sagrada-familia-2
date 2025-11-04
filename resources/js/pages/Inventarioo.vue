@@ -14,43 +14,6 @@
           </div>
         </div>
 
-        <!-- Animación de éxito -->
-        <div v-if="showSuccessAnimation" 
-             class="success-overlay position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-             style="z-index: 9999; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);">
-          <div class="success-modal text-center text-white">
-            <div class="success-icon-container mb-4">
-              <div class="success-circle">
-                <i class="fas fa-check success-check"></i>
-              </div>
-            </div>
-            <h2 class="fw-bold mb-3">¡Movimiento Registrado!</h2>
-            <p class="fs-5 mb-2">El movimiento se ha guardado correctamente</p>
-            <div class="success-details mt-4 p-3 rounded" style="background: rgba(255, 255, 255, 0.1);">
-              <div class="row text-start">
-                <div class="col-6">
-                  <strong>Producto:</strong><br>
-                  <span class="text-light">{{ getProductName(lastMovement.producto_id) }}</span>
-                </div>
-                <div class="col-6">
-                  <strong>Tipo:</strong><br>
-                  <span class="text-light">{{ lastMovement.tipo === 'entrada' ? '⬇️ Entrada' : '⬆️ Salida' }}</span>
-                </div>
-              </div>
-              <div class="row mt-2 text-start">
-                <div class="col-6">
-                  <strong>Cantidad:</strong><br>
-                  <span class="text-light">{{ lastMovement.cantidad }} unidades</span>
-                </div>
-                <div class="col-6">
-                  <strong>Stock actual:</strong><br>
-                  <span class="text-light">{{ selectedProductStock }} unidades</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Mensajes de éxito o error -->
         <div v-if="message" 
              class="row mb-4">
@@ -149,17 +112,18 @@
                       </label>
                       <select
                         id="tipo"
-                        v-model="form.tipo"
+                        v-model.number="form.tipo_movimiento_id"
                         class="form-select form-select-lg shadow-sm"
                         style="border-radius: 15px; border: 2px solid #e9ecef; padding: 1rem 1.5rem;"
                         required
                       >
                         <option value="">Seleccionar tipo...</option>
-                        <option value="entrada">
-                          Entrada (Agregar stock)
-                        </option>
-                        <option value="salida">
-                          Salida (Reducir stock)
+                        <option 
+                          v-for="tipo in tiposMovimiento" 
+                          :key="tipo.id" 
+                          :value="tipo.id"
+                        >
+                          {{ tipo.tipo }} {{ tipo.id === 2 ? '(Agregar stock)' : '(Reducir stock)' }}
                         </option>
                       </select>
                     </div>
@@ -253,13 +217,17 @@ export default {
     productos: {
       type: Array,
       default: () => []
+    },
+    tipos_movimiento: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
     return {
       form: {
         producto_id: '',
-        tipo: '',
+        tipo_movimiento_id: '',
         cantidad: '',
         descripcion: ''
       },
@@ -276,7 +244,7 @@ export default {
   computed: {
     isFormValid() {
       return this.form.producto_id && 
-             this.form.tipo && 
+             this.form.tipo_movimiento_id && 
              this.form.cantidad > 0 && 
              this.form.descripcion.trim() &&
              !this.cantidadError;
@@ -293,6 +261,9 @@ export default {
       return this.productos.filter(producto => 
         producto.nombre.toLowerCase().includes(query)
       );
+    },
+    tiposMovimiento() {
+      return this.tipos_movimiento;
     }
   },
   methods: {
@@ -323,8 +294,8 @@ export default {
         return;
       }
 
-      // Validar stock para salidas
-      if (this.form.tipo === 'salida' && this.selectedProductStock !== null) {
+      // Validar stock para salidas (ID 1)
+      if (this.form.tipo_movimiento_id === 1 && this.selectedProductStock !== null) {
         if (this.form.cantidad > this.selectedProductStock) {
           this.cantidadError = `No hay suficiente stock. Disponible: ${this.selectedProductStock}`;
         }
@@ -357,12 +328,6 @@ export default {
         console.error('Error al obtener stock:', error);
         this.selectedProductStock = null;
       }
-    },
-
-    // Método para obtener el nombre del producto
-    getProductName(productoId) {
-      const producto = this.productos.find(p => p.id == productoId);
-      return producto ? producto.nombre : 'Producto desconocido';
     },
 
     toggleDropdown() {
@@ -407,7 +372,7 @@ export default {
           },
           body: JSON.stringify({
             producto_id: this.form.producto_id,
-            tipo: this.form.tipo,
+            tipo_movimiento_id: this.form.tipo_movimiento_id,
             cantidad: this.form.cantidad,
             descripcion: this.form.descripcion
           })
@@ -452,13 +417,12 @@ export default {
     resetForm() {
       this.form = {
         producto_id: '',
-        tipo: '',
+        tipo_movimiento_id: '',
         cantidad: '',
         descripcion: ''
       };
       this.selectedProductStock = null;
       this.cantidadError = '';
-      
       this.cantidadTouched = false;
       this.searchQuery = '';
     }
@@ -473,7 +437,7 @@ export default {
   },
 
   watch: {
-    'form.tipo'() {
+    'form.tipo_movimiento_id'() {
       this.validateCantidad();
     }
   }
@@ -481,7 +445,6 @@ export default {
 </script>
 
 <style scoped>
-
 .card {
   border-radius: 12px;
   background-color: rgba(248, 249, 250, 0.4) !important;
@@ -544,7 +507,6 @@ export default {
   font-weight: 600;
 }
 
-
 .card-body {
   animation: fadeInUp 0.6s ease-out;
 }
@@ -560,13 +522,11 @@ export default {
   }
 }
 
-
 .form-control:focus,
 .form-select:focus {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(25, 135, 84, 0.15) !important;
 }
-
 
 .form-control:disabled,
 .form-select:disabled {
