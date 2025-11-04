@@ -110,4 +110,46 @@ class PagosEmpleadoController extends Controller
             'id' => $id
         ], 201);
     }
+
+     public function update(Request $request, $id)
+    {
+        $pago = DB::table('pagos_empleados')->where('id', $id)->first();
+
+        if (!$pago) {
+            return response()->json(['error' => 'Pago no encontrado.'], 404);
+        }
+
+        $rules = [
+            'salario_base'       => ['sometimes', 'numeric', 'min:0'],
+            'bonificacion_ley'   => ['sometimes', 'numeric', 'min:0'],
+            'bonificacion_extra' => ['sometimes', 'numeric', 'min:0'],
+            'descuento_igss'     => ['sometimes', 'numeric', 'min:0'],
+            'descuentos_varios'  => ['sometimes', 'numeric', 'min:0'],
+            'tipo_estado_id'     => ['sometimes', 'exists:tipo_estados,id'],
+        ];
+
+        $data = $request->validate($rules);
+
+        if (empty($data)) {
+            return response()->json(['error' => 'No hay cambios que aplicar.'], 422);
+        }
+
+        $merged = array_merge((array)$pago, $data);
+
+        $data['total'] =
+            ($merged['salario_base'] ?? 0) +
+            ($merged['bonificacion_ley'] ?? 0) +
+            ($merged['bonificacion_extra'] ?? 0) -
+            ($merged['descuento_igss'] ?? 0) -
+            ($merged['descuentos_varios'] ?? 0);
+
+        $data['updated_at'] = now();
+
+        DB::table('pagos_empleados')->where('id', $id)->update($data);
+
+        return response()->json([
+            'message' => 'Pago actualizado correctamente',
+            'id' => $id
+        ]);
+    }
 }
