@@ -22,8 +22,11 @@ class PagosEstudianteController extends Controller
 
         // Si es admin (1) o secretaria (2), mostrar vista de administración
         if ($rolId === 1 || $rolId === 2) {
+            // Obtener los tipos de estado para el filtro
+            $tiposEstado = TipoEstado::select('id', 'tipo')->orderBy('tipo')->get();
+
             // Obtener todos los pagos con las relaciones necesarias
-            $pagos = EstudiantePago::with(['estudiante.usuario'])
+            $pagos = EstudiantePago::with(['estudiante.usuario', 'tipoEstado'])
                 ->whereNotNull('comprobante')
                 ->orderByDesc('created_at')
                 ->get()
@@ -40,12 +43,15 @@ class PagosEstudianteController extends Controller
                         'periodo_inicio' => $pago->periodo_inicio->format('Y-m-d'),
                         'periodo_fin' => $pago->periodo_fin->format('Y-m-d'),
                         'fecha_registro' => $usuario->fecha_registro ?? ($usuario ? $usuario->created_at->format('Y-m-d') : 'N/A'),
-                        'comprobante' => $pago->comprobante ?? null
+                        'comprobante' => $pago->comprobante ?? null,
+                        'tipo_estado_id' => $pago->tipo_estado_id,
+                        'tipo_estado_nombre' => $pago->tipoEstado->tipo ?? 'N/A'
                     ];
                 });
 
             $params = [
-                'pagos' => $pagos
+                'pagos' => $pagos,
+                'tipos_estado' => $tiposEstado
             ];
 
             return view('component', [
@@ -233,7 +239,7 @@ class PagosEstudianteController extends Controller
 
             $nuevoEstado = (int) $data['tipo_estado_id'];
 
-            // Si “aprueban” con el estado intermedio (Procesado), lo forzamos a Pagado
+            // Si "aprueban" con el estado intermedio (Procesado), lo forzamos a Pagado
             if ($nuevoEstado === (int) $idEnProceso) {
                 $nuevoEstado = (int) $idCompletado;
             }
@@ -305,7 +311,7 @@ class PagosEstudianteController extends Controller
                 ]);
             }
 
-            // “Soft delete”: marcar como Cancelado + registrar aprobador y fecha
+            // "Soft delete": marcar como Cancelado + registrar aprobador y fecha
             $pago->tipo_estado_id = (int)$idCancelado;
             $pago->aprobado_id    = null;
             $pago->aprobado_en    = null;
