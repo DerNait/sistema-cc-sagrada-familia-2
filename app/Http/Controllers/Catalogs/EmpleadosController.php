@@ -40,9 +40,8 @@ class EmpleadosController extends CrudControllerBase
             ->type('numeric')
             ->rules(['required','numeric','min:0']);
 
-        $this->column('created_at')
+        $this->column('creado_en')
             ->label('Creado en')
-            ->type('datetime')
             ->readonly();
 
         $this->syncAbilities('admin.empleados');
