@@ -26,6 +26,9 @@ class NavigationSeeder extends Seeder
             new NavModule('Estudiante','pagos.estudiante',400,'fas fa-credit-card', 'pagos', array_merge(NavModule::READ, NavModule::CREATE)),
             new NavModule('Empleado','pagos.empleado',400,'fas fa-credit-card', 'pagos', array_merge(NavModule::READ, NavModule::CREATE)),
 
+            new NavModule('Registro', 'inventario.registro', 100, 'fas fa-clipboard-list', 'inventario', array_merge(NavModule::CREATE, NavModule::READ)),
+            new NavModule('Historial', 'inventario.historial', 200, 'fas fa-history', 'inventario', NavModule::READ),
+
             new NavModule('Usuarios', 'admin.usuarios', 100, 'fas fa-user-shield', 'admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
             new NavModule('Roles', 'admin.roles', 200, 'fas fa-user-tag', 'admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),
             new NavModule('Empleados','admin.empleados', 300,'fas fa-id-badge','admin', array_merge(NavModule::CRUD, NavModule::EXPORT)),

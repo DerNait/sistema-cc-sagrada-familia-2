@@ -71,13 +71,16 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
     });
 
     // ----- INVENTARIO -----
-    Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
-    Route::post('/inventario', [InventarioController::class, 'store'])->name('inventario.store');
-    Route::get('/inventario/stock/{id}', [InventarioController::class, 'getProductoStock'])->name('inventario.stock');
+    Route::prefix('inventario')->name('inventario.')->group(function () {
+        Route::get('/registro', [InventarioController::class, 'index'])->name('registro.index');
+        Route::post('/registro', [InventarioController::class, 'store'])->name('registro.store');
+        Route::get('/registro/stock/{id}', [InventarioController::class, 'getProductoStock'])->name('stock');
 
-    Route::get('/historial', [InventarioHistorialController::class, 'index'])->name('inventario.historial');
+        Route::get('/historial', [InventarioHistorialController::class, 'index'])->name('historial.index');
+    });
 
-    Route::get('/historial', [InventarioHistorialController::class, 'index'])->name('inventario.historial');
+
+
 
     // ----- PERMISOS DE ROLES -----
     Route::post('/admin/roles/{role}/permisos', [RoleModulePermissionController::class, 'update'])->name('roles.permisos.update');
