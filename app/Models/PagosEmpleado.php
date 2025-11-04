@@ -4,56 +4,145 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Carbon\Carbon;
 
-class PagosEmpleado extends Model
+class EstudiantePago extends Model
 {
-    protected $table = 'pagos_empleados';
+    protected $table = 'estudiante_pagos';
 
-    // Si no usas fillable, al menos usa guarded vacío para asignación masiva controlada en controladores/requests
-    protected $guarded = [];
-
-    // Si prefieres explícito:
-    // protected $fillable = [
-    //     'empleado_id','nombre','fecha_ingreso',
-    //     'periodo_mes','periodo_anio','tipo_estado_id',
-    //     'salario_base','bonificacion_ley','bonificacion_extra',
-    //     'descuento_igss','descuentos_varios','total',
-    // ];
+    protected $guarded = ['id'];
 
     protected $casts = [
-        'fecha_ingreso'    => 'date',
-        'salario_base'     => 'decimal:2',
-        'bonificacion_ley' => 'decimal:2',
-        'bonificacion_extra'=> 'decimal:2',
-        'descuento_igss'   => 'decimal:2',
-        'descuentos_varios'=> 'decimal:2',
-        'total'            => 'decimal:2',
-        'periodo_mes'      => 'integer',
-        'periodo_anio'     => 'integer',
+        'periodo_inicio' => 'date',
+        'periodo_fin'    => 'date',
+        'aprobado_en'    => 'datetime',
+        'created_at'     => 'datetime',
+        'updated_at'     => 'datetime',
     ];
 
-    public $timestamps = true;
+    // Para exponer ya formateado en JSON / arrays
+    protected $appends = ['periodo_label', 'periodo_rango'];
 
-    // ─── Relaciones ─────────────────────────────────────────────────────────────
-    public function empleado(): BelongsTo
+    // Si quieres ocultar las fechas crudas en las respuestas JSON, descomenta:
+    // protected $hidden  = ['periodo_inicio', 'periodo_fin'];
+
+    /* ==========================
+     |  Relaciones
+     ========================== */
+    public function estudiante(): BelongsTo
     {
-        return $this->belongsTo(Empleado::class, 'empleado_id');
+        return $this->belongsTo(Estudiante::class);
+    }
+
+    public function gradoPrecio(): BelongsTo
+    {
+        return $this->belongsTo(GradoPrecio::class);
+    }
+
+    public function tipoPago(): BelongsTo
+    {
+        return $this->belongsTo(TipoPago::class);
     }
 
     public function tipoEstado(): BelongsTo
     {
-        return $this->belongsTo(TipoEstado::class, 'tipo_estado_id');
+        return $this->belongsTo(TipoEstado::class);
     }
 
-    public function ajustes(): HasMany
+    /* ==========================
+     |  Scopes
+     ========================== */
+    public function scopeDelEstudiante($q, int $estudianteId)
     {
-        return $this->hasMany(AjusteSalarial::class, 'pago_empleado_id');
+        return $q->where('estudiante_id', $estudianteId);
     }
 
-    // ─── Scopes útiles (opcional) ──────────────────────────────────────────────
-    public function scopeForPeriod($q, int $mes, int $anio)
+    /* ==========================
+     |  Accessors / Helpers
+     ========================== */
+
+    // ¿Está aprobado?
+    public function getEstaAprobadoAttribute(): bool
     {
-        return $q->where('periodo_mes', $mes)->where('periodo_anio', $anio);
+        return !is_null($this->aprobado_en);
+    }
+
+    // “noviembre 2025” tomando periodo_inicio
+    public function getPeriodoLabelAttribute(): string
+    {
+        if (!$this->periodo_inicio) return '';
+        return Carbon::parse($this->periodo_inicio)
+            ->locale('es')
+            ->translatedFormat('F Y');
+    }
+
+    // “noviembre 2025 – enero 2026” si abarca varios meses; si es 1 mes, muestra solo uno
+    public function getPeriodoRangoAttribute(): string
+    {
+        if (!$this->periodo_inicio) return '';
+        if (!$this->periodo_fin) return $this->periodo_label;
+
+        $ini = Carbon::parse($this->periodo_inicio)->locale('es')->translatedFormat('F Y');
+        $fin = Carbon::parse($this->periodo_fin)->locale('es')->translatedFormat('F Y');
+
+        return $ini === $fin ? $ini : ($ini.' – '.$fin);
+    }
+
+    /* ==========================
+     |  Lógica de estado actual
+     ========================== */
+    public static function estadoActual(int $estudianteId, ?Carbon $hoy = null, ?Carbon $fechaAlta = null): array
+    {
+        $hoy = $hoy ?? Carbon::today();
+
+        $actuales = self::delEstudiante($estudianteId)
+            ->whereDate('periodo_fin', '>=', $hoy->toDateString())
+            ->get();
+
+        $tienePendienteExtra = self::delEstudiante($estudianteId)
+            ->whereDate('periodo_fin', '>=', $hoy->toDateString())
+            ->whereNull('aprobado_en')
+            ->exists();
+
+        if ($actuales->isNotEmpty()) {
+            $aprobado = $actuales->filter->estaAprobado->sortByDesc('periodo_fin')->first();
+            if ($aprobado) {
+                return [
+                    'estado'                   => 'vigente',
+                    'mensaje'                  => 'Vigente hasta el '.$aprobado->periodo_fin->isoFormat('D [de] MMMM'),
+                    'pendiente_extra'          => $tienePendienteExtra,
+                    'pendiente_extra_mensaje'  => $tienePendienteExtra ? 'Tienes un pago pendiente de revisión' : null,
+                ];
+            }
+
+            return [
+                'estado'                   => 'pendiente',
+                'mensaje'                  => 'Pendiente de revisión',
+                'pendiente_extra'          => false,
+                'pendiente_extra_mensaje'  => null,
+            ];
+        }
+
+        $ultimoPago = self::delEstudiante($estudianteId)
+            ->whereNotNull('periodo_fin')
+            ->orderByDesc('periodo_fin')
+            ->first();
+
+        if ($ultimoPago) {
+            return [
+                'estado'                   => 'vencido',
+                'mensaje'                  => 'Vencido desde el '.$ultimoPago->periodo_fin->isoFormat('D [de] MMMM'),
+                'pendiente_extra'          => $tienePendienteExtra,
+                'pendiente_extra_mensaje'  => $tienePendienteExtra ? 'Tienes un pago pendiente de revisión' : null,
+            ];
+        }
+
+        $desde = ($fechaAlta ?? Carbon::today())->isoFormat('D [de] MMMM');
+        return [
+            'estado'                   => 'vencido',
+            'mensaje'                  => 'Vencido desde el '.$desde,
+            'pendiente_extra'          => $tienePendienteExtra,
+            'pendiente_extra_mensaje'  => $tienePendienteExtra ? 'Tienes un pago pendiente de revisión' : null,
+        ];
     }
 }
