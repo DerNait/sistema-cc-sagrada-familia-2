@@ -114,9 +114,9 @@ import { ref, reactive, computed, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-import SortableTable from '@/components/SortableTable.vue';
-import Filtros from '@/components/Filtros.vue';
-import Form from '@/components/crud/Form.vue';
+import SortableTable from '../components/SortableTable.vue';
+import Filtros from '../components/Filtros.vue';
+import Form from '../components/Crud/Form.vue';
 
 const props = defineProps({
   rows: { type: Array, default: () => [] },              // ← NUEVO: viene ya mezclado (empleados + pagos del periodo)
