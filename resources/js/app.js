@@ -25,12 +25,12 @@ import Form from './components/Crud/Form.vue';
 import RolesPermisos from './pages/RolesPermisos.vue';
 
 // Perfil
-import Perfil from './Pages/Perfil.vue';
+import Perfil from './pages/Perfil.vue';
 
 // Pagos
-import EmpleadoPago from './Pages/EmpleadoPago.vue';
-import EstudiantePago from './Pages/EstudiantePago.vue';
+import EstudiantePago from './pages/EstudiantePago.vue';
 import AdminPago from './pages/AdminPago.vue';
+import EmpleadoPago from './pages/EmpleadoPago.vue';
 
 const app = createApp({});
 
