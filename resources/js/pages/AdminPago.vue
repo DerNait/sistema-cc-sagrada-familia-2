@@ -4,26 +4,55 @@
       <h4 class="fw-semibold">Pagos</h4>
     </div>
 
-    <div class="filters-container d-flex px-3 py-4 d-flex justify-content-between align-items-center">
-      <div id="filters" class="d-flex flex-wrap gap-2">
+    <div class="filters-container px-3 py-4">
+      <div id="filters" class="d-flex flex-wrap justify-content-center align-items-end gap-4">
+        <!-- Filtro por estudiante -->
         <div>
+          <p class="fw-bold mb-1 fs-6 ms-1">Estudiante</p>
           <Filtros
-            :options="filtroOptions"
+            v-model="filtros.estudiante_id"
+            :options="estudianteOptions"
             value-key="id"
-            label-key="nombre"
-            placeholder="Rol"
+            label-key="nombre_completo"
+            placeholder="Buscar estudiante…"
           />
-       </div>
+        </div>
 
-        <!-- <div v-if="hasActiveFilters" class="align-self-end">
-          <button class="btn btn-outline-secondary" @click="clearFilters">
+        <!-- Filtro por tipo de estado -->
+        <div>
+          <p class="fw-bold mb-1 fs-6 ms-1">Tipo</p>
+          <Filtros
+            v-model="filtros.tipo_estado_id"
+            :options="tipoEstadoOptions"
+            value-key="id"
+            label-key="tipo"
+            placeholder="Estado del pago…"
+          />
+        </div>
+
+        <!-- Filtro de fecha desde -->
+        <div>
+          <p class="fw-bold mb-1 fs-6 ms-1">Desde</p>
+          <DateFiltro v-model="filtros.fecha_inicio" placeholder="dd/mm/aaaa" />
+        </div>
+
+        <!-- Filtro de fecha hasta -->
+        <div>
+          <p class="fw-bold mb-1 fs-6 ms-1">Hasta</p>
+          <DateFiltro v-model="filtros.fecha_fin" placeholder="dd/mm/aaaa" />
+        </div>
+
+        <!-- Botón limpiar filtros -->
+        <div v-if="hasActiveFilters">
+          <button 
+            class="btn btn-outline-secondary" 
+            @click="limpiarFiltros"
+            title="Limpiar todos los filtros"
+          >
+            <i class="fa-solid fa-filter-circle-xmark me-1"></i>
             Limpiar
           </button>
-        </div> -->
-      </div>
-  
-      <div style="max-width: 270px; flex:1">
-        <SearchBar v-model="searchQuery" />
+        </div>
       </div>
     </div>
 
@@ -137,11 +166,15 @@
 import { ref, computed } from 'vue'
 import SortableTable from '@/components/SortableTable.vue'
 import Filtros from '@/components/Filtros.vue'
-import SearchBar from '@/components/SearchBar.vue'
+import DateFiltro from '@/components/DateFiltro.vue'
 
 // Recibir los datos del controller Laravel
 const props = defineProps({
   pagos: {
+    type: Array,
+    default: () => []
+  },
+  tipos_estado: {
     type: Array,
     default: () => []
   }
@@ -149,7 +182,6 @@ const props = defineProps({
 
 // Estado reactivo
 const selectedFilter = ref('estudiante')
-const searchQuery = ref('')
 const isProcessing = ref(false)
 
 // Variables para el modal del comprobante
@@ -159,6 +191,57 @@ const imageError = ref(false)
 
 // Usar los datos que vienen del controller
 const paymentsData = ref(props.pagos)
+
+// ESTADO DE FILTROS (con tipo_estado_id)
+const filtros = ref({
+  estudiante_id: null,
+  tipo_estado_id: null,
+  fecha_inicio: '',
+  fecha_fin: ''
+})
+
+// OPCIONES para el filtro de estudiantes
+const estudianteOptions = computed(() => {
+  // Extraer estudiantes únicos de los pagos
+  const estudiantesUnicos = new Map()
+  
+  paymentsData.value.forEach(pago => {
+    const id = pago.id // o el campo que uses para identificar al estudiante
+    const nombreCompleto = `${pago.nombre} ${pago.apellido}`.trim()
+    
+    if (!estudiantesUnicos.has(id)) {
+      estudiantesUnicos.set(id, {
+        id: id,
+        nombre_completo: nombreCompleto
+      })
+    }
+  })
+  
+  return Array.from(estudiantesUnicos.values()).sort((a, b) => 
+    a.nombre_completo.localeCompare(b.nombre_completo)
+  )
+})
+
+// OPCIONES para el filtro de tipos de estado
+const tipoEstadoOptions = computed(() => {
+  return props.tipos_estado || []
+})
+
+// COMPUTED para detectar filtros activos (con tipo_estado_id)
+const hasActiveFilters = computed(() => {
+  return filtros.value.estudiante_id !== null || 
+         filtros.value.tipo_estado_id !== null ||
+         filtros.value.fecha_inicio !== '' || 
+         filtros.value.fecha_fin !== ''
+})
+
+// FUNCIÓN para limpiar filtros (con tipo_estado_id)
+function limpiarFiltros() {
+  filtros.value.estudiante_id = null
+  filtros.value.tipo_estado_id = null
+  filtros.value.fecha_inicio = ''
+  filtros.value.fecha_fin = ''
+}
 
 // Obtener CSRF token
 const getCsrfToken = () => {
@@ -233,18 +316,33 @@ const filtroOptions = [
   { id: 'admin', nombre: 'Administrador' }
 ]
 
-// Computed para filtrar los datos
+// LÓGICA DE FILTRADO SIMPLIFICADA (sin búsqueda por texto)
 const filteredRows = computed(() => {
   let filtered = paymentsData.value
 
-  // Filtrar por búsqueda
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(row => 
-      row.nombre.toLowerCase().includes(query) ||
-      row.apellido.toLowerCase().includes(query) ||
-      row.correo.toLowerCase().includes(query)
-    )
+  // 1) Filtro por estudiante
+  if (filtros.value.estudiante_id !== null) {
+    filtered = filtered.filter(row => row.id === filtros.value.estudiante_id)
+  }
+
+  // 2) Filtro por tipo de estado
+  if (filtros.value.tipo_estado_id !== null) {
+    filtered = filtered.filter(row => row.tipo_estado_id === filtros.value.tipo_estado_id)
+  }
+
+  // 3) Filtro por rango de fechas
+  if (filtros.value.fecha_inicio) {
+    filtered = filtered.filter(row => {
+      const fechaPago = row.fecha_registro ? String(row.fecha_registro).slice(0, 10) : null
+      return fechaPago && fechaPago >= filtros.value.fecha_inicio
+    })
+  }
+
+  if (filtros.value.fecha_fin) {
+    filtered = filtered.filter(row => {
+      const fechaPago = row.fecha_registro ? String(row.fecha_registro).slice(0, 10) : null
+      return fechaPago && fechaPago <= filtros.value.fecha_fin
+    })
   }
 
   return filtered
@@ -353,51 +451,6 @@ const approvePayment = async () => {
     }
   }
 }
-
-/* const rejectPayment = async () => {
-  if (!selectedPayment.value || isProcessing.value) return
-  
-  if (confirm(`¿Estás seguro de rechazar el pago de ${selectedPayment.value.nombre} ${selectedPayment.value.apellido}?`)) {
-    isProcessing.value = true
-    
-    try {
-      const formData = new FormData()
-      formData.append('_method', 'PUT')
-      formData.append('tipo_estado_id', '3') // 3 = Cancelado (rechazado)
-      
-      const response = await fetch(`/admin/pagos/${selectedPayment.value.id}`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-CSRF-TOKEN': getCsrfToken()
-        },
-        body: formData
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Error response:', errorText)
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-
-      if (data.success) {
-        alert('Pago rechazado correctamente')
-        window.location.reload()
-      } else {
-        alert('Error al rechazar el pago: ' + (data.message || 'Error desconocido'))
-      }
-    } catch (error) {
-      console.error('Error completo:', error)
-      alert('Error de conexión al rechazar el pago: ' + error.message)
-    } finally {
-      isProcessing.value = false
-      closeComprobanteModal()
-    }
-  }
-} */
 
 const editPayment = (row) => {
   console.log('Editar pago:', row)
