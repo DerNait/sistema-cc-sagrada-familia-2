@@ -63,11 +63,16 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
 
     // ----- PAGOS -----
     Route::prefix('pagos')->name('pagos.')->group(function () {
-        Route::get('/pagos/estudiante', [PagosEstudianteController::class, 'index'])->name('estudiante.index');
+        // Estudiante (igual)
+        Route::get('/pagos/estudiante',  [PagosEstudianteController::class, 'index'])->name('estudiante.index');
         Route::post('/pagos/estudiante', [PagosEstudianteController::class, 'store'])->name('estudiante.store');
-    
-        Route::get('/empleado', [PagosEmpleadoController::class, 'index'])->name('empleado.index');
-        Route::post('/empleado', [PagosEmpleadoController::class, 'store'])->name('empleado.store');
+
+        // Empleado (nuevo flujo)
+        Route::get('/empleado',          [PagosEmpleadoController::class, 'index'])->name('empleado.index');   // SSR con ?mes&anio
+        Route::post('/empleado',         [PagosEmpleadoController::class, 'store'])->name('empleado.store');   // crear/aprobar (upsert → Completado)
+        Route::get('/empleado/{id}',     [PagosEmpleadoController::class, 'show'])->name('empleado.show');     // ver detalle
+        Route::put('/empleado/{id}',     [PagosEmpleadoController::class, 'update'])->name('empleado.update'); // aprobar/revertir/editar
+        // NO usar delete: cancelar ahora es PUT → Pendiente
     });
 
     // ----- INVENTARIO -----
@@ -78,9 +83,6 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
 
         Route::get('/historial', [InventarioHistorialController::class, 'index'])->name('historial.index');
     });
-
-
-
 
     // ----- PERMISOS DE ROLES -----
     Route::post('/admin/roles/{role}/permisos', [RoleModulePermissionController::class, 'update'])->name('roles.permisos.update');
