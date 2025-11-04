@@ -22,4 +22,14 @@ class Movimiento extends Model
     {
         return $this->belongsTo(Producto::class);
     }
+
+    public function tipoMovimiento()
+    {
+        return $this->belongsTo(TipoMovimiento::class, 'tipo_movimiento_id');
+    }
+
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'user_id'); // ajusta si tu FK se llama distinto
+    }
 }
