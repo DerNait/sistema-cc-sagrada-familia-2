@@ -140,4 +140,73 @@ class PagosEmpleadoController extends Controller
         ]);
     }
 
+    /**
+     * Actualizar el estado del pago de empleado (Pagado, Pendiente, Cancelado, etc.)
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            $pago = PagosEmpleado::findOrFail($id);
+
+            // Resolver IDs por nombre (evitar “números mágicos”)
+            $idPendiente  = TipoEstado::where('tipo', 'Pendiente')->value('id');
+            $idCompletado = TipoEstado::where('tipo', 'Completado')->value('id');
+            $idCancelado  = TipoEstado::where('tipo', 'Cancelado')->value('id');
+            $idReembolsado= TipoEstado::where('tipo', 'Reembolsado')->value('id');
+            $idEnProceso  = TipoEstado::where('tipo', 'En proceso')->value('id');
+
+            $data = $request->validate([
+                'tipo_estado_id' => [
+                    'required',
+                    'integer',
+                    Rule::in([$idPendiente, $idCompletado, $idCancelado, $idReembolsado, $idEnProceso]),
+                ],
+            ]);
+
+            $nuevoEstado = (int) $data['tipo_estado_id'];
+
+            // Si viene “En proceso” → lo forzamos a Completado
+            if ($nuevoEstado === (int)$idEnProceso) {
+                $nuevoEstado = (int)$idCompletado;
+            }
+
+            // Evita re-aprobar o re-anular si ya está cerrado
+            if (in_array((int)$pago->tipo_estado_id, [(int)$idCompletado, (int)$idCancelado], true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El pago ya fue cerrado (Pagado/Anulado).',
+                ], 422);
+            }
+
+            $pago->tipo_estado_id = $nuevoEstado;
+
+            if (in_array($nuevoEstado, [(int)$idCompletado, (int)$idCancelado], true)) {
+                $pago->aprobado_id = Auth::id();
+                $pago->aprobado_en = now();
+            } else {
+                $pago->aprobado_id = null;
+                $pago->aprobado_en = null;
+            }
+
+            $pago->save();
+
+            $mensaje = match ($nuevoEstado) {
+                (int)$idCompletado => 'Pago aprobado correctamente (Pagado).',
+                (int)$idCancelado  => 'Pago cancelado correctamente.',
+                default             => 'Estado del pago actualizado correctamente.',
+            };
+
+            return response()->json([
+                'success' => true,
+                'message' => $mensaje,
+                'pago'    => $pago,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el pago: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
 }
