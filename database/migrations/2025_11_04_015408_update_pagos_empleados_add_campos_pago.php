@@ -17,17 +17,16 @@ return new class extends Migration
                 ->onDelete('cascade');
 
             // 2) Nuevos campos solicitados
-            $table->string('nombre', 150)->after('empleado_id');
-            $table->date('fecha_ingreso')->after('nombre');
+            $table->date('fecha_ingreso')->nullable()->after('empleado_id');
 
-            $table->decimal('salario_base', 10, 2)->after('fecha_ingreso');
-            $table->decimal('bonificacion_ley', 10, 2)->default(0)->after('salario_base');
-            $table->decimal('bonificacion_extra', 10, 2)->default(0)->after('bonificacion_ley');
-            $table->decimal('descuento_igss', 10, 2)->default(0)->after('bonificacion_extra');
-            $table->decimal('descuentos_varios', 10, 2)->default(0)->after('descuento_igss');
+            $table->decimal('salario_base', 10, 2)->nullable()->after('fecha_ingreso');
+            $table->decimal('bonificacion_ley', 10, 2)->nullable()->default(0)->after('salario_base');
+            $table->decimal('bonificacion_extra', 10, 2)->nullable()->default(0)->after('bonificacion_ley');
+            $table->decimal('descuento_igss', 10, 2)->nullable()->default(0)->after('bonificacion_extra');
+            $table->decimal('descuentos_varios', 10, 2)->nullable()->default(0)->after('descuento_igss');
 
             // Total (si lo vas a setear/calcular en app; si lo quieres generado en DB, mira la nota abajo)
-            $table->decimal('total', 10, 2)->after('descuentos_varios');
+            $table->decimal('total', 10, 2)->nullable()->after('descuentos_varios');
 
             // 3) Quitar columnas viejas si ya no se usarán
             if (Schema::hasColumn('pagos_empleados', 'monto_base')) {
@@ -67,7 +66,6 @@ return new class extends Migration
                 'bonificacion_ley',
                 'salario_base',
                 'fecha_ingreso',
-                'nombre',
             ]);
 
             // Revertir FK a usuarios (como estaba originalmente)
