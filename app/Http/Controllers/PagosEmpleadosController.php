@@ -56,4 +56,58 @@ class PagosEmpleadoController extends Controller
 
         return response()->json($pago);
     }
+
+    public function store(Request $request)
+    {
+        $rules = [
+            'empleado_id'        => ['required', 'exists:empleados,id'],
+            'periodo_mes'        => ['required', 'integer', 'min:1', 'max:12'],
+            'periodo_anio'       => ['required', 'integer', 'min:2000'],
+            'salario_base'       => ['required', 'numeric', 'min:0'],
+            'bonificacion_ley'   => ['nullable', 'numeric', 'min:0'],
+            'bonificacion_extra' => ['nullable', 'numeric', 'min:0'],
+            'descuento_igss'     => ['nullable', 'numeric', 'min:0'],
+            'descuentos_varios'  => ['nullable', 'numeric', 'min:0'],
+            'tipo_estado_id'     => ['sometimes', 'exists:tipo_estados,id'],
+        ];
+
+        $data = $request->validate($rules);
+
+        // Buscar si ya existe el pago para ese empleado y periodo
+        $existing = DB::table('pagos_empleados')
+            ->where('empleado_id', $data['empleado_id'])
+            ->where('periodo_mes', $data['periodo_mes'])
+            ->where('periodo_anio', $data['periodo_anio'])
+            ->first();
+
+        $total = 
+            ($data['salario_base'] ?? 0) +
+            ($data['bonificacion_ley'] ?? 0) +
+            ($data['bonificacion_extra'] ?? 0) -
+            ($data['descuento_igss'] ?? 0) -
+            ($data['descuentos_varios'] ?? 0);
+
+        $data['total'] = $total;
+        $data['tipo_estado_id'] = $data['tipo_estado_id'] ?? 1; // pendiente por defecto
+        $data['updated_at'] = now();
+
+        if ($existing) {
+            DB::table('pagos_empleados')
+                ->where('id', $existing->id)
+                ->update($data);
+
+            return response()->json([
+                'message' => 'Pago actualizado correctamente',
+                'id' => $existing->id
+            ]);
+        }
+
+        $data['created_at'] = now();
+        $id = DB::table('pagos_empleados')->insertGetId($data);
+
+        return response()->json([
+            'message' => 'Pago creado correctamente',
+            'id' => $id
+        ], 201);
+    }
 }
