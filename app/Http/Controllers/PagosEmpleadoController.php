@@ -12,10 +12,38 @@ use Carbon\Carbon;
 
 class PagosEmpleadoController extends Controller
 {
+<<<<<<< HEAD
     /**
      * Mostrar vista de administración de pagos de empleados
      * (para roles Admin / Secretaria)
      */
+=======
+    public function apiIndex()
+    {
+        $tiposEstado = \App\Models\TipoEstado::select('id', 'tipo')->get();
+        $pagos = \App\Models\PagosEmpleado::with(['empleado.user', 'tipoEstado'])
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn($pago) => [
+                'id' => $pago->id,
+                'nombre' => $pago->empleado->user->nombre ?? '',
+                'apellido' => $pago->empleado->user->apellido ?? '',
+                'correo' => $pago->empleado->user->email ?? '',
+                'salario_base' => $pago->salario_base,
+                'total' => $pago->total,
+                'tipo_estado_id' => $pago->tipo_estado_id,
+                'tipo_estado_nombre' => $pago->tipoEstado->tipo ?? 'N/A',
+                'fecha_registro' => $pago->created_at?->format('Y-m-d'),
+            ]);
+
+        return response()->json([
+            'pagos' => $pagos,
+            'tipos_estado' => $tiposEstado,
+        ]);
+    }
+
+
+>>>>>>> 8258e2c (Add Empleado Pago Controller)
     public function index()
     {
         $user = Auth::user();

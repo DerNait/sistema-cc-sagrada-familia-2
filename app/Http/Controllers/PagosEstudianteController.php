@@ -96,6 +96,30 @@ class PagosEstudianteController extends Controller
         }
     }
 
+    public function apiIndex()
+    {
+        $tiposEstado = \App\Models\TipoEstado::select('id', 'tipo')->get();
+        $pagos = \App\Models\EstudiantePago::with(['estudiante.user', 'tipoEstado'])
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn($pago) => [
+                'id' => $pago->id,
+                'nombre' => $pago->estudiante->user->nombre ?? '',
+                'apellido' => $pago->estudiante->user->apellido ?? '',
+                'correo' => $pago->estudiante->user->email ?? '',
+                'monto_pagado' => $pago->monto_total ?? 0,
+                'tipo_estado_id' => $pago->tipo_estado_id,
+                'tipo_estado_nombre' => $pago->tipoEstado->tipo ?? 'N/A',
+                'fecha_registro' => $pago->created_at?->format('Y-m-d'),
+            ]);
+
+        return response()->json([
+            'pagos' => $pagos,
+            'tipos_estado' => $tiposEstado,
+        ]);
+    }
+
+
     public function store(Request $request)
     {
         $data = $request->validate([
