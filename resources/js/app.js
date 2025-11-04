@@ -5,7 +5,6 @@ import './bootstrap';
 import { createApp } from 'vue';
 import InicioSesion from './pages/InicioSesion.vue';
 import Registro from './pages/Registro.vue';
-import Pagos from './pages/Pagos.vue';
 import Inventario from './pages/Inventario.vue';
 import Empleados from './components/Empleados.vue';
 import Planilla from './components/Planilla.vue';
