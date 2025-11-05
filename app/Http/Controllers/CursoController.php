@@ -10,10 +10,8 @@ use App\Models\Seccion;
 use App\Models\SeccionEstudiante;
 use App\Models\EstudianteNota;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use App\Traits\PdfExport;
 use App\Support\Forerunner\Forerunner;
-use Barryvdh\DomPDF\Facade\Pdf;
 class CursoController extends Controller
 {
     use PdfExport;
@@ -631,17 +629,13 @@ public function exportCalificaciones(int $cursoId)
             'actividades' => $actividades,
             'estudiantes' => $estudiantes,
             'notas' => $notas,
-            'isPdf' => true, // Flag para cambiar rutas de imágenes si es necesario
         ];
 
-        // Generar PDF con DomPDF
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('reporte-calificaciones-cursos', $data);
-        
-        // Configuración opcional del PDF
-        $pdf->setPaper('a4', 'landscape'); // Horizontal para que entren todas las columnas
-        
-        // Descargar con nombre dinámico
-        $fileName = 'calificaciones-' . \Str::slug($curso->nombre) . '.pdf';
-        return $pdf->download($fileName);
+        // Si tienes DomPDF instalado:
+        // $pdf = \PDF::loadView('reporte-calificaciones-cursos', $data);
+        // return $pdf->download("calificaciones-{$curso->nombre}.pdf");
+
+        // Mientras tanto, devuelve la vista (para preview):
+        return view('reporte-calificaciones-cursos', $data);
     }
 }
