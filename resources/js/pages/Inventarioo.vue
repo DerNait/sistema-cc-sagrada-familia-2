@@ -372,7 +372,9 @@ export default {
           Swal.fire({
             icon: "success",
             title: "¡Éxito!",
-            text: data.message || "Movimiento registrado correctamente"
+            text: data.message || "Movimiento registrado correctamente",
+            timer: 3000,
+            showConfirmButton: false
           });
           
           // Actualizar stock
@@ -385,7 +387,9 @@ export default {
           Swal.fire({
             icon: "error",
             title: "Oops...",
-            text: data.message || "No se pudo registrar el movimiento"
+            text: data.message || "No se pudo registrar el movimiento",
+            timer: 3000,
+            showConfirmButton: false
           });
         }
       } catch (error) {
@@ -393,7 +397,9 @@ export default {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: "Error de conexión. Intente nuevamente."
+          text: "Error de conexión. Intente nuevamente.",
+          timer: 3000,
+          showConfirmButton: false
         });
         console.error('Error:', error);
       }
