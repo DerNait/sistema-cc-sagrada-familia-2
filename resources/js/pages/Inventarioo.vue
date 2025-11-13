@@ -14,23 +14,6 @@
           </div>
         </div>
 
-        <!-- Mensajes de éxito o error -->
-        <div v-if="message" 
-             class="row mb-4">
-          <div class="col-12">
-            <div :class="messageType === 'success' ? 'alert-success' : 'alert-danger'"
-                 class="alert d-flex align-items-center shadow-sm border-0"
-                 style="border-radius: 15px;">
-              <div class="me-3">
-                <i :class="messageType === 'success' ? 'fas fa-check-circle fs-3' : 'fas fa-exclamation-triangle fs-3'"></i>
-              </div>
-              <div>
-                <span class="fs-5">{{ message }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Formulario en tarjeta elegante -->
         <div class="row justify-content-center">
           <div class="col-lg-10 col-xl-8">
@@ -232,8 +215,6 @@ export default {
         descripcion: ''
       },
       selectedProductStock: null,
-      message: '',
-      messageType: '',
       loading: false,
       cantidadError: '',
       cantidadTouched: false,
@@ -359,7 +340,6 @@ export default {
       if (!this.isFormValid) return;
 
       this.loading = true;
-      this.message = '';
 
       try {
         const response = await fetch('/inventario', {
@@ -387,31 +367,17 @@ export default {
         const data = await response.json();
 
         if (data.success) {
-          this.message = data.message;
-          this.messageType = 'success';
-          
           // Actualizar stock
           await this.getStock();
           
           // Limpiar formulario
           this.resetForm();
-          
-        } else {
-          this.message = data.message;
-          this.messageType = 'error';
         }
       } catch (error) {
-        this.message = 'Error de conexión. Intente nuevamente.';
-        this.messageType = 'error';
         console.error('Error:', error);
       }
 
       this.loading = false;
-      
-      // Limpiar mensaje después de 5 segundos
-      setTimeout(() => {
-        this.message = '';
-      }, 5000);
     },
 
     resetForm() {
