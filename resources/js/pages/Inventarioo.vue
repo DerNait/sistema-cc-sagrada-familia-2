@@ -380,8 +380,21 @@ export default {
           
           // Limpiar formulario
           this.resetForm();
+        } else {
+          // Mostrar alerta de error
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: data.message || "No se pudo registrar el movimiento"
+          });
         }
       } catch (error) {
+        // Mostrar alerta de error de conexión
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Error de conexión. Intente nuevamente."
+        });
         console.error('Error:', error);
       }
 
