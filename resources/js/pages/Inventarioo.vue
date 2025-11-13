@@ -162,9 +162,9 @@
                         <button
                           type="submit"
                           :disabled="loading || !isFormValid"
-                          class="btn btn-lg px-5 py-3 fw-bold shadow-lg"
-                          :class="loading || !isFormValid ? 'btn-secondary' : 'btn-primary'"
-                          style="border-radius: 25px; font-size: 1.1rem; min-width: 200px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border: none;"
+                          class="btn btn-lg px-5 py-3 fw-bold shadow-lg btn-registrar"
+                          :class="loading || !isFormValid ? 'btn-secondary' : 'btn-outline-secondary'"
+                          style="border-radius: 25px; font-size: 1.1rem; min-width: 200px; border: 2px solid #6c757d;"
                         >
                           <i v-if="loading" class="fas fa-spinner fa-spin me-2"></i>
                           <i v-else class="fas fa-save me-2"></i>
@@ -546,6 +546,13 @@ export default {
 
 /* Estilos para el botón Limpiar */
 .btn-limpiar:hover {
+  background-color: #198754 !important;
+  border-color: #198754 !important;
+  color: white !important;
+}
+
+/* Estilos para el botón Registrar */
+.btn-registrar:not(:disabled):hover {
   background-color: #198754 !important;
   border-color: #198754 !important;
   color: white !important;
