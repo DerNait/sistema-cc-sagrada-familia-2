@@ -368,6 +368,13 @@ export default {
         const data = await response.json();
 
         if (data.success) {
+          // Mostrar alerta de éxito
+          Swal.fire({
+            icon: "success",
+            title: "¡Éxito!",
+            text: data.message || "Movimiento registrado correctamente"
+          });
+          
           // Actualizar stock
           await this.getStock();
           
