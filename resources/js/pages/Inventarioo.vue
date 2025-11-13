@@ -174,7 +174,7 @@
                         <button
                           type="button"
                           @click="resetForm"
-                          class="btn btn-outline-secondary btn-lg px-5 py-3 fw-bold shadow-lg"
+                          class="btn btn-outline-secondary btn-lg px-5 py-3 fw-bold shadow-lg btn-limpiar"
                           style="border-radius: 25px; font-size: 1.1rem; min-width: 200px; border: 2px solid #6c757d;"
                         >
                           <i class="fas fa-broom me-2"></i>
@@ -542,5 +542,12 @@ export default {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Estilos para el botón Limpiar */
+.btn-limpiar:hover {
+  background-color: #198754 !important;
+  border-color: #198754 !important;
+  color: white !important;
 }
 </style>
