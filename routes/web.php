@@ -78,8 +78,8 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
     // ----- INVENTARIO -----
     Route::prefix('inventario')->name('inventario.')->group(function () {
         Route::get('/registro', [InventarioController::class, 'index'])->name('registro.index');
-        Route::post('/registro', [InventarioController::class, 'store'])->name('registro.store');
-        Route::get('/registro/stock/{id}', [InventarioController::class, 'getProductoStock'])->name('stock');
+        Route::post('/', [InventarioController::class, 'store'])->name('store');
+        Route::get('/stock/{id}', [InventarioController::class, 'getProductoStock'])->name('stock');
 
         Route::get('/historial', [InventarioHistorialController::class, 'index'])->name('historial.index');
     });
