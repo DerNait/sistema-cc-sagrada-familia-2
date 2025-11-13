@@ -162,8 +162,7 @@
                         <button
                           type="submit"
                           :disabled="loading || !isFormValid"
-                          class="btn btn-lg px-5 py-3 fw-bold shadow-lg btn-registrar"
-                          :class="loading || !isFormValid ? 'btn-secondary' : 'btn-outline-secondary'"
+                          class="btn btn-outline-secondary btn-lg px-5 py-3 fw-bold shadow-lg btn-registrar"
                           style="border-radius: 25px; font-size: 1.1rem; min-width: 200px; border: 2px solid #6c757d;"
                         >
                           <i v-if="loading" class="fas fa-spinner fa-spin me-2"></i>
