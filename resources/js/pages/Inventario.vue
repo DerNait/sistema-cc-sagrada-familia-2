@@ -21,7 +21,7 @@
         <div class="row g-3">
           <!-- Filtro por ID -->
           <div class="col-md-4">
-            <label for="filter-id" class="form-label">ID del Producto</label>
+            <label for="filter-id" class="form-label fs-5">ID del Producto</label>
             <input
               type="number"
               id="filter-id"
@@ -36,7 +36,7 @@
 
           <!-- Filtro por Nombre -->
           <div class="col-md-4">
-            <label for="filter-nombre" class="form-label">Nombre del Producto</label>
+            <label for="filter-nombre" class="form-label fs-5">Nombre del Producto</label>
             <input
               type="text"
               id="filter-nombre"
@@ -48,7 +48,7 @@
 
           <!-- Filtro por Tipo -->
           <div class="col-md-4">
-            <label for="filter-tipo" class="form-label">Tipo de Producto</label>
+            <label for="filter-tipo" class="form-label fs-5">Tipo de Producto</label>
             <select
               id="filter-tipo"
               v-model="filters.tipo_producto_id"
@@ -89,7 +89,7 @@
 
           <!-- Filtro por Fecha -->
           <div class="col-md-6">
-            <label for="filter-fecha" class="form-label">Fecha de Ingreso</label>
+            <label for="filter-fecha" class="form-label fs-5">Fecha de Ingreso</label>
             <input
               type="date"
               id="filter-fecha"
