@@ -15,7 +15,7 @@
 
                 <!-- USUARIO -->
                 <div class="mb-3 text-start w-100" style="max-width: 400px;">
-                    <label for="email" class="form-label">Usuario</label>
+                    <label for="email" class="form-label fs-5">Usuario</label>
                     <input type="email"
                         id="email"
                         name="email"
@@ -32,7 +32,7 @@
 
                 <!-- CONTRASEÑA -->
                 <div class="mb-4 text-start w-100" style="max-width: 400px;">
-                    <label for="password" class="form-label">Contraseña</label>
+                    <label for="password" class="form-label fs-5">Contraseña</label>
                     <input type="password"
                         id="password"
                         name="password"
