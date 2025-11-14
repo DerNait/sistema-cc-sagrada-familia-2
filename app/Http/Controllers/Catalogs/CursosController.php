@@ -6,6 +6,7 @@ use App\Http\Controllers\Crud\CrudControllerBase;
 use App\Models\Curso;
 use App\Models\Grado;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class CursosController extends CrudControllerBase
 {
@@ -101,5 +102,41 @@ class CursosController extends CrudControllerBase
             ->readonly();
 
         $this->syncAbilities('admin.cursos');
+    }
+
+    /**
+     * Validación personalizada antes de guardar
+     */
+    protected function beforeStore(Request $request, $data)
+    {
+        $this->validateUniqueNombre($request->input('nombre'));
+        return $data;
+    }
+
+    /**
+     * Validación personalizada antes de actualizar
+     */
+    protected function beforeUpdate(Request $request, $item, $data)
+    {
+        $this->validateUniqueNombre($request->input('nombre'), $item->id);
+        return $data;
+    }
+
+    /**
+     * Valida que el nombre del curso sea único (case-insensitive)
+     */
+    private function validateUniqueNombre($nombre, $ignoreId = null)
+    {
+        $query = Curso::whereRaw('LOWER(nombre) = ?', [strtolower($nombre)]);
+        
+        if ($ignoreId) {
+            $query->where('id', '!=', $ignoreId);
+        }
+        
+        if ($query->exists()) {
+            throw ValidationException::withMessages([
+                'nombre' => ['Ya existe un curso con este nombre. Por favor, elige un nombre diferente.']
+            ]);
+        }
     }
 }
