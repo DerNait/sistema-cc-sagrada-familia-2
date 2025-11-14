@@ -15,7 +15,7 @@
 
                 <!-- NOMBRE -->
                 <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="name" class="form-label">Nombre</label>
+                    <label for="name" class="form-label fs-5">Nombre</label>
                     <input type="text"
                         id="name"
                         name="name"
@@ -31,7 +31,7 @@
 
                 <!-- APELLIDO -->
                 <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="apellido" class="form-label">Apellido</label>
+                    <label for="apellido" class="form-label fs-5">Apellido</label>
                     <input type="text"
                         id="apellido"
                         name="apellido"
@@ -46,7 +46,7 @@
 
                 <!-- CORREO -->
                 <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="email" class="form-label">Correo</label>
+                    <label for="email" class="form-label fs-5">Correo</label>
                     <input type="email"
                         id="email"
                         name="email"
@@ -61,7 +61,7 @@
 
                 <!-- CONTRASEÑA -->
                 <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="password" class="form-label">Contraseña</label>
+                    <label for="password" class="form-label fs-5">Contraseña</label>
                     <input type="password"
                         id="password"
                         name="password"
@@ -75,7 +75,7 @@
 
                 <!-- CONFIRMAR CONTRASEÑA -->
                 <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="password_confirmation" class="form-label">Confirmar Contraseña</label>
+                    <label for="password_confirmation" class="form-label fs-5">Confirmar Contraseña</label>
                     <input type="password"
                         id="password_confirmation"
                         name="password_confirmation"
@@ -86,7 +86,7 @@
 
                 <!-- FECHA DE NACIMIENTO -->
                 <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="fecha_nacimiento" class="form-label">Fecha de nacimiento</label>
+                    <label for="fecha_nacimiento" class="form-label fs-5">Fecha de nacimiento</label>
                     <input type="date"
                         id="fecha_nacimiento"
                         name="fecha_nacimiento"
@@ -100,7 +100,7 @@
 
                 <!-- ROL -->
                 <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="role" class="form-label">Rol</label>
+                    <label for="role" class="form-label fs-5">Rol</label>
                     <select name="role" id="role"
                         class="form-control border-success @error('role') is-invalid @enderror"
                         required>
@@ -122,7 +122,7 @@
                 <div id="camposEmpleado" style="display: none; width: 100%; max-width: 450px;">
                     <!-- SALARIO -->
                     <div class="mb-3 text-start">
-                        <label for="salario" class="form-label">Salario Base</label>
+                        <label for="salario" class="form-label fs-5">Salario Base</label>
                         <input type="number"
                             id="salario"
                             name="salario"
@@ -136,7 +136,7 @@
 
                 <!-- Fecha de Registro -->
                 <div class="mb-3 text-start w-100" style="max-width: 450px;">
-                    <label for="fecha_registro" class="form-label">Fecha de Registro</label>
+                    <label for="fecha_registro" class="form-label fs-5">Fecha de Registro</label>
                     <input type="date"
                         id="fecha_registro"
                         name="fecha_registro"
