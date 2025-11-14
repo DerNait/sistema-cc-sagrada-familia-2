@@ -14,7 +14,7 @@
           
           <!-- Nombre -->
           <div class="col-12">
-            <label for="nombre" class="form-label">Nombre</label>
+            <label for="nombre" class="form-label fs-5">Nombre</label>
             <input type="text" class="form-control" id="nombre" v-model="form.nombre"/>
             <div class="invalid-feedback">Por favor ingresa tu nombre.</div>
             <div class="valid-feedback">¡Lindo nombre!</div>
@@ -22,7 +22,7 @@
 
           <!-- Apellido -->
           <div class="col-12">
-            <label for="apellido" class="form-label">Apellido</label>
+            <label for="apellido" class="form-label fs-5">Apellido</label>
             <input type="text" class="form-control" id="apellido" v-model="form.apellido"/>
             <div class="invalid-feedback">Por favor ingresa tu apellido.</div>
             <div class="valid-feedback"></div>
@@ -30,7 +30,7 @@
 
           <!-- Correo -->
           <div class="col-12">
-            <label for="correo" class="form-label">Correo</label>
+            <label for="correo" class="form-label fs-5">Correo</label>
             <input type="email" class="form-control" id="correo" v-model="form.correo"/>
             <div class="invalid-feedback">Por favor ingresa un correo válido.</div>
             <div class="valid-feedback">¡Se ve bien!</div>
@@ -38,7 +38,7 @@
 
           <!-- Contraseña -->
           <div class="col-12">
-            <label for="contraseña" class="form-label">Contraseña</label>
+            <label for="contraseña" class="form-label fs-5">Contraseña</label>
             <input type="password" class="form-control" id="contraseña" v-model="form.contraseña" minlength="6"  />
             <div class="invalid-feedback">Debe tener al menos 6 caracteres.</div>
             <div class="valid-feedback">¡Mantenla en secreto!</div>
@@ -46,7 +46,7 @@
 
           <!-- Confirmar contraseña -->
           <div class="col-12">
-            <label for="confirmarContraseña" class="form-label">Confirmar Contraseña</label>
+            <label for="confirmarContraseña" class="form-label fs-5">Confirmar Contraseña</label>
             <input type="password" class="form-control" id="confirmarContraseña" v-model="form.confirmarContraseña"
                    :class="{'is-invalid': !passwordsCoinciden, 'is-valid': form.confirmarContraseña && passwordsCoinciden}"
                     />
@@ -56,7 +56,7 @@
 
           <!-- Fecha de nacimiento -->
           <div class="col-12">
-            <label for="fechaNacimiento" class="form-label">Fecha de nacimiento</label>
+            <label for="fechaNacimiento" class="form-label fs-5">Fecha de nacimiento</label>
             <input type="date" class="form-control" id="fechaNacimiento" v-model="form.fechaNacimiento"/>
             <div class="invalid-feedback">Por favor ingresa tu fecha de nacimiento.</div>
             <div class="valid-feedback">¡Se ve bien!</div>
@@ -64,7 +64,7 @@
 
           <!-- Rol -->
           <div class="col-12">
-            <label class="form-label">Rol</label>
+            <label class="form-label fs-5">Rol</label>
             <Multiselect v-model="form.rol"
                          :options="roles"
                          placeholder="Selecciona un rol"
