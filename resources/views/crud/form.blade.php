@@ -12,7 +12,7 @@
             @if(!$c->editable) @continue @endif
 
             <div class="mb-3">
-                <label class="form-label">{{ $c->label }}</label>
+                <label class="form-label fs-5">{{ $c->label }}</label>
 
                 @if($c->type==='relation' && is_array($c->options))
                     {{-- Select genérico --}}
