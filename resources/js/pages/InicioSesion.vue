@@ -16,7 +16,7 @@
 
         <!-- USUARIO -->
         <div class="mb-3 text-start w-100" style="max-width: 400px;">
-          <label for="usuario" class="form-label">Usuario</label>
+          <label for="usuario" class="form-label fs-5">Usuario</label>
           <input
             type="text"
             id="usuario"
@@ -27,7 +27,7 @@
 
         <!-- CONTRASEÑA -->
         <div class="mb-4 text-start w-100" style="max-width: 400px;">
-          <label for="contraseña" class="form-label">Contraseña</label>
+          <label for="contraseña" class="form-label fs-5">Contraseña</label>
           <input
             type="password"
             id="contraseña"
