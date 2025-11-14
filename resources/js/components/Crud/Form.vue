@@ -11,7 +11,7 @@
     <div class="flex-grow-1 overflow-auto pe-1">
       <div v-for="c in Object.values(columns)" :key="c.field" class="mb-3">
         <div v-if="(!props.readonly && c.editable) || props.readonly">
-          <label class="form-label">{{ c.label }}</label>
+          <label class="form-label fs-5 fw-semibold">{{ c.label }}</label>
   
           <select 
             v-if="c.type==='relation' && c.options && !c.isMultiRelation"
