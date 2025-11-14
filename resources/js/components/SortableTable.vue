@@ -130,6 +130,40 @@ function getValue (obj, path) {
   return path.split('.').reduce((o, p) => (o ? o[p] : null), obj);
 }
 
+function formatValue(row, col) {
+  const raw = getValue(row, col.field);
+
+  // Selects (options)
+  if (col.options && raw != null && Object.prototype.hasOwnProperty.call(col.options, raw)) {
+    return String(col.options[raw] ?? '');
+  }
+
+  // Relaciones (a.b.c)
+  if (col.field.includes('.')) {
+    if (col.type === 'date') {
+      return String(raw ?? '').slice(0, 10);
+    }
+    if (col.type === 'datetime') {
+      return String(raw ?? '').slice(0, 19).replace('T', ' ');
+    }
+    return String(raw ?? '');
+  }
+
+  // Tipos simples
+  if (col.type === 'date') {
+    return String(raw ?? '').slice(0, 10);
+  }
+  if (col.type === 'datetime') {
+    // 2025-10-14T05:18:37.000000Z -> 2025-10-14 05:18:37
+    return String(raw ?? '').slice(0, 19).replace('T', ' ');
+  }
+  if (col.type === 'boolean') {
+    return raw ? 'Sí' : 'No';
+  }
+
+  return String(raw ?? '');
+}
+
 const sortedRows = computed(() => {
   if (!sortField.value) return props.rows;
 
