@@ -631,11 +631,8 @@ public function exportCalificaciones(int $cursoId)
             'notas' => $notas,
         ];
 
-        // Si tienes DomPDF instalado:
-        // $pdf = \PDF::loadView('reporte-calificaciones-cursos', $data);
-        // return $pdf->download("calificaciones-{$curso->nombre}.pdf");
-
-        // Mientras tanto, devuelve la vista (para preview):
-        return view('reporte-calificaciones-cursos', $data);
+        // Generar PDF usando el trait PdfExport
+        $filename = 'calificaciones-' . \Illuminate\Support\Str::slug($curso->nombre) . '.pdf';
+        return $this->exportToPdf('reporte-calificaciones-cursos', $data, $filename, 'a4', 'landscape');
     }
 }
