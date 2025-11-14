@@ -10,7 +10,7 @@
     {{-- Usas POST en web.php, por eso no va @method('PUT') --}}
 
     <div class="mb-3">
-      <label class="form-label">Nombre</label>
+      <label class="form-label fs-5">Nombre</label>
       <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
              value="{{ old('name', auth()->user()->name) }}">
       @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -27,7 +27,7 @@
         @endif
       </div>
       <div class="flex-grow-1">
-        <label class="form-label mb-1">Cambiar foto</label>
+        <label class="form-label fs-5 mb-1">Cambiar foto</label>
         <input type="file" name="foto_perfil" accept="image/*"
                class="form-control @error('foto_perfil') is-invalid @enderror">
         <div class="form-text">Máx. 2MB. JPG/PNG/WebP.</div>
