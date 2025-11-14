@@ -2,8 +2,66 @@
 
 namespace App\Traits;
 
+use Barryvdh\DomPDF\Facade\Pdf;
+
 trait PdfExport
 {
+    /**
+     * Export data as PDF using DOMPDF with a Blade view.
+     *
+     * Usage:
+     *  $this->exportToPdf('reporte-calificaciones', $data, 'calificaciones.pdf', 'a4', 'landscape');
+     *
+     * @param string $viewName   Name of the Blade view to render
+     * @param array $data        Data to pass to the view
+     * @param string $filename   Output filename (e.g., 'reporte.pdf')
+     * @param string $paperSize  Paper size: 'a4', 'letter', etc. (default: 'a4')
+     * @param string $orientation Orientation: 'portrait' or 'landscape' (default: 'portrait')
+     * @return \Illuminate\Http\Response
+     */
+    public function exportToPdf(
+        string $viewName,
+        array $data = [],
+        string $filename = 'documento.pdf',
+        string $paperSize = 'a4',
+        string $orientation = 'portrait'
+    ) {
+        // Mark that we're generating PDF (useful for conditional logic in views)
+        $data['isPdf'] = true;
+
+        // Load the view with DOMPDF
+        $pdf = Pdf::loadView($viewName, $data);
+
+        // Set paper size and orientation
+        $pdf->setPaper($paperSize, $orientation);
+
+        // Download the PDF
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Stream PDF inline (display in browser) instead of downloading.
+     *
+     * @param string $viewName
+     * @param array $data
+     * @param string $paperSize
+     * @param string $orientation
+     * @return \Illuminate\Http\Response
+     */
+    public function streamPdf(
+        string $viewName,
+        array $data = [],
+        string $paperSize = 'a4',
+        string $orientation = 'portrait'
+    ) {
+        $data['isPdf'] = true;
+
+        $pdf = Pdf::loadView($viewName, $data);
+        $pdf->setPaper($paperSize, $orientation);
+
+        return $pdf->stream();
+    }
+
     /**
      * Export multiple sheets (name => Collection/array) as an Excel/CSV download.
      *
