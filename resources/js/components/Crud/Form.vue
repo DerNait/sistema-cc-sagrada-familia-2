@@ -205,6 +205,7 @@
 <script setup>
 import { reactive, computed, ref, onMounted } from 'vue';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const props = defineProps({
   item:     Object,
@@ -320,7 +321,12 @@ async function onFileChange(e, c) {
 
   } catch (err) {
     console.error(err);
-    alert('Error al subir el archivo');
+    Swal.fire({
+      icon: 'error',
+      title: 'Error al subir archivo',
+      text: 'No se pudo subir el archivo. Por favor intenta nuevamente.',
+      confirmButtonText: 'Entendido'
+    });
   } finally {
     isUploading[field] = false;
   }
@@ -350,7 +356,43 @@ async function handleSubmit() {
   } catch (err) {
     console.error(err);
     busy.value = false;
-    alert('Error al guardar');
+    
+    // Mostrar errores de validación con SweetAlert2
+    if (err.response && err.response.status === 422) {
+      const errors = err.response.data.errors || {};
+      const errorMessages = Object.values(errors).flat();
+      
+      if (errorMessages.length > 0) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de validación',
+          html: errorMessages.map(msg => `• ${msg}`).join('<br>'),
+          confirmButtonText: 'Entendido',
+          confirmButtonColor: '#3085d6'
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de validación',
+          text: 'Por favor verifica los datos ingresados.',
+          confirmButtonText: 'Entendido'
+        });
+      }
+    } else if (err.response && err.response.data && err.response.data.message) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.response.data.message,
+        confirmButtonText: 'Entendido'
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al guardar',
+        text: 'Por favor intenta nuevamente.',
+        confirmButtonText: 'Entendido'
+      });
+    }
   }
 }
 
