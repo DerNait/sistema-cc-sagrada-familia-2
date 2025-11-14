@@ -25,10 +25,13 @@ WORKDIR /var/www/html
 # Extensiones necesarias
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
     && apk add --no-cache libpq postgresql-dev libzip-dev busybox-suid icu-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip bcmath intl \
+       libpng-dev libjpeg-turbo-dev freetype-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_pgsql zip bcmath intl gd \
     && pecl install redis \
     && docker-php-ext-enable redis \
-    && apk del .build-deps
+    && apk del .build-deps \
+    && apk add --no-cache libpng libjpeg-turbo freetype
 
 # OPcache prod
 RUN { \
