@@ -8,7 +8,7 @@
         @foreach($columns as $c)
             @if($c->filterable)
                 <div class="col-auto">
-                    <label class="form-label">{{ $c->label }}</label>
+                    <label class="form-label fs-5">{{ $c->label }}</label>
 
                     @php
                         // Construimos el name en bracket-notation:
