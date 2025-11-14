@@ -33,19 +33,14 @@
                       v-if="$slots[`cell-${c.field}`]"
                       :name="`cell-${c.field}`"
                       :row="row"
-                      :value="getValue(row, c.field)"
+                      :value="formatValue(row, c)"
                     />
                     <template v-else>
-                      <template v-if="c.type === 'relation' && c.options">
-                        {{ c.options[row[c.field]] ?? '' }}
-                      </template>
-                      <template v-else>
-                        {{ getValue(row, c.field) }}
-                      </template>
+                      {{ formatValue(row, c) }}
                     </template>
                   </td>
                 </template>
-      
+
                 <td v-if="hasRowActionsSlot">
                   <slot name="row-actions" :row="row" />
                 </td>
