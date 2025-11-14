@@ -203,9 +203,14 @@ abstract class CrudControllerBase extends Controller
         abort_unless($this->abilities['create'] ?? false, 403);
 
         DB::transaction(function () use ($request, &$item) {
-            $item = $this->newModelQuery()->create(
-                $this->validatedData($request)
-            );
+            $data = $this->validatedData($request);
+            
+            // Hook para validaciones adicionales antes de crear
+            if (method_exists($this, 'beforeStore')) {
+                $data = $this->beforeStore($request, $data);
+            }
+            
+            $item = $this->newModelQuery()->create($data);
             $this->syncPivotRelations($request, $item);
         });
 
@@ -239,7 +244,14 @@ abstract class CrudControllerBase extends Controller
         $item = $this->newModelQuery()->findOrFail($id);
 
         DB::transaction(function () use ($request, $item) {
-            $item->update($this->validatedData($request));
+            $data = $this->validatedData($request);
+            
+            // Hook para validaciones adicionales antes de actualizar
+            if (method_exists($this, 'beforeUpdate')) {
+                $data = $this->beforeUpdate($request, $item, $data);
+            }
+            
+            $item->update($data);
             $this->syncPivotRelations($request, $item);
         });
 
