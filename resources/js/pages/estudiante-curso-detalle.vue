@@ -7,7 +7,7 @@
     <div class="d-flex gap-3 mb-4 flex-wrap filtro-container">
       <!-- Curso -->
       <div class="filtro-combo flex-fill">
-        <label class="form-label">Curso</label>
+        <label class="form-label fs-5">Curso</label>
         <div class="input-icon-wrapper w-100">
           <i class="fas fa-search icon-left"></i>
           <select class="form-select ps-5" v-model="selectedCurso">
@@ -21,7 +21,7 @@
 
       <!-- Sección -->
       <div class="filtro-combo flex-fill">
-        <label class="form-label">Sección</label>
+        <label class="form-label fs-5">Sección</label>
         <div class="input-icon-wrapper w-100">
           <i class="fas fa-search icon-left"></i>
           <select class="form-select ps-5" v-model="selectedSeccion">
@@ -35,7 +35,7 @@
 
       <!-- Estudiante -->
       <div class="filtro-combo flex-fill">
-        <label class="form-label">Estudiante</label>
+        <label class="form-label fs-5">Estudiante</label>
         <div class="input-icon-wrapper w-100">
           <i class="fas fa-search icon-left"></i>
           <select class="form-select ps-5" v-model="selectedEstudiante">
@@ -49,7 +49,7 @@
 
       <!-- Actividad -->
       <div class="filtro-combo flex-fill">
-        <label class="form-label">Actividad</label>
+        <label class="form-label fs-5">Actividad</label>
         <div class="input-icon-wrapper w-100">
           <i class="fas fa-search icon-left"></i>
           <select class="form-select ps-5" v-model="selectedActividad">
