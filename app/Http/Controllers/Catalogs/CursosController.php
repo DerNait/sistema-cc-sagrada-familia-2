@@ -109,7 +109,10 @@ class CursosController extends CrudControllerBase
      */
     protected function beforeStore(Request $request, $data)
     {
-        $this->validateUniqueNombre($request->input('nombre'));
+        // Limpiar el nombre: eliminar espacios extra y trim
+        $data['nombre'] = $this->limpiarNombre($request->input('nombre'));
+        
+        $this->validateUniqueNombre($data['nombre']);
         return $data;
     }
 
@@ -118,22 +121,43 @@ class CursosController extends CrudControllerBase
      */
     protected function beforeUpdate(Request $request, $item, $data)
     {
-        $this->validateUniqueNombre($request->input('nombre'), $item->id);
+        // Limpiar el nombre: eliminar espacios extra y trim
+        $data['nombre'] = $this->limpiarNombre($request->input('nombre'));
+        
+        $this->validateUniqueNombre($data['nombre'], $item->id);
         return $data;
     }
 
     /**
-     * Valida que el nombre del curso sea único (case-insensitive)
+     * Limpia el nombre eliminando espacios extra y haciendo trim
+     */
+    private function limpiarNombre($nombre)
+    {
+        return preg_replace('/\s+/', ' ', trim($nombre));
+    }
+
+    /**
+     * Valida que el nombre del curso sea único (case-insensitive y sin espacios)
      */
     private function validateUniqueNombre($nombre, $ignoreId = null)
     {
-        $query = Curso::whereRaw('LOWER(nombre) = ?', [strtolower($nombre)]);
+        // Eliminar TODOS los espacios y convertir a minúsculas para comparar
+        $nombreSinEspacios = strtolower(str_replace(' ', '', $nombre));
+        
+        // Obtener todos los cursos excepto el actual
+        $query = Curso::query();
         
         if ($ignoreId) {
             $query->where('id', '!=', $ignoreId);
         }
         
-        if ($query->exists()) {
+        // Verificar si existe algún curso con el mismo nombre (sin espacios)
+        $existe = $query->get()->contains(function ($curso) use ($nombreSinEspacios) {
+            $nombreExistente = strtolower(str_replace(' ', '', $curso->nombre));
+            return $nombreExistente === $nombreSinEspacios;
+        });
+        
+        if ($existe) {
             throw ValidationException::withMessages([
                 'nombre' => ['Ya existe un curso con este nombre. Por favor, elige un nombre diferente.']
             ]);
