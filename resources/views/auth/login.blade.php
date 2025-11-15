@@ -5,7 +5,7 @@
     <div class="bg-white px-4 py-5 rounded shadow d-flex flex-column justify-content-center align-items-center"
         style="width: 550px; text-align: center; min-height: 600px;">
         
-        <img src="/images/logo_.jpg" alt="Logo" class="mb-4 w-75" style="margin-top: 50px;" />
+        <img src="/images/logo_.jpg" class="mb-4 w-75" style="margin-top: 50px;"  alt="Logo"/>
 
         <div class="mt-5 w-100 d-flex flex-column align-items-center" style="margin-top: 85px;">
             <h3 class="mb-4">Inicio de Sesión</h3>
