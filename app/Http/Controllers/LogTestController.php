@@ -18,7 +18,7 @@ class LogTestController extends Controller
             'descripcion' => 'Carga de prueba (entrada)',
         ]);
 
-        return "Entrada registrada correctamente.";
+        return "La entrada de inventario se registró correctamente.";
     }
 
     public function registrarSalida($productoId)
@@ -32,7 +32,7 @@ class LogTestController extends Controller
             'descripcion' => 'Venta simulada (salida)',
         ]);
 
-        return "Salida registrada correctamente.";
+        return "La salida de inventario se registró correctamente.";
     }
 
     public function verMovimientos($productoId)
