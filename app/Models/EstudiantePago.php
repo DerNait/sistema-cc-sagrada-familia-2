@@ -67,7 +67,7 @@ class EstudiantePago extends Model
             if ($aprobado) {
                 return [
                     'estado'  => 'vigente',
-                    'mensaje' => 'Vigente hasta el '.$aprobado->periodo_fin->isoFormat('MMMM [de] YYYY'),
+                    'mensaje' => 'Vigente hasta '.$aprobado->periodo_fin->isoFormat('MMMM [de] YYYY'),
                     'pendiente_extra' => $tienePendienteExtra,
                     'pendiente_extra_mensaje' => $tienePendienteExtra ? 'Tienes un pago pendiente de revisión' : null,
                 ];
