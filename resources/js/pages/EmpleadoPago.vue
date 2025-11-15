@@ -5,7 +5,7 @@
 
       <div class="d-flex justify-content-evenly gap-2">
         <a
-          class="btn btn-success"
+          class="btn btn-sm btn-primary"
           :href="`/admin/empleados/planilla?anio=${Number(localFilters.periodo_anio) || currentAnio}&mes=${Number(localFilters.periodo_mes) || currentMes}`"
           target="_blank"
         >
@@ -41,7 +41,7 @@
         <div class="d-flex justify-content-evenly">
           <!-- Aprobar: siempre visible; si ya está Completado, lo deshabilito -->
           <button
-            class="btn btn-sm btn-success"
+            class="btn btn-sm btn-primary"
             :disabled="row.tipo_estado_nombre === 'Completado'"
             @click="openApprove(row)"
             title="Aprobar / Registrar pago"
