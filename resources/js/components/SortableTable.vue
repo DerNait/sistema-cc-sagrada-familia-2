@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- ========= TABLA ========= -->
-    <div :class="['table-scroll', 'mb-0', { 'table-scroll-all': pageLength === -1 }]">
+    <div :class="['table-scroll','mb-0',{ 'table-scroll-fixed': shouldScroll }]">
       <table class="table table-bordered mb-0 sortable-table">
           <thead>
             <tr>
@@ -187,6 +187,10 @@ const pageLengthOptions = computed(() => props.pageLengths);
 const pageLength = ref(pageLengthOptions.value[0]); // -1 => "Todos"
 const currentPage = ref(1);
 
+const shouldScroll = computed(() =>
+  pageLength.value === -1 || pageLength.value >= 25
+);
+
 const pageCount = computed(() =>
   pageLength.value === -1
     ? 1
@@ -246,10 +250,5 @@ function goTo(n) {
   min-width: max-content;           /* ancho mínimo = ancho total de columnas */
 }
 
-/* Cuando se muestran "Todos" los registros, limitar altura y activar scroll vertical */
-.table-scroll-all {
-  max-height: 60vh;      /* ajusta a gusto: 50vh, 400px, etc. */
-  overflow-y: auto;
-}
 
 </style>
