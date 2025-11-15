@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\PagosEmpleado;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EmpleadosController extends CrudControllerBase
 {
@@ -77,7 +78,7 @@ class EmpleadosController extends CrudControllerBase
             abort(404, 'No hay registros de pagos para generar la planilla.');
         }
 
-        $empleados = Empleado::with(['usuario', 'role', 'pagos' => function ($q) use ($periodo) {
+        $empleados = Empleado::with(['user', 'role', 'pagos' => function ($q) use ($periodo) {
             $q->where('periodo_anio', $periodo->anio)
             ->where('periodo_mes', $periodo->mes)
             ->with('ajustes.tipo');
@@ -108,12 +109,11 @@ class EmpleadosController extends CrudControllerBase
             })->sum('monto');
 
             return [
-                'name'           => $empleado->usuario->name,
+                'name'           => $empleado->user->name,
                 'dpi'            => $empleado->dpi,
-                'cargo'          => $empleado->role?->nombre,
-                'cuenta'         => $empleado->numero_cuenta,
-                'banco'          => $empleado->banco,
+                'cargo'          => $empleado->user->role->nombre,
                 'fecha_ingreso'  => $empleado->fecha_ingreso,
+                'estado'         => $empleado->estado_pago_mes_actual,
                 'salario_base'   => $pago->monto_base,
                 'bonificaciones' => $ajustesPositivos,
                 'descuentos'     => $ajustesNegativos,
