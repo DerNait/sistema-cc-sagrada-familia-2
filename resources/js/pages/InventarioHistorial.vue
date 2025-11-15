@@ -333,13 +333,28 @@ function truncate(text, len = 120) {
 /* ===== Grid de filtros dentro del offcanvas ===== */
 .filters-grid {
   display: grid;
-  grid-template-columns: 1fr;  /* móvil: 1 col */
+  grid-template-columns: 1fr;  /* móvil: 1 columna */
   gap: 1rem;
 }
+
+/* Layout de 2 columnas y áreas a partir de 576px */
 @media (min-width: 576px) {
   .filters-grid {
-    grid-template-columns: 1fr 1fr; /* ≥576px: 2 cols */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "producto tipo"
+      "usuario usuario"
+      "cantidad cantidad"
+      "fecha fecha"
+      "actions actions";
   }
+
+  .grid-producto { grid-area: producto; }
+  .grid-tipo     { grid-area: tipo; }
+  .grid-usuario  { grid-area: usuario; }
+  .grid-cantidad { grid-area: cantidad; }
+  .grid-fecha    { grid-area: fecha; }
+  .grid-actions  { grid-area: actions; }
 }
 
 /* Pares (min–max / desde–hasta) responden con 1–2 columnas */
@@ -352,15 +367,16 @@ function truncate(text, len = 120) {
   .pair-grid { grid-template-columns: 1fr 1fr; }
 }
 
-/* Acciones ocupa 2 columnas cuando hay 2 cols arriba */
+/* Acciones: botones lado a lado en pantallas medias+ */
 .actions-row {
   display: grid;
   grid-template-columns: 1fr;
   gap: .75rem;
 }
 @media (min-width: 576px) {
-  .actions-row { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; }
+  .actions-row { grid-template-columns: 1fr 1fr; }
 }
+
 
 /* ===== Overrides para Filtros.vue dentro del offcanvas ===== */
 /* elimina el min-width:280px del componente dentro del panel */
