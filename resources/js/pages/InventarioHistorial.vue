@@ -50,6 +50,7 @@
     </div>
 
     <!-- Offcanvas con filtros -->
+        <!-- Offcanvas con filtros -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="filtersCanvas">
       <div class="offcanvas-header">
         <h5 class="offcanvas-title">Filtros</h5>
@@ -58,12 +59,14 @@
 
       <div class="offcanvas-body">
         <div class="filters-grid">
+          <!-- Fila 1: Producto | Tipo -->
           <Filtros
             v-model="filtros.productoId"
             :options="productoOpts"
             value-key="id"
             label-key="nombre"
             placeholder="Producto"
+            class="grid-producto"
           />
           <Filtros
             v-model="filtros.tipoMovimientoId"
@@ -71,39 +74,47 @@
             value-key="id"
             label-key="tipo"
             placeholder="Tipo de movimiento"
+            class="grid-tipo"
           />
+
+          <!-- Fila 2: Usuario (a lo ancho) -->
           <Filtros
             v-model="filtros.usuarioId"
             :options="usuarioOpts"
             value-key="id"
             label-key="name"
             placeholder="Usuario"
+            class="grid-usuario"
           />
 
-          <!-- Bloque Cantidad (min–max) -->
-          <div class="field-block">
-            <label class="form-label fw-semibold small text-secondary mb-1 d-block">Cantidad</label>
+          <!-- Fila 3: Cantidad (a lo ancho, con Min/Max dentro) -->
+          <div class="field-block grid-cantidad">
+            <label class="form-label fw-semibold small text-secondary mb-1 d-block">
+              Cantidad
+            </label>
             <div class="pair-grid">
               <Filtros v-model="filtros.cantidadMin" mode="numeric" placeholder="Min" />
               <Filtros v-model="filtros.cantidadMax" mode="numeric" placeholder="Max" />
             </div>
           </div>
 
-          <!-- Bloque Fecha (desde–hasta) -->
-          <div class="field-block">
-            <label class="form-label fw-semibold small text-secondary mb-1 d-block">Fecha</label>
+          <!-- Fila 4: Fecha (a lo ancho, con Desde/Hasta dentro) -->
+          <div class="field-block grid-fecha">
+            <label class="form-label fw-semibold small text-secondary mb-1 d-block">
+              Fecha
+            </label>
             <div class="pair-grid">
               <Filtros v-model="filtros.fechaDesde" mode="text" placeholder="Desde (YYYY-MM-DD)" />
               <Filtros v-model="filtros.fechaHasta" mode="text" placeholder="Hasta (YYYY-MM-DD)" />
             </div>
           </div>
 
-          <div class="actions-row">
+          <!-- Fila 5: Botones (a lo ancho) -->
+          <div class="actions-row grid-actions">
             <button class="btn btn-success w-100" data-bs-dismiss="offcanvas">Aplicar</button>
             <button class="btn btn-outline-secondary w-100" @click="clearAll">Limpiar</button>
           </div>
         </div>
-
       </div>
     </div>
   </div>
