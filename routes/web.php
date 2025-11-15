@@ -92,6 +92,7 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         // EMPLEADOS
         Route::prefix('empleados')->name('empleados.')->group(function () {
+            Route::get('planilla',    [EmpleadosController::class, 'planilla'])->name('planilla');
             Route::get('/',           [EmpleadosController::class, 'index'])->name('index');
             Route::get('/export',     [EmpleadosController::class, 'export'])->name('export');
             Route::get('{id}',        [EmpleadosController::class, 'show'])->name('show');
@@ -100,7 +101,6 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
             Route::get('{id}/editar', [EmpleadosController::class, 'edit'])->name('edit');
             Route::put('{id}',        [EmpleadosController::class, 'update'])->name('update');
             Route::delete('{id}',     [EmpleadosController::class, 'destroy'])->name('destroy');
-            Route::get('planilla',    [EmpleadosController::class, 'planilla'])->name('planilla');
         });
 
         // USUARIOS
