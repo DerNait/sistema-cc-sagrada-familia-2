@@ -39,11 +39,9 @@
             <tr>
                 <th>No.</th>
                 <th>Nombre</th>
-                <th>DPI</th>
                 <th>Cargo</th>
                 <th>Fecha de Ingreso</th>
-                <th>Cuenta</th>
-                <th>Banco</th>
+                <th>Estado</th>
                 <th class="text-right">Salario Base</th>
                 <th class="text-right">Bonificaciones</th>
                 <th class="text-right">Descuentos</th>
@@ -56,11 +54,9 @@
                 <tr>
                     <td>{{ $contador++ }}</td>
                     <td>{{ $empleado['name'] }}</td>
-                    <td>{{ $empleado['dpi'] }}</td>
                     <td>{{ $empleado['cargo'] }}</td>
                     <td>{{ \Carbon\Carbon::parse($empleado['fecha_ingreso'])->format('d/m/Y') }}</td>
-                    <td>{{ $empleado['cuenta'] }}</td>
-                    <td>{{ $empleado['banco'] }}</td>
+                    <td>{{ $empleado['estado'] }}</td>
                     <td class="text-right">Q{{ number_format($empleado['salario_base'], 2) }}</td>
                     <td class="text-right">Q{{ number_format($empleado['bonificaciones'], 2) }}</td>
                     <td class="text-right">Q{{ number_format($empleado['descuentos'], 2) }}</td>
