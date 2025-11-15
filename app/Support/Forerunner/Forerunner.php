@@ -47,6 +47,6 @@ class Forerunner
 
     public static function isRoot(): bool
     {
-        return Auth::check() && Auth::user()->rol_id == self::rootRoleId();
+        return Auth::check() && (int) Auth::user()->rol_id === self::rootRoleId();
     }
 }

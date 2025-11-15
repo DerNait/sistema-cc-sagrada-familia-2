@@ -35,8 +35,14 @@ import SearchBar from '../components/SearchBar.vue'
 import Card from '@/components/Card.vue'
 
 const props = defineProps({
-  cursos: Array,
-  can_create: Boolean,
+  cursos: {
+    type: Array,
+    required: true
+  },
+  can_create: {
+    type: Boolean,
+    required: true
+  }
 })
 
 const busqueda = ref('')
