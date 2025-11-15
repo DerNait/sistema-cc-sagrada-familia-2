@@ -65,7 +65,6 @@ Route::group(['middleware' => ['auth', 'forerunner']], function () {
     Route::prefix('pagos')->name('pagos.')->group(function () {
         // Estudiante (igual)
         Route::get('/pagos/estudiante',  [PagosEstudianteController::class, 'index'])->name('estudiante.index');
-        Route::post('/pagos/estudiante', [PagosEstudianteController::class, 'store'])->name('estudiante.store');
 
         // Empleado (nuevo flujo)
         Route::get('/empleado',          [PagosEmpleadoController::class, 'index'])->name('empleado.index');   // SSR con ?mes&anio
