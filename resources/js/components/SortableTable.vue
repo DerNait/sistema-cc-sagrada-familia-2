@@ -1,8 +1,8 @@
 <template>
   <div>
     <!-- ========= TABLA ========= -->
-    <div class="table-scroll mb-0">
-        <table class="table table-bordered mb-0 sortable-table">
+    <div :class="['table-scroll', 'mb-0', { 'table-scroll-all': pageLength === -1 }]">
+      <table class="table table-bordered mb-0 sortable-table">
           <thead>
             <tr>
               <template v-for="c in colArray" :key="c.field">
