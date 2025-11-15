@@ -250,5 +250,9 @@ function goTo(n) {
   min-width: max-content;           /* ancho mínimo = ancho total de columnas */
 }
 
-
+/* Contenedor con altura fija + scroll vertical */
+.table-scroll-fixed {
+  max-height: 60vh;   /* ajusta a gusto: 50vh, 400px, etc. */
+  overflow-y: auto;
+}
 </style>
