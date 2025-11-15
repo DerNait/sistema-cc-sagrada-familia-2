@@ -245,4 +245,11 @@ function goTo(n) {
 .table-scroll table {
   min-width: max-content;           /* ancho mínimo = ancho total de columnas */
 }
+
+/* Cuando se muestran "Todos" los registros, limitar altura y activar scroll vertical */
+.table-scroll-all {
+  max-height: 60vh;      /* ajusta a gusto: 50vh, 400px, etc. */
+  overflow-y: auto;
+}
+
 </style>
